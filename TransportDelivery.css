@@ -15,9 +15,11 @@ body {
 .sidebar {
     width: 260px;
     height: 100vh;
-    background-color: #0f2f3f;
-    color: #ffffff;
+    background: #0f2f3f;
     position: fixed;
+    top: 0;
+    left: 0;
+    color: #fff;
 }
 
 .brand {
@@ -26,14 +28,16 @@ body {
 }
 
 .brand h1 {
-    font-size: 22px;
     color: #4dd0c8;
+    font-size: 22px;
 }
 
 .brand p {
     font-size: 12px;
     color: #cfdfe6;
+    margin-top: 6px;
 }
+
 
 /* MENU */
 .menu ul {
