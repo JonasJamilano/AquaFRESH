@@ -1,0 +1,318 @@
+/* =====================
+   GLOBAL
+===================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7f8;
+    color: #2c3e50;
+}
+
+/* =====================
+   SIDEBAR
+===================== */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #0f2f3f;
+    color: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.brand {
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brand h1 {
+    font-size: 22px;
+    color: #4dd0c8;
+}
+
+.brand p {
+    font-size: 12px;
+    margin-top: 6px;
+    color: #cfdfe6;
+}
+
+/* =====================
+   MENU
+===================== */
+.menu ul {
+    list-style: none;
+    margin-top: 16px;
+}
+
+.menu li {
+    border-left: 4px solid transparent;
+}
+
+.menu li a {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: #ffffff;
+    width: 100%;
+}
+
+.menu li:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.menu li.active {
+    background: rgba(77, 208, 200, 0.15);
+    border-left: 4px solid #4dd0c8;
+}
+
+.icon {
+    width: 18px;
+    height: 18px;
+    background: #4dd0c8;
+    border-radius: 4px;
+    margin-right: 14px;
+}
+
+/* =====================
+   TOP BAR
+===================== */
+.topbar {
+    height: 56px;
+    background: #ffffff;
+    border-bottom: 1px solid #e0e6e9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    margin-left: 260px;
+    position: fixed;
+    top: 0;
+    width: calc(100% - 260px);
+    z-index: 10;
+}
+
+.menu-btn {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* =====================
+   PROFILE DROPDOWN
+===================== */
+.profile-dropdown {
+    position: relative;
+}
+
+.profile-trigger {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #34495e;
+}
+
+.user-icon {
+    font-size: 18px;
+}
+
+.caret {
+    font-size: 12px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 120%;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #e0e6e9;
+    min-width: 120px;
+    display: none;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #34495e;
+    font-size: 13px;
+}
+
+.dropdown-menu a.logout {
+    color: #e57373;
+}
+
+.dropdown-menu a:hover {
+    background: #f4f7f8;
+}
+
+#profile-toggle {
+    display: none;
+}
+
+#profile-toggle:checked ~ .dropdown-menu {
+    display: block;
+}
+
+/* =====================
+   MAIN CONTENT
+===================== */
+.content {
+    margin-left: 260px;
+    padding: 80px 32px;
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media (max-width: 768px) {
+    .content {
+        margin-left: 0;
+        padding: 100px 16px;
+    }
+
+    .topbar {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* =====================
+   KPI CARDS
+===================== */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.kpi-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e0e6e9;
+}
+
+.kpi-card h3 {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.kpi-number {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.kpi-card.warning {
+    background: #fff6e0;
+}
+
+.kpi-card.success {
+    background: #e0f7f4;
+}
+
+/* =====================
+   PANELS
+===================== */
+.panel {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 24px;
+    border: 1px solid #e0e6e9;
+}
+
+.panel h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+}
+
+/* =====================
+   SENSOR STATUS TABLE
+===================== */
+.status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.status-table th,
+.status-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e6e9;
+    text-align: left;
+}
+
+.status {
+    font-weight: 500;
+}
+
+.status.good {
+    color: #2ecc71;
+}
+
+.status.warning {
+    color: #f39c12;
+}
+
+.status.alert {
+    color: #e74c3c;
+}
+
+/* =====================
+   ALERT LIST
+===================== */
+.alert-list {
+    list-style: none;
+}
+
+.alert-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e6e9;
+    font-size: 14px;
+}
+
+.alert-text {
+    color: #2c3e50;
+}
+
+.alert-time {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+/* =====================
+   SIDEBAR TOGGLE
+===================== */
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .brand h1,
+.sidebar.collapsed .brand p,
+.sidebar.collapsed .menu li a span:not(.icon) {
+    display: none;
+}
+
+.topbar.collapsed {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+.content.collapsed {
+    margin-left: 80px;
+}
+
