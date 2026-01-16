@@ -42,20 +42,23 @@ body {
 .menu ul {
     list-style: none;
     margin-top: 16px;
-    border-left: 4px solid transparent;
+}
 
+.menu li {
+    border-left: 4px solid transparent;
 }
 
 .menu li a {
     display: flex;
     align-items: center;
     padding: 14px 20px;
-    color: #fff;
     text-decoration: none;
+    color: #ffffff;
 }
 
 .menu li.active {
-    background: rgba(77,208,200,0.15);
+    background: rgba(77, 208, 200, 0.15);
+    border-left: 4px solid #4dd0c8;
 }
 
 .menu li a:hover {
