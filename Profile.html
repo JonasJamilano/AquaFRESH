@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile | AquaFRESH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Profile.css">
+</head>
+<body>
+
+  <!-- TOP NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">AquaFRESH</div>
+
+    <div class="profile-menu">
+      <input type="checkbox" id="profile-toggle">
+      <label for="profile-toggle" class="profile-name">
+        Admin <span class="caret">▾</span>
+      </label>
+
+      <div class="dropdown">
+        <a href="Dashboard.html">Dashboard</a>
+        <a href="Profile.html">Profile</a>
+        <a href="Login.html" class="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+    <div class="profile-card">
+      <h2>Profile Overview</h2>
+
+      <!-- Profile photo -->
+      <div class="profile-photo">
+        <img id="profilePhoto" src="default-avatar.png" alt="Profile Photo">
+      </div>
+
+      <div class="profile-info">
+        <p><strong>Full Name:</strong> <span id="fullName">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+        <p><strong>Phone:</strong> <span id="phone">Loading...</span></p>
+        <p><strong>Address:</strong> <span id="address">Loading...</span></p>
+        <p><strong>Role:</strong> <span id="role">Admin</span></p>
+      </div>
+
+      <div class="profile-actions">
+        <a href="EditProfile.html" class="edit-btn">Edit Profile</a>
+        <a href="ChangePass.html" class="edit-btn">Change Password</a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const fullNameEl = document.getElementById("fullName");
+    const emailEl = document.getElementById("email");
+    const phoneEl = document.getElementById("phone");
+    const addressEl = document.getElementById("address");
+    const profilePhotoEl = document.getElementById("profilePhoto");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "Login.html";
+        return;
+      }
+
+      emailEl.textContent = user.email;
+
+      const userDocRef = doc(db, "users", user.uid);
+
+      // Real-time listener
+      onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          fullNameEl.textContent = data.fullName || "Not set";
+          phoneEl.textContent = data.phone || "Not set";
+          addressEl.textContent = data.address || "Not set";
+
+          // Update profile photo
+          profilePhotoEl.src = data.photoURL || "default-avatar.png";
+        } else {
+          fullNameEl.textContent = "Not set";
+          phoneEl.textContent = "Not set";
+          addressEl.textContent = "Not set";
+          profilePhotoEl.src = "default-avatar.png";
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
