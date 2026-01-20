@@ -5,10 +5,8 @@
     <title>AquaFRESH | Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
     <link rel="stylesheet" href="Login.css">
 </head>
 <body>
@@ -17,11 +15,10 @@
         <div class="login-card">
 
             <div class="login-brand">
-                <h1>AquaFRESH</h1>
+                <img src="assets/AquaFRESH.png" alt="AquaFRESH Logo" class="login-logo">
                 <p>Aquaculture Freshness Monitoring System</p>
             </div>
 
-            <!-- LOGIN FORM -->
             <form class="login-form" id="loginForm">
 
                 <div class="form-group">
@@ -44,6 +41,10 @@
                     >
                 </div>
 
+                <div class="forgot-password">
+                    <a href="ForgotPassword.html">Forgot password?</a>
+                </div>
+
                 <button type="submit" class="login-btn">
                     Login
                 </button>
@@ -58,7 +59,6 @@
         </div>
     </div>
 
-    <!-- Firebase Auth Logic -->
     <script type="module" src="auth.js"></script>
 
 </body>
