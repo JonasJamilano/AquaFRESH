@@ -290,3 +290,7 @@ td.spoiled {
 .content.collapsed {
     margin-left: 80px;
 }
+/* Hide role-based menu items by default */
+.menu li[data-role] {
+    display: none;
+}
