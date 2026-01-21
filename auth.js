@@ -20,10 +20,14 @@ if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const fullName = document.getElementById("fullName").value;
-    const email = document.getElementById("signupEmail").value;
+    const fullName = document.getElementById("fullName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
     const password = document.getElementById("signupPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
+
+    // ✅ NEW
+    const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address").value.trim();
 
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -37,8 +41,11 @@ if (signupForm) {
         uid: cred.user.uid,
         fullName,
         email,
-        role: "admin", // TEMP
+        phone,          // ✅ added
+        address,        // ✅ added
+        role: "admin",  // TEMP
         status: "active",
+        photoURL: "default-avatar.png",
         createdAt: serverTimestamp()
       });
 
