@@ -136,3 +136,26 @@ body {
     border-top: 1px solid #f1f3f4;
     padding-top: 16px;
 }
+
+/* =====================
+   SELECT (ROLE DROPDOWN)
+   ===================== */
+.form-group select {
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #dfe6e9;
+    font-size: 14px;
+    background-color: #fff;
+    color: #34495e;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='10' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #4dd0c8;
+}

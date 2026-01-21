@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /* ======================
-   SIGN UP (ADMIN ONLY FOR NOW)
+   SIGN UP (INSPECTOR / DELIVERY)
 ====================== */
 const signupForm = document.getElementById("signupForm");
 
@@ -20,14 +20,20 @@ if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // ✅ CORRECT ELEMENT REFERENCES
     const fullName = document.getElementById("fullName").value.trim();
     const email = document.getElementById("signupEmail").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const role = document.getElementById("role").value;
     const password = document.getElementById("signupPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
-    // ✅ NEW
-    const phone = document.getElementById("phone").value.trim();
-    const address = document.getElementById("address").value.trim();
+    // ✅ VALIDATION
+    if (!role) {
+      alert("Please select a role");
+      return;
+    }
 
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -35,25 +41,28 @@ if (signupForm) {
     }
 
     try {
+      // 🔐 CREATE AUTH USER
       const cred = await createUserWithEmailAndPassword(auth, email, password);
 
+      // 🧾 SAVE USER PROFILE
       await setDoc(doc(db, "users", cred.user.uid), {
         uid: cred.user.uid,
         fullName,
         email,
-        phone,          // ✅ added
-        address,        // ✅ added
-        role: "admin",  // TEMP
+        phone,
+        address,
+        role,
         status: "active",
         photoURL: "default-avatar.png",
         createdAt: serverTimestamp()
       });
 
-      alert("Account created successfully!");
+      alert("✅ Account created successfully!");
       window.location.href = "Login.html";
 
     } catch (err) {
       alert(err.message);
+      console.error(err);
     }
   });
 }
@@ -67,22 +76,21 @@ if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = loginForm.loginEmail.value;
-    const password = loginForm.loginPassword.value;
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
 
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, "users", cred.user.uid));
+      const userSnap = await getDoc(doc(db, "users", cred.user.uid));
 
-      if (!userDoc.exists()) {
+      if (!userSnap.exists()) {
         alert("User profile not found");
         return;
       }
 
-      const role = userDoc.data().role;
+      const role = userSnap.data().role;
       localStorage.setItem("role", role);
 
-      // Role-based redirect
       if (["superadmin", "admin", "manager"].includes(role)) {
         window.location.href = "Dashboard.html";
       } else if (role === "inspector") {
@@ -91,7 +99,7 @@ if (loginForm) {
         window.location.href = "DeliveryDashboard.html";
       }
 
-    } catch {
+    } catch (err) {
       alert("Invalid login credentials");
     }
   });
