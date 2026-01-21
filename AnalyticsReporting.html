@@ -22,48 +22,62 @@
 
     <nav class="menu">
         <ul>
-            <li>
-                <a href="Dashboard.html">
-                    <span class="icon"></span>
-                    <span class="label">Dashboard</span>
-                </a>
-            </li>
+    <li data-role="superadmin admin manager">
+        <a href="Dashboard.html">
+            <span class="icon"></span>
+            <span class="label">Dashboard</span>
+        </a>
+    </li>
 
-            <li> 
-                <a href="FreshnessEvaluation.html">
-                    <span class="icon"></span>
-                    <span class="label">Freshness Evaluation</span>
-                </a>
-            </li>
+    <li data-role="inspector">
+        <a href="InspectorDashboard.html">
+            <span class="icon"></span>
+            <span class="label">Inspector Dashboard</span>
+        </a>
+    </li>
 
-            <li>
-                <a href="TransportDelivery.html">
-                    <span class="icon"></span>
-                    <span class="label">Transport & Delivery</span>
-                </a>
-            </li>
+    <li data-role="delivery">
+        <a href="DeliveryDashboard.html">
+            <span class="icon"></span>
+            <span class="label">Delivery Dashboard</span>
+        </a>
+    </li>
 
-            <li class="active">
-                <a href="AnalyticsReporting.html">
-                    <span class="icon"></span>
-                    <span class="label">Analytics & Reporting</span>
-                </a>
-            </li>
+    <li data-role="superadmin admin manager inspector delivery">
+        <a href="FreshnessEvaluation.html">
+            <span class="icon"></span>
+            <span class="label">Freshness Evaluation</span>
+        </a>
+    </li>
 
-            <li>
-                <a href="QualityControl.html">
-                    <span class="icon"></span>
-                    <span class="label">Quality Control</span>
-                </a>
-            </li>
+    <li data-role="superadmin admin manager delivery">
+        <a href="TransportDelivery.html">
+            <span class="icon"></span>
+            <span class="label">Transport & Delivery</span>
+        </a>
+    </li>
 
-            <li>
-                <a href="UserManagement.html">
-                    <span class="icon"></span>
-                    <span class="label">User Management</span>
-                </a>
-            </li>
-        </ul>
+    <li data-role="superadmin admin manager inspector">
+        <a href="AnalyticsReporting.html">
+            <span class="icon"></span>
+            <span class="label">Analytics & Reporting</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager inspector">
+        <a href="QualityControl.html">
+            <span class="icon"></span>
+            <span class="label">Quality Control</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin">
+        <a href="UserManagement.html">
+            <span class="icon"></span>
+            <span class="label">User Management</span>
+        </a>
+    </li>
+</ul>
     </nav>
 </aside>
 
@@ -74,7 +88,7 @@
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-            Admin <span class="caret">▾</span>
+    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
 
         <div class="dropdown-menu">
@@ -233,18 +247,8 @@
 
 </main>
 
-<script>
-    const menuBtn = document.querySelector('.menu-btn');
-    const sidebar = document.querySelector('.sidebar');
-    const topbar = document.querySelector('.topbar');
-    const content = document.querySelector('.content');
-
-    menuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        topbar.classList.toggle('collapsed');
-        content.classList.toggle('collapsed');
-    });
-</script>
+<script type="module" src="sidebar.js"></script>
+<script type="module" src="role-ui.js"></script>
 
 </body>
 </html>

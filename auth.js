@@ -1,5 +1,4 @@
 import { auth, db } from "./firebase.js";
-
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword
@@ -8,11 +7,12 @@ import {
 import {
   doc,
   setDoc,
+  getDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /* ======================
-   SIGN UP
+   SIGN UP (ADMIN ONLY FOR NOW)
 ====================== */
 const signupForm = document.getElementById("signupForm");
 
@@ -26,41 +26,33 @@ if (signupForm) {
     const confirmPassword = document.getElementById("confirmPassword").value;
 
     if (password !== confirmPassword) {
-      alert("❌ Passwords do not match");
+      alert("Passwords do not match");
       return;
     }
 
     try {
-      // Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      await setDoc(doc(db, "users", cred.user.uid), {
+        uid: cred.user.uid,
+        fullName,
         email,
-        password
-      );
-
-      const user = userCredential.user;
-
-      // Save user data in Firestore (ADMIN for now)
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        fullName: fullName,
-        email: email,
-        role: "admin",        // TEMPORARY
+        role: "admin", // TEMP
         status: "active",
         createdAt: serverTimestamp()
       });
 
-      alert("✅ Registered successfully!");
+      alert("Account created successfully!");
       window.location.href = "Login.html";
 
-    } catch (error) {
-      alert(error.message);
+    } catch (err) {
+      alert(err.message);
     }
   });
 }
 
 /* ======================
-   LOGIN
+   LOGIN + ROLE REDIRECT
 ====================== */
 const loginForm = document.getElementById("loginForm");
 
@@ -68,17 +60,32 @@ if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+    const email = loginForm.loginEmail.value;
+    const password = loginForm.loginPassword.value;
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, "users", cred.user.uid));
 
-      // Login successful → go to dashboard
-      window.location.href = "Dashboard.html";
+      if (!userDoc.exists()) {
+        alert("User profile not found");
+        return;
+      }
 
-    } catch (error) {
-      alert("❌ Invalid email or password");
+      const role = userDoc.data().role;
+      localStorage.setItem("role", role);
+
+      // Role-based redirect
+      if (["superadmin", "admin", "manager"].includes(role)) {
+        window.location.href = "Dashboard.html";
+      } else if (role === "inspector") {
+        window.location.href = "InspectorDashboard.html";
+      } else if (role === "delivery") {
+        window.location.href = "DeliveryDashboard.html";
+      }
+
+    } catch {
+      alert("Invalid login credentials");
     }
   });
 }

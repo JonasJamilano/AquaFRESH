@@ -5,10 +5,7 @@
     <title>Transport & Delivery | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
     <link rel="stylesheet" href="TransportDelivery.css">
 </head>
 <body>
@@ -22,42 +19,59 @@
 
     <nav class="menu">
         <ul>
-            <li>
+            <!-- ADMIN / MANAGER DASHBOARD -->
+            <li data-role="superadmin admin manager">
                 <a href="Dashboard.html">
                     <span class="icon"></span>
                     <span class="label">Dashboard</span>
                 </a>
             </li>
 
-            <li> 
+            <!-- INSPECTOR DASHBOARD -->
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
+
+            <!-- DELIVERY DASHBOARD -->
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager inspector delivery">
                 <a href="FreshnessEvaluation.html">
                     <span class="icon"></span>
                     <span class="label">Freshness Evaluation</span>
                 </a>
             </li>
 
-            <li class="active">
+            <li data-role="superadmin admin manager delivery">
                 <a href="TransportDelivery.html">
                     <span class="icon"></span>
                     <span class="label">Transport & Delivery</span>
                 </a>
             </li>
 
-            <li>
+            <li data-role="superadmin admin manager inspector">
                 <a href="AnalyticsReporting.html">
                     <span class="icon"></span>
                     <span class="label">Analytics & Reporting</span>
                 </a>
             </li>
 
-            <li>
+            <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
                     <span class="icon"></span>
                     <span class="label">Quality Control</span>
                 </a>
             </li>
 
-            <li>
+            <li data-role="superadmin admin">
                 <a href="UserManagement.html">
                     <span class="icon"></span>
                     <span class="label">User Management</span>
@@ -69,16 +83,15 @@
 
 <!-- TOP BAR -->
 <header class="topbar">
-    <label for="nav-toggle" class="menu-btn">☰</label>
+    <span class="menu-btn">☰</span>
 
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-            Admin <span class="caret">▾</span>
+    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
-
         <div class="dropdown-menu">
-            <a href="#">Profile</a>
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
@@ -110,80 +123,64 @@
             <h3>Late</h3>
             <p>1</p>
         </div>
-        
-        
-    </div>
     </div>
 
     <!-- DELIVERY STATUS TABLE -->
-    <section class="delivery-table">
+    <section class="panel">
         <h3>Active Deliveries</h3>
 
-        <table>
+        <table class="delivery-table">
             <thead>
                 <tr>
                     <th>Delivery ID</th>
                     <th>Batch ID</th>
                     <th>Current Location</th>
                     <th>Avg Temp (°C)</th>
-                    <th>Delivery Status</th>
+                    <th>Status</th>
                     <th>ETA</th>
                 </tr>
             </thead>
-                <tbody>
-            <tr>
-                <td>D-101</td>
-                <td>B-001</td>
-                <td>En Route – Highway</td>
-                <td>4.2</td>
-                <td class="on-time">On Time</td>
-                <td>11:30 AM</td>
-            </tr>
-
-            <tr>
-                <td>D-102</td>
-                <td>B-002</td>
-                <td>Checkpoint Delay</td>
-                <td>6.8</td>
-                <td class="delayed">Delayed</td>
-                <td>12:15 PM</td>
-            </tr>
-
-            <tr>
-                <td>D-103</td>
-                <td>B-003</td>
-                <td>En Route – Highway</td>
-                <td>4.1</td>
-                <td class="early">Early</td>
-                <td>11:00 AM</td>
-            </tr>
-
-            <tr>
-                <td>D-104</td>
-                <td>B-004</td>
-                <td>Urban Area</td>
-                <td>8.1</td>
-                <td class="late">Late</td>
-                <td>12:45 PM</td>
-            </tr>
-        </tbody>
+            <tbody>
+                <tr>
+                    <td>D-101</td>
+                    <td>B-001</td>
+                    <td>En Route – Highway</td>
+                    <td>4.2</td>
+                    <td class="on-time">On Time</td>
+                    <td>11:30 AM</td>
+                </tr>
+                <tr>
+                    <td>D-102</td>
+                    <td>B-002</td>
+                    <td>Checkpoint Delay</td>
+                    <td>6.8</td>
+                    <td class="delayed">Delayed</td>
+                    <td>12:15 PM</td>
+                </tr>
+                <tr>
+                    <td>D-103</td>
+                    <td>B-003</td>
+                    <td>En Route – Highway</td>
+                    <td>4.1</td>
+                    <td class="early">Early</td>
+                    <td>11:00 AM</td>
+                </tr>
+                <tr>
+                    <td>D-104</td>
+                    <td>B-004</td>
+                    <td>Urban Area</td>
+                    <td>8.1</td>
+                    <td class="late">Late</td>
+                    <td>12:45 PM</td>
+                </tr>
+            </tbody>
         </table>
     </section>
 
 </main>
 
-<script>
-    const menuBtn = document.querySelector('.menu-btn');
-    const sidebar = document.querySelector('.sidebar');
-    const topbar = document.querySelector('.topbar');
-    const content = document.querySelector('.content');
-
-    menuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        topbar.classList.toggle('collapsed');
-        content.classList.toggle('collapsed');
-    });
-</script>
+<script type="module" src="sidebar.js"></script>
+<script type="module" src="role-ui.js"></script>
 
 </body>
 </html>

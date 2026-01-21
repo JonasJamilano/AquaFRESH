@@ -22,13 +22,62 @@
 
     <nav class="menu">
         <ul>
-            <li><a href="Dashboard.html"><span class="icon"></span><span class="label">Dashboard</span></a></li>
-            <li><a href="FreshnessEvaluation.html"><span class="icon"></span><span class="label">Freshness Evaluation</span></a></li>
-            <li><a href="TransportDelivery.html"><span class="icon"></span><span class="label">Transport & Delivery</span></a></li>
-            <li><a href="AnalyticsReporting.html"><span class="icon"></span><span class="label">Analytics & Reporting</span></a></li>
-            <li><a href="QualityControl.html"><span class="icon"></span><span class="label">Quality Control</span></a></li>
-            <li class="active"><a href="UserManagement.html"><span class="icon"></span><span class="label">User Management</span></a></li>
-        </ul>
+    <li data-role="superadmin admin manager">
+        <a href="Dashboard.html">
+            <span class="icon"></span>
+            <span class="label">Dashboard</span>
+        </a>
+    </li>
+
+    <li data-role="inspector">
+        <a href="InspectorDashboard.html">
+            <span class="icon"></span>
+            <span class="label">Inspector Dashboard</span>
+        </a>
+    </li>
+
+    <li data-role="delivery">
+        <a href="DeliveryDashboard.html">
+            <span class="icon"></span>
+            <span class="label">Delivery Dashboard</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager inspector delivery">
+        <a href="FreshnessEvaluation.html">
+            <span class="icon"></span>
+            <span class="label">Freshness Evaluation</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager delivery">
+        <a href="TransportDelivery.html">
+            <span class="icon"></span>
+            <span class="label">Transport & Delivery</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager inspector">
+        <a href="AnalyticsReporting.html">
+            <span class="icon"></span>
+            <span class="label">Analytics & Reporting</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager inspector">
+        <a href="QualityControl.html">
+            <span class="icon"></span>
+            <span class="label">Quality Control</span>
+        </a>
+    </li>
+
+    <li data-role="superadmin admin manager">
+        <a href="UserManagement.html">
+            <span class="icon"></span>
+            <span class="label">User Management</span>
+        </a>
+    </li>
+</ul>
     </nav>
 </aside>
 
@@ -39,10 +88,10 @@
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-            Admin <span class="caret">▾</span>
+    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
-            <a href="#">Profile</a>
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
@@ -66,7 +115,7 @@
             <p class="card-number">12</p>
         </div>
         <div class="card success">
-            <h3>Active Users</h3>
+            <h3>Active</h3>
             <p class="card-number">9</p>
         </div>
         <div class="card warning">
@@ -96,6 +145,7 @@
                 </tr>
             </thead>
             <tbody>
+
                 <tr>
                     <td>U-001</td>
                     <td>Juan Dela Cruz</td>
@@ -106,7 +156,7 @@
                     <td class="actions">
                         <button class="btn edit">Edit</button>
                         <button class="btn disable">Deactivate</button>
-                        <button class="btn delete" title="Delete User">🗑</button>
+                        <button class="btn delete" title="Delete">🗑</button>
                     </td>
                 </tr>
 
@@ -120,7 +170,7 @@
                     <td class="actions">
                         <button class="btn edit">Edit</button>
                         <button class="btn disable">Deactivate</button>
-                         <button class="btn delete" title="Delete User">🗑</button>
+                        <button class="btn delete" title="Delete">🗑</button>
                     </td>
                 </tr>
 
@@ -134,9 +184,10 @@
                     <td class="actions">
                         <button class="btn edit">Edit</button>
                         <button class="btn enable">Activate</button>
-                        <button class="btn delete" title="Delete User">🗑</button>
+                        <button class="btn delete" title="Delete">🗑</button>
                     </td>
                 </tr>
+
             </tbody>
         </table>
     </section>
@@ -148,12 +199,14 @@
         <div class="form-grid">
             <input type="text" placeholder="Full Name">
             <input type="email" placeholder="Email Address">
+
             <select>
                 <option>Administrator</option>
                 <option>Manager</option>
                 <option>Quality Inspector</option>
                 <option>Delivery Staff</option>
             </select>
+
             <select>
                 <option>Active</option>
                 <option>Disabled</option>
@@ -168,18 +221,9 @@
 
 </main>
 
-<script>
-    const menuBtn = document.querySelector('.menu-btn');
-    const sidebar = document.querySelector('.sidebar');
-    const topbar = document.querySelector('.topbar');
-    const content = document.querySelector('.content');
-
-    menuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        topbar.classList.toggle('collapsed');
-        content.classList.toggle('collapsed');
-    });
-</script>
+<!-- SIDEBAR TOGGLE -->
+<script type="module" src="sidebar.js"></script>
+<script type="module" src="role-ui.js"></script>
 
 </body>
 </html>
