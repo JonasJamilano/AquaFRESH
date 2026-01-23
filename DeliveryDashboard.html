@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delivery Dashboard | AquaFRESH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="DeliveryDashboard.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="brand">
+        <h1>AquaFRESH</h1>
+        <p>Aquaculture Freshness Monitoring System</p>
+    </div>
+
+        <nav class="menu">
+            <ul>
+            <!-- ADMIN / MANAGER DASHBOARD -->
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
+
+            <!-- INSPECTOR DASHBOARD -->
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
+
+            <!-- DELIVERY DASHBOARD -->
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <span class="icon"></span>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <span class="icon"></span>
+                    <span class="label">Transport & Delivery</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html">
+                    <span class="icon"></span>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html">
+                    <span class="icon"></span>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin">
+                <a href="UserManagement.html">
+                    <span class="icon"></span>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
+        </nav>
+</aside>
+
+<!-- TOP BAR -->
+<header class="topbar">
+    <span class="menu-btn">☰</span>
+
+    <div class="profile-dropdown">
+        <input type="checkbox" id="profile-toggle">
+        <label for="profile-toggle" class="profile-trigger">
+    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+        </label>
+        <div class="dropdown-menu">
+            <a href="Profile.html">Profile</a>
+            <a href="Login.html" class="logout">Logout</a>
+        </div>
+    </div>
+</header>
+
+<!-- CONTENT -->
+<main class="content">
+    <h2>Delivery Dashboard</h2>
+    <p>Current delivery status and assignments.</p>
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <h3>Active Deliveries</h3>
+            <p class="kpi-number">5</p>
+        </div>
+
+        <div class="kpi-card success">
+            <h3>On-Time</h3>
+            <p class="kpi-number">3</p>
+        </div>
+
+        <div class="kpi-card warning">
+            <h3>Delayed</h3>
+            <p class="kpi-number">1</p>
+        </div>
+
+        <div class="kpi-card danger">
+            <h3>Late</h3>
+            <p class="kpi-number">1</p>
+        </div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <section class="panel">
+        <h3>Assigned Deliveries</h3>
+        <ul class="task-list">
+            <li>D-102 – Tuna → Dock B</li>
+            <li>D-105 – Shrimp → Processing Area</li>
+        </ul>
+    </section>
+</main>
+
+<script type="module" src="sidebar.js"></script>
+<script type="module" src="role-ui.js"></script>
+
+</body>
+</html>

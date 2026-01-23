@@ -1,0 +1,15 @@
+@import url("Dashboard.css");
+
+.task-list {
+    list-style: none;
+    font-size: 14px;
+}
+
+.task-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e6e9;
+}
+/* Hide role-based menu items by default */
+.menu li[data-role] {
+    display: none;
+}
