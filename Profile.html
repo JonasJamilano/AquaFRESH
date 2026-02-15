@@ -1,97 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Profile | AquaFRESH</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="Profile.css">
+    <meta charset="UTF-8">
+    <title>AquaFRESH | Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="Dashboard.css">
+    <link rel="stylesheet" href="Profile.css">
 </head>
 <body>
 
-  <!-- TOP NAVBAR -->
-  <nav class="navbar">
-    <div class="logo">AquaFRESH</div>
+<input type="checkbox" id="nav-toggle">
 
-    <div class="profile-menu">
-      <input type="checkbox" id="profile-toggle">
-      <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
-      </label>
-
-      <div class="dropdown">
-        <a href="Dashboard.html">Dashboard</a>
-        <a href="Profile.html">Profile</a>
-        <a href="Login.html" class="logout">Logout</a>
-      </div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="brand">
+        <h1>AquaFRESH</h1>
+        <p>Aquaculture Freshness Monitoring System</p>
     </div>
-  </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
-    <div class="profile-card">
-      <h2>Profile Overview</h2>
+    <nav class="menu">
+        <ul>
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <span class="icon"></span>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
 
-      <!-- Profile photo -->
-      <div class="profile-photo">
-        <img id="profilePhoto" src="default-avatar.png" alt="Profile Photo">
-      </div>
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <span class="icon"></span>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
 
-      <div class="profile-info">
-        <p><strong>Full Name:</strong> <span id="fullName">Loading...</span></p>
-        <p><strong>Email:</strong> <span id="email">Loading...</span></p>
-        <p><strong>Phone:</strong> <span id="phone">Loading...</span></p>
-        <p><strong>Address:</strong> <span id="address">Loading...</span></p>
-        <p><strong>Role:</strong> <span id="role">Admin</span></p>
-      </div>
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html">
+                    <span class="icon"></span>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
 
-      <div class="profile-actions">
-        <a href="EditProfile.html" class="edit-btn">Edit Profile</a>
-        <a href="ChangePass.html" class="edit-btn">Change Password</a>
-      </div>
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html">
+                    <span class="icon"></span>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
+
+            <li data-role="superadmin admin manager">
+                <a href="UserManagement.html">
+                    <span class="icon"></span>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- TOP BAR -->
+<header class="topbar">
+    <label for="nav-toggle" class="menu-btn">☰</label>
+
+    <div class="profile-dropdown">
+        <input type="checkbox" id="profile-toggle">
+        <label for="profile-toggle" class="profile-trigger">
+            <span id="userRoleLabel">User</span>
+            <span class="caret">▾</span>
+        </label>
+
+        <div class="dropdown-menu">
+            <a href="Profile.html">Profile</a>
+            <a href="Login.html" class="logout">Logout</a>
+        </div>
     </div>
-  </main>
+</header>
 
-  <script type="module">
-    import { auth, db } from "./firebase.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<!-- MAIN CONTENT -->
+<main class="content">
+    <h2>My Profile</h2>
+    <p>View your account information below.</p>
 
-    const fullNameEl = document.getElementById("fullName");
-    const emailEl = document.getElementById("email");
-    const phoneEl = document.getElementById("phone");
-    const addressEl = document.getElementById("address");
-    const profilePhotoEl = document.getElementById("profilePhoto");
+    <div class="profile-container">
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "Login.html";
-        return;
+        <!-- ACTION BAR -->
+        <div class="profile-actions">
+            <a href="EditProfile.html" class="edit-btn">Edit Profile</a>
+        </div>
+
+        <!-- PROFILE HEADER -->
+        <div class="profile-header">
+            <div class="avatar" id="profileAvatar">JS</div>
+            <div class="profile-info">
+                <h2 id="profileName">Loading...</h2>
+                <p class="email" id="profileEmail">Loading...</p>
+                <span class="role-badge" id="profileRoleBadge">Loading...</span>
+            </div>
+        </div>
+
+        <!-- PROFILE DETAILS -->
+        <div class="profile-details">
+            <div class="detail-item accent">
+                <label>Full Name</label>
+                <p id="detailFullName">Loading...</p>
+            </div>
+
+            <div class="detail-item">
+                <label>Email</label>
+                <p id="detailEmail">Loading...</p>
+            </div>
+
+            <div class="detail-item">
+                <label>Address</label>
+                <p id="detailAddress">Loading...</p>
+            </div>
+
+            <div class="detail-item">
+                <label>Phone</label>
+                <p id="detailPhone">Loading...</p>
+            </div>
+
+            <div class="detail-item role">
+                <label>Role</label>
+                <p id="detailRole">Loading...</p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- PROFILE SCRIPT -->
+<script>
+  const API_BASE_URL = "http://localhost:3000";
+
+  function getInitials(fullName) {
+    if (!fullName) return "U";
+    const parts = fullName.trim().split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (
+      parts[0].charAt(0).toUpperCase() +
+      parts[parts.length - 1].charAt(0).toUpperCase()
+    );
+  }
+
+  function formatRole(role) {
+    if (!role) return "";
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  }
+
+  async function loadUserProfile() {
+    const userId = localStorage.getItem("userId");
+    const storedFullName = localStorage.getItem("userFullName");
+    const storedRole = localStorage.getItem("userRole");
+
+    console.log("Profile page - userId:", userId);
+    console.log("Profile page - storedFullName:", storedFullName);
+    console.log("Profile page - storedRole:", storedRole);
+
+    if (!userId) {
+      console.warn("No userId in localStorage, redirecting to login");
+      window.location.href = "Login.html";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/${userId}`);
+      console.log("Profile fetch status:", res.status);
+
+      if (!res.ok) {
+        throw new Error("Failed to load profile");
       }
 
-      emailEl.textContent = user.email;
+      const user = await res.json();
+      console.log("Profile data from server:", user);
 
-      const userDocRef = doc(db, "users", user.uid);
+      const avatarEl = document.getElementById("profileAvatar");
+      const profileNameEl = document.getElementById("profileName");
+      const profileEmailEl = document.getElementById("profileEmail");
+      const profileRoleBadgeEl = document.getElementById("profileRoleBadge");
 
-      // Real-time listener
-      onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          fullNameEl.textContent = data.fullName || "Not set";
-          phoneEl.textContent = data.phone || "Not set";
-          addressEl.textContent = data.address || "Not set";
+      const detailFullNameEl = document.getElementById("detailFullName");
+      const detailEmailEl = document.getElementById("detailEmail");
+      const detailAddressEl = document.getElementById("detailAddress");
+      const detailPhoneEl = document.getElementById("detailPhone");
+      const detailRoleEl = document.getElementById("detailRole");
 
-          // Update profile photo
-          profilePhotoEl.src = data.photoURL || "default-avatar.png";
-        } else {
-          fullNameEl.textContent = "Not set";
-          phoneEl.textContent = "Not set";
-          addressEl.textContent = "Not set";
-          profilePhotoEl.src = "default-avatar.png";
-        }
-      });
-    });
-  </script>
+      const userRoleLabelEl = document.getElementById("userRoleLabel");
+
+      const fullName = user.fullName || storedFullName || "Unknown User";
+      const role = user.role || storedRole || "user";
+
+      avatarEl.textContent = getInitials(fullName);
+      profileNameEl.textContent = fullName;
+      profileEmailEl.textContent = user.email || "No email";
+      profileRoleBadgeEl.textContent = formatRole(role);
+
+      detailFullNameEl.textContent = fullName;
+      detailEmailEl.textContent = user.email || "";
+      detailAddressEl.textContent = user.address || "No address provided";
+      detailPhoneEl.textContent = user.phone || "No phone provided";
+      detailRoleEl.textContent = formatRole(role);
+
+      userRoleLabelEl.textContent = formatRole(role);
+    } catch (err) {
+      console.error("Error loading profile:", err);
+      alert("Failed to load profile. Please log in again.");
+      window.location.href = "Login.html";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadUserProfile);
+</script>
+
+<script type="module" src="sidebar.js"></script>
+<script type="module" src="role-ui.js"></script>
 
 </body>
 </html>
