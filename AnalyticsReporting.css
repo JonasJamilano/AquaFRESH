@@ -71,13 +71,14 @@ body {
     background: rgba(255,255,255,0.08);
 }
 
-.icon {
-    width: 18px;
-    height: 18px;
-    background: #4dd0c8;
-    border-radius: 4px;
+/* Icon styling */
+.menu li a i {
+    width: 20px;
     margin-right: 14px;
+    text-align: center;
+    color: #4dd0c8;
 }
+
 
 /* =====================
    TOP BAR

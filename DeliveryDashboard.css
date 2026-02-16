@@ -10,6 +10,14 @@
     border-bottom: 1px solid #e0e6e9;
 }
 
+/* Icon styling */
+.menu li a i {
+    width: 20px;
+    margin-right: 14px;
+    text-align: center;
+    color: #4dd0c8;
+}
+
 /* Hide role-based menu items by default */
 .menu li[data-role] {
     display: none;
