@@ -146,6 +146,127 @@ app.put("/users/:id", async (req, res) => {
   }
 });
 
+/* =====================
+   GET ALL USERS
+===================== */
+app.get("/users", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT id, full_name, email, phone, address, role, status, created_at
+       FROM users
+       ORDER BY id DESC`
+    );
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error("❌ GET USERS ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* =====================
+   UPDATE USER (ADMIN)
+===================== */
+app.put("/admin/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { fullName, email, phone, address, role, status } = req.body;
+
+  try {
+    const [result] = await db.execute(
+      `UPDATE users
+       SET full_name = ?, 
+           email = ?, 
+           phone = ?, 
+           address = ?, 
+           role = ?, 
+           status = ?
+       WHERE id = ?`,
+      [fullName, email, phone, address, role, status, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ ADMIN UPDATE ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* =====================
+   TOGGLE USER STATUS
+===================== */
+app.patch("/admin/users/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; // active / inactive
+
+  try {
+    const [result] = await db.execute(
+      `UPDATE users SET status = ? WHERE id = ?`,
+      [status, id]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ STATUS UPDATE ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* =====================
+   ADMIN CREATE USER
+===================== */
+app.post("/admin/users", async (req, res) => {
+  const { fullName, email, password, phone, address, role, status } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.execute(
+      `INSERT INTO users 
+       (full_name, email, password, phone, address, role, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [fullName, email, hashedPassword, phone, address, role, status]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ ADMIN CREATE ERROR:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/* =====================
+   DELETE USER (ADMIN)
+===================== */
+app.delete("/admin/users/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.execute(
+      "DELETE FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("❌ DELETE USER ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 app.listen(3000, () => {
   console.log("🚀 Server with profile routes running on http://localhost:3000");
 });
