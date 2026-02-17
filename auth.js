@@ -80,9 +80,12 @@ if (loginForm) {
         return;
       }
 
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("user", data.fullName);
+      // ✅ SAVE EXACT KEYS YOUR PROFILE PAGE EXPECTS
+      localStorage.setItem("userId", data.id);
+      localStorage.setItem("userFullName", data.fullName);
+      localStorage.setItem("userRole", data.role);
 
+      // Redirect by role
       if (["superadmin", "admin", "manager"].includes(data.role)) {
         window.location.href = "Dashboard.html";
       } else if (data.role === "inspector") {
