@@ -237,8 +237,28 @@ body {
 }
 
 .btn.edit { background: #e0f2f1; }
-.btn.disable { background: #ffe0b2; }
-.btn.enable { background: #c8e6c9; }
+
+/* ACTIVATE BUTTON (Green) */
+.btn.activate {
+    background: #c8e6c9;
+    color: #1b5e20;
+    font-weight: 600;
+}
+
+.btn.activate:hover {
+    background: #a5d6a7;
+}
+
+/* DEACTIVATE BUTTON (Red) */
+.btn.deactivate {
+    background: #ffcdd2;
+    color: #b71c1c;
+    font-weight: 600;
+}
+
+.btn.deactivate:hover {
+    background: #ef9a9a;
+}
 
 .btn.delete {
     background: #fdecea;
@@ -313,4 +333,57 @@ body {
 /* Hide role-based menu items by default */
 .menu li[data-role] {
     display: none;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 95%;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* DELETE MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
 }

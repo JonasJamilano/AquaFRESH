@@ -7,6 +7,16 @@ async function loadUsers() {
   const res = await fetch("http://localhost:3000/users");
   const users = await res.json();
 
+    // Calculate summary counts
+    const totalUsers = users.length;
+    const activeUsers = users.filter(u => u.status === "active").length;
+    const disabledUsers = users.filter(u => u.status === "inactive").length;
+
+    // Update UI
+    document.getElementById("totalUsers").textContent = totalUsers;
+    document.getElementById("activeUsers").textContent = activeUsers;
+    document.getElementById("disabledUsers").textContent = disabledUsers;
+
   const tbody = document.querySelector(".user-table tbody");
   tbody.innerHTML = "";
 
@@ -38,8 +48,8 @@ async function loadUsers() {
             : ""
         }
         <button onclick="toggleStatus(${user.id}, '${user.status}')"
-                class="btn disable">
-                ${toggleText}
+        class="btn ${user.status === "active" ? "deactivate" : "activate"}">
+        ${toggleText}
         </button>
         </td>
     </tr>
@@ -70,26 +80,41 @@ async function toggleStatus(id, currentStatus) {
    EDIT USER (TEMP SIMPLE)
 ========================= */
 async function editUser(id) {
-  const fullName = prompt("Enter new full name:");
-  const email = prompt("Enter new email:");
-  const phone = prompt("Enter phone number:");
-  const address = prompt("Enter address:");
-  const roleInput = prompt("Enter role (superadmin/admin/manager/inspector/delivery):");
-  const status = prompt("Enter status (active/inactive):");
+  const res = await fetch(`http://localhost:3000/users/${id}`);
+  const user = await res.json();
+
+  document.getElementById("editUserId").value = user.id;
+  document.getElementById("editFullName").value = user.fullName;
+  document.getElementById("editEmail").value = user.email;
+  document.getElementById("editPhone").value = user.phone || "";
+  document.getElementById("editAddress").value = user.address || "";
+  document.getElementById("editRole").value = user.role;
+
+  document.getElementById("editModal").style.display = "flex";
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+async function saveEditUser() {
+  const id = document.getElementById("editUserId").value;
+
+  const data = {
+    fullName: document.getElementById("editFullName").value,
+    email: document.getElementById("editEmail").value,
+    phone: document.getElementById("editPhone").value,
+    address: document.getElementById("editAddress").value,
+    role: document.getElementById("editRole").value,
+  };
 
   await fetch(`http://localhost:3000/admin/users/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      fullName,
-      email,
-      phone,
-      address,
-      role: roleInput,
-      status
-    })
+    body: JSON.stringify(data)
   });
 
+  closeEditModal();
   loadUsers();
 }
 
@@ -147,14 +172,22 @@ function clearForm() {
 /* =========================
    DELETE USER
 ========================= */
-async function deleteUser(id) {
-  const confirmDelete = confirm("Are you sure you want to delete this user?");
+function deleteUser(id) {
+  document.getElementById("deleteUserId").value = id;
+  document.getElementById("deleteModal").style.display = "flex";
+}
 
-  if (!confirmDelete) return;
+function closeDeleteModal() {
+  document.getElementById("deleteModal").style.display = "none";
+}
+
+async function confirmDeleteUser() {
+  const id = document.getElementById("deleteUserId").value;
 
   await fetch(`http://localhost:3000/admin/users/${id}`, {
     method: "DELETE"
   });
 
+  closeDeleteModal();
   loadUsers();
 }

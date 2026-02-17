@@ -170,7 +170,7 @@ app.get("/users", async (req, res) => {
 ===================== */
 app.put("/admin/users/:id", async (req, res) => {
   const { id } = req.params;
-  const { fullName, email, phone, address, role, status } = req.body;
+  const { fullName, email, phone, address, role } = req.body;
 
   try {
     const [result] = await db.execute(
@@ -179,10 +179,16 @@ app.put("/admin/users/:id", async (req, res) => {
            email = ?, 
            phone = ?, 
            address = ?, 
-           role = ?, 
-           status = ?
+           role = ?
        WHERE id = ?`,
-      [fullName, email, phone, address, role, status, id]
+      [
+        fullName,
+        email,
+        phone || null,
+        address || null,
+        role,
+        id
+      ]
     );
 
     if (result.affectedRows === 0) {
