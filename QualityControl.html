@@ -23,62 +23,62 @@
 
     <nav class="menu">
         <ul>
-    <li data-role="superadmin admin manager">
-        <a href="Dashboard.html">
-           <i class="fa-solid fa-gauge"></i>
-            <span class="label">Dashboard</span>
-        </a>
-    </li>
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <i class="fa-solid fa-gauge"></i>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
 
-    <li data-role="inspector">
-        <a href="InspectorDashboard.html">
-            <i class="fa-solid fa-clipboard-check"></i>
-            <span class="label">Inspector Dashboard</span>
-        </a>
-    </li>
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
 
-    <li data-role="delivery">
-        <a href="DeliveryDashboard.html">
-            <i class="fa-solid fa-truck"></i>
-            <span class="label">Delivery Dashboard</span>
-        </a>
-    </li>
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                    <i class="fa-solid fa-truck"></i>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
 
-    <li data-role="superadmin admin manager inspector delivery">
-        <a href="FreshnessEvaluation.html">
-           <i class="fa-solid fa-water"></i>
-            <span class="label">Freshness Evaluation</span>
-        </a>
-    </li>
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <i class="fa-solid fa-water"></i>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
 
-    <li data-role="superadmin admin manager delivery">
-        <a href="TransportDelivery.html">
-            <i class="fa-solid fa-route"></i>
-            <span class="label">Transport & Delivery</span>
-        </a>
-    </li>
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <i class="fa-solid fa-route"></i>
+                    <span class="label">Transport & Delivery</span>
+                </a>
+            </li>
 
-    <li data-role="superadmin admin manager inspector">
-        <a href="AnalyticsReporting.html">
-            <i class="fa-solid fa-chart-line"></i>
-            <span class="label">Analytics & Reporting</span>
-        </a>
-    </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
 
-    <li data-role="superadmin admin manager inspector">
-        <a href="QualityControl.html">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span class="label">Quality Control</span>
-        </a>
-    </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
 
-    <li data-role="superadmin admin manager">
-        <a href="UserManagement.html">
-            <i class="fa-solid fa-users"></i>
-            <span class="label">User Management</span>
-        </a>
-    </li>
-</ul>
+            <li data-role="superadmin admin manager">
+                <a href="UserManagement.html">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
     </nav>
 </aside>
 
@@ -89,7 +89,7 @@
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
             <a href="#">Profile</a>
@@ -110,8 +110,7 @@
 
     <!-- INSPECTIONS TODAY -->
     <section class="panel">
-        <h3>Inspections Today (3)</h3>
-
+        <h3>Inspections Today (<span id="inspections-today-count">0</span>)</h3>
         <table class="qc-table">
             <thead>
                 <tr>
@@ -122,207 +121,148 @@
                     <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>B-201</td>
-                    <td>Juan Dela Cruz</td>
-                    <td>Dock A</td>
-                    <td>Milkfish</td>
-                    <td class="status success">Passed</td>
-                </tr>
-                <tr>
-                    <td>B-202</td>
-                    <td>Maria Santos</td>
-                    <td>Cold Storage</td>
-                    <td>Tuna</td>
-                    <td class="status warning">With Issues</td>
-                </tr>
-                <tr>
-                    <td>B-203</td>
-                    <td>Jose Ramirez</td>
-                    <td>Processing Area</td>
-                    <td>Tilapia</td>
-                    <td class="status danger">Rejected</td>
-                </tr>
+            <tbody id="inspections-today-body">
+                <!-- Dynamic rows here -->
             </tbody>
         </table>
     </section>
 
+    <!-- Passed Inspections -->
     <section class="panel success-panel">
-    <h3>Passed Inspections (5)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Remarks</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-198</td>
-                <td>Milkfish</td>
-                <td>Dock A</td>
-                <td>No issues found</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-199</td>
-                <td>Tuna</td>
-                <td>Dock B</td>
-                <td>Meets quality standards</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-200</td>
-                <td>Tilapia</td>
-                <td>Cold Storage</td>
-                <td>Acceptable condition</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-201</td>
-                <td>Milkfish</td>
-                <td>Dock A</td>
-                <td>Fresh and intact</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-204</td>
-                <td>Shrimp</td>
-                <td>Processing Area</td>
-                <td>No abnormalities</td>
-                <td class="status success">Passed</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <section class="panel warning-panel">
-    <h3>Inspections With Issues (2)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Issue Noted</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-195</td>
-                <td>Tuna</td>
-                <td>Cold Storage</td>
-                <td>Temperature deviation detected</td>
-                <td class="status warning">With Issues</td>
-            </tr>
-            <tr>
-                <td>B-202</td>
-                <td>Milkfish</td>
-                <td>Dock B</td>
-                <td>Minor packaging damage</td>
-                <td class="status warning">With Issues</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <section class="panel danger-panel">
-    <h3>Rejected Inspections (1)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Reason for Rejection</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-203</td>
-                <td>Tilapia</td>
-                <td>Processing Area</td>
-                <td>Unacceptable odor and gill discoloration</td>
-                <td class="status danger">Rejected</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <!-- ADD / NEW INSPECTION -->
-    <section class="panel">
-        <h3>New Inspection Log</h3>
-
-        <div class="form-grid">
-            <input type="text" placeholder="Batch ID">
-            <input type="text" placeholder="Inspector Name">
-            <input type="text" placeholder="Inspection Location">
-            <input type="text" placeholder="Product Type">
-        </div>
-
+        <h3>Passed Inspections (<span id="passed-count">0</span>)</h3>
         <table class="qc-table">
             <thead>
                 <tr>
-                    <th>Criteria</th>
-                    <th>Assessment</th>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
                     <th>Remarks</th>
+                    <th>Status</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Eye Clarity</td>
-                    <td>
-                        <select>
-                            <option>Excellent</option>
-                            <option>Acceptable</option>
-                            <option>Rejected</option>
-                        </select>
-                    </td>
-                    <td><input type="text"></td>
-                </tr>
-                <tr>
-                    <td>Gill Color</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
-                </tr>
-                <tr>
-                    <td>Body Firmness</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
-                </tr>
-                 <tr>
-                    <td>Odor</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
-                </tr>
+            <tbody id="passed-body">
+                <!-- Dynamic rows here -->
             </tbody>
         </table>
-
-        <div class="action-buttons">
-            <button class="secondary-btn">Add Another Inspection</button>
-            <button class="submit-btn">Save Inspection Log</button>
-        </div>
     </section>
+
+    <!-- Inspections With Issues -->
+    <section class="panel warning-panel">
+        <h3>Inspections With Issues (<span id="issues-count">0</span>)</h3>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Issue Noted</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="issues-body">
+                <!-- Dynamic rows here -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Rejected Inspections -->
+    <section class="panel danger-panel">
+        <h3>Rejected Inspections (<span id="rejected-count">0</span>)</h3>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Reason for Rejection</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="rejected-body">
+                <!-- Dynamic rows here -->
+            </tbody>
+        </table>
+    </section>
+
+   <!-- ADD / NEW INSPECTION -->
+<section class="panel" id="new-inspection-section">
+    <h3>New Inspection Log</h3>
+
+    <div class="form-grid">
+        <input type="text" id="batch-code" placeholder="Batch ID">
+        <input type="text" id="inspector-name" placeholder="Inspector Name">
+        <input type="text" id="inspection-location" placeholder="Inspection Location">
+        <input type="text" id="product-type" placeholder="Product Type">
+    </div>
+
+    <table class="qc-table">
+        <thead>
+            <tr>
+                <th>Criteria</th>
+                <th>Assessment</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody id="new-inspection-tbody">
+            <tr>
+                <td>Eye Clarity</td>
+                <td>
+                    <select class="criteria-select" data-criteria="Eye Clarity">
+                        <option>Excellent</option>
+                        <option>Acceptable</option>
+                        <option>Rejected</option>
+                    </select>
+                </td>
+                <td><input class="criteria-remarks" type="text"></td>
+            </tr>
+            <tr>
+                <td>Gill Color</td>
+                <td>
+                    <select class="criteria-select" data-criteria="Gill Color">
+                        <option>Excellent</option>
+                        <option>Acceptable</option>
+                        <option>Rejected</option>
+                    </select>
+                </td>
+                <td><input class="criteria-remarks" type="text"></td>
+            </tr>
+            <tr>
+                <td>Body Firmness</td>
+                <td>
+                    <select class="criteria-select" data-criteria="Body Firmness">
+                        <option>Excellent</option>
+                        <option>Acceptable</option>
+                        <option>Rejected</option>
+                    </select>
+                </td>
+                <td><input class="criteria-remarks" type="text"></td>
+            </tr>
+            <tr>
+                <td>Odor</td>
+                <td>
+                    <select class="criteria-select" data-criteria="Odor">
+                        <option>Excellent</option>
+                        <option>Acceptable</option>
+                        <option>Rejected</option>
+                    </select>
+                </td>
+                <td><input class="criteria-remarks" type="text"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="action-buttons">
+        <button class="secondary-btn" id="add-inspection-btn">Add Another Inspection</button>
+        <button class="submit-btn" id="save-inspection-btn">Save Inspection Log</button>
+    </div>
+</section>
+
 
 </main>
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script type="module" src="QualityControl.js"></script>
 
 </body>
 </html>

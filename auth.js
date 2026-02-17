@@ -85,13 +85,17 @@ if (loginForm) {
       localStorage.setItem("userFullName", data.fullName);
       localStorage.setItem("userRole", data.role);
 
-      // Redirect by role
-      if (["superadmin", "admin", "manager"].includes(data.role)) {
-        window.location.href = "Dashboard.html";
-      } else if (data.role === "inspector") {
-        window.location.href = "InspectorDashboard.html";
+      // Redirect by role (fixed for multiple roles)
+      const roles = data.role.split(",").map(r => r.trim()); // split and trim
+
+      if (roles.includes("superadmin") || roles.includes("admin") || roles.includes("manager")) {
+          window.location.href = "Dashboard.html";
+      } else if (roles.includes("inspector")) {
+          window.location.href = "InspectorDashboard.html";
+      } else if (roles.includes("delivery")) {
+          window.location.href = "DeliveryDashboard.html";
       } else {
-        window.location.href = "DeliveryDashboard.html";
+          alert("Unknown role. Contact admin.");
       }
 
     } catch (err) {

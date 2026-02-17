@@ -276,3 +276,137 @@ app.delete("/admin/users/:id", async (req, res) => {
 app.listen(3000, () => {
   console.log("🚀 Server with profile routes running on http://localhost:3000");
 });
+
+/* =====================
+   QUALITY CONTROL BACKEND
+===================== */
+
+// Helper function to calculate overall status from criteria
+function calculateOverallStatus(criteriaResults) {
+  let hasRejected = false;
+  let hasAcceptable = false;
+
+  for (let c of criteriaResults) {
+    if (c.assessment === "Rejected") hasRejected = true;
+    if (c.assessment === "Acceptable") hasAcceptable = true;
+  }
+
+  if (hasRejected) return "Rejected";
+  if (hasAcceptable) return "With Issues";
+  return "Passed";
+}
+
+/* =====================
+   CREATE NEW INSPECTION
+   POST /quality-control
+===================== */
+app.post("/quality-control", async (req, res) => {
+  const { batchCode, productType, location, inspectorId, criteria } = req.body;
+
+  if (!batchCode || !productType || !location || !inspectorId || !criteria) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    // Check if batch exists, otherwise insert
+    let [batch] = await db.execute(
+      "SELECT * FROM inspection_batches WHERE batch_code = ?",
+      [batchCode]
+    );
+
+    let batchId;
+    if (batch.length === 0) {
+      const [newBatch] = await db.execute(
+        "INSERT INTO inspection_batches (batch_code, product_type, location) VALUES (?, ?, ?)",
+        [batchCode, productType, location]
+      );
+      batchId = newBatch.insertId;
+    } else {
+      batchId = batch[0].id;
+    }
+
+    // Calculate overall status
+    const overallStatus = calculateOverallStatus(criteria);
+
+    // Insert inspection log
+    const [logResult] = await db.execute(
+      "INSERT INTO inspection_logs (batch_id, inspector_id, overall_status) VALUES (?, ?, ?)",
+      [batchId, inspectorId, overallStatus]
+    );
+
+    const inspectionLogId = logResult.insertId;
+
+    // Insert criteria results
+    for (let c of criteria) {
+      await db.execute(
+        "INSERT INTO inspection_criteria_results (inspection_log_id, criteria_name, assessment, remarks) VALUES (?, ?, ?, ?)",
+        [inspectionLogId, c.criteriaName, c.assessment, c.remarks || null]
+      );
+    }
+
+    res.json({ success: true, status: overallStatus });
+
+  } catch (err) {
+    console.error("❌ QC CREATE ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* =====================
+   GET INSPECTIONS TODAY
+   GET /quality-control/today
+===================== */
+app.get("/quality-control/today", async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        il.id,
+        ib.batch_code,
+        ib.product_type,
+        ib.location,
+        u.full_name AS inspector,
+        il.overall_status,
+        il.inspection_date
+      FROM inspection_logs il
+      JOIN inspection_batches ib ON il.batch_id = ib.id
+      JOIN users u ON il.inspector_id = u.id
+      WHERE DATE(il.inspection_date) = CURDATE()
+      ORDER BY il.inspection_date DESC
+    `);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error("❌ QC TODAY ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* =====================
+   GET INSPECTIONS BY STATUS
+   GET /quality-control/status/:status
+===================== */
+app.get("/quality-control/status/:status", async (req, res) => {
+  const { status } = req.params;
+
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        ib.batch_code,
+        ib.product_type,
+        ib.location,
+        il.overall_status,
+        il.inspection_date
+      FROM inspection_logs il
+      JOIN inspection_batches ib ON il.batch_id = ib.id
+      WHERE il.overall_status = ?
+      ORDER BY il.inspection_date DESC
+    `, [status]);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error("❌ QC STATUS ERROR:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
