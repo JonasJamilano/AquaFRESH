@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "../firebase.js";
 import {
   onAuthStateChanged,
   updateEmail
@@ -24,7 +24,6 @@ const emailInput = document.getElementById("email");
 const phoneInput = document.getElementById("phone");
 const addressInput = document.getElementById("address");
 const photoInput = document.getElementById("photo");
-
 const form = document.getElementById("profileForm");
 const message = document.getElementById("message");
 

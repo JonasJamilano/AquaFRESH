@@ -5,15 +5,14 @@
     <title>Analytics & Reporting | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="AnalyticsReporting.css">
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
         <h1>AquaFRESH</h1>
@@ -22,83 +21,73 @@
 
     <nav class="menu">
         <ul>
-    <li data-role="superadmin admin manager">
-        <a href="Dashboard.html">
-            <span class="icon"></span>
-            <span class="label">Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="inspector">
-        <a href="InspectorDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Inspector Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="delivery">
-        <a href="DeliveryDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Delivery Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector delivery">
-        <a href="FreshnessEvaluation.html">
-            <span class="icon"></span>
-            <span class="label">Freshness Evaluation</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager delivery">
-        <a href="TransportDelivery.html">
-            <span class="icon"></span>
-            <span class="label">Transport & Delivery</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="AnalyticsReporting.html">
-            <span class="icon"></span>
-            <span class="label">Analytics & Reporting</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="QualityControl.html">
-            <span class="icon"></span>
-            <span class="label">Quality Control</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager">
-        <a href="UserManagement.html">
-            <span class="icon"></span>
-            <span class="label">User Management</span>
-        </a>
-    </li>
-</ul>
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <i class="fa-solid fa-gauge"></i>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                   <i class="fa-solid fa-truck"></i>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <i class="fa-solid fa-water"></i>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <i class="fa-solid fa-route"></i>
+                    <span class="label">Transport & Delivery</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html" class="active">
+                   <i class="fa-solid fa-chart-line"></i>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager">
+                <a href="UserManagement.html">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
     </nav>
 </aside>
 
-<!-- TOP BAR -->
 <header class="topbar">
     <span class="menu-btn">☰</span>
 
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
-
         <div class="dropdown-menu">
-            <a href="#">Profile</a>
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="content">
 
     <h2>Sensor Monitoring</h2>
@@ -106,7 +95,6 @@
         Real-time environmental readings, sensor health, and connectivity status
     </p>
 
-    <!-- SENSOR STATUS SUMMARY -->
     <div class="summary-cards">
         <div class="card success">
             <h3>Normal</h3>
@@ -122,11 +110,13 @@
         </div>
     </div>
 
-    <!-- SENSOR STATUS TABLE -->
-    <section class="sensor-table">
-        <h3>Sensor Status Overview</h3>
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Sensor Status Overview</h3>
+            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Live Data Feed</span>
+        </div>
 
-        <table>
+        <table class="status-table">
             <thead>
                 <tr>
                     <th>Tank ID</th>
@@ -139,63 +129,67 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Tank 1</td>
+                    <td><strong>Tank 1</strong></td>
                     <td>25.3</td>
                     <td>7.1</td>
-                    <td class="normal">Normal</td>
-                    <td class="online">Online</td>
+                    <td><span class="status good"><i class="fa-solid fa-check"></i> Normal</span></td>
+                    <td><span class="status online"><i class="fa-solid fa-wifi"></i> Online</span></td>
                     <td>10:22 AM</td>
                 </tr>
-
                 <tr>
-                    <td>Tank 2</td>
+                    <td><strong>Tank 2</strong></td>
                     <td>29.1</td>
                     <td>6.8</td>
-                    <td class="warning-status">Warning</td>
-                    <td class="online">Online</td>
+                    <td><span class="status warning-status"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></td>
+                    <td><span class="status online"><i class="fa-solid fa-wifi"></i> Online</span></td>
                     <td>10:21 AM</td>
                 </tr>
-
                 <tr>
-                    <td>Tank 3</td>
+                    <td><strong>Tank 3</strong></td>
                     <td>32.4</td>
                     <td>6.3</td>
-                    <td class="alert">Alert</td>
-                    <td class="offline">Offline</td>
+                    <td><span class="status alert"><i class="fa-solid fa-circle-exclamation"></i> Alert</span></td>
+                    <td><span class="status offline"><i class="fa-solid fa-plug-circle-xmark"></i> Offline</span></td>
                     <td>10:10 AM</td>
                 </tr>
             </tbody>
         </table>
     </section>
 
-    <!-- SENSOR TREND PREVIEW -->
-    <section class="chart-section">
-        <h3>Sensor Trends (Preview)</h3>
-        <p class="subtitle">
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Sensor Trends</h3>
+        </div>
+        <p class="subtitle" style="margin-top: -10px; margin-bottom: 20px;">
             Visual placeholders for historical sensor data (prototype view)
         </p>
 
         <div class="chart-grid">
             <div class="chart-card">
                 <h4>Temperature Trend</h4>
-                <div class="chart-placeholder">Line Chart Placeholder</div>
+                <div class="chart-placeholder">
+                    <i class="fa-solid fa-chart-line"></i> Line Chart
+                </div>
             </div>
 
             <div class="chart-card">
                 <h4>pH Level Trend</h4>
-                <div class="chart-placeholder">Line Chart Placeholder</div>
+                <div class="chart-placeholder">
+                    <i class="fa-solid fa-chart-line"></i> Line Chart
+                </div>
             </div>
 
             <div class="chart-card">
                 <h4>Humidity Trend</h4>
-                <div class="chart-placeholder">Line Chart Placeholder</div>
+                <div class="chart-placeholder">
+                    <i class="fa-solid fa-chart-line"></i> Line Chart
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- FRESHNESS TRENDS -->
     <section class="analytics-section">
-        <h3>Freshness Trends</h3>
+        <h2>Freshness Trends</h2>
         <p class="subtitle">Distribution of freshness outcomes across monitored batches</p>
 
         <div class="summary-cards">
@@ -213,15 +207,16 @@
             </div>
         </div>
 
-        <div class="chart-card">
-            <h4>Freshness Outcome Trend</h4>
-            <div class="chart-placeholder">Bar / Line Chart Placeholder</div>
+        <div class="panel">
+            <h3>Freshness Outcome Trend</h3>
+            <div class="chart-placeholder large">
+                <i class="fa-solid fa-chart-column"></i> Bar / Line Chart
+            </div>
         </div>
     </section>
 
-    <!-- DELIVERY PERFORMANCE -->
     <section class="analytics-section">
-        <h3>Delivery Performance</h3>
+        <h2>Delivery Performance</h2>
         <p class="subtitle">Operational insights based on delivery timeliness and conditions</p>
 
         <div class="summary-cards">
@@ -239,9 +234,11 @@
             </div>
         </div>
 
-        <div class="chart-card">
-            <h4>Delivery Timeliness Trend</h4>
-            <div class="chart-placeholder">Bar Chart Placeholder</div>
+        <div class="panel">
+            <h3>Delivery Timeliness Trend</h3>
+            <div class="chart-placeholder large">
+                <i class="fa-solid fa-chart-column"></i> Bar Chart
+            </div>
         </div>
     </section>
 

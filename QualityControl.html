@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <title>Quality Control | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="QualityControl.css">
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
         <h1>AquaFRESH</h1>
@@ -19,82 +21,73 @@
 
     <nav class="menu">
         <ul>
-    <li data-role="superadmin admin manager">
-        <a href="Dashboard.html">
-            <span class="icon"></span>
-            <span class="label">Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="inspector">
-        <a href="InspectorDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Inspector Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="delivery">
-        <a href="DeliveryDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Delivery Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector delivery">
-        <a href="FreshnessEvaluation.html">
-            <span class="icon"></span>
-            <span class="label">Freshness Evaluation</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager delivery">
-        <a href="TransportDelivery.html">
-            <span class="icon"></span>
-            <span class="label">Transport & Delivery</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="AnalyticsReporting.html">
-            <span class="icon"></span>
-            <span class="label">Analytics & Reporting</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="QualityControl.html">
-            <span class="icon"></span>
-            <span class="label">Quality Control</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager">
-        <a href="UserManagement.html">
-            <span class="icon"></span>
-            <span class="label">User Management</span>
-        </a>
-    </li>
-</ul>
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <i class="fa-solid fa-gauge"></i>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                    <i class="fa-solid fa-truck"></i>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <i class="fa-solid fa-water"></i>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <i class="fa-solid fa-route"></i>
+                    <span class="label">Transport & Delivery</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html" class="active">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager">
+                <a href="UserManagement.html">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
     </nav>
 </aside>
 
-<!-- TOP BAR -->
 <header class="topbar">
     <span class="menu-btn">☰</span>
 
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
-            <a href="#">Profile</a>
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="content">
 
     <section class="page-header">
@@ -104,168 +97,48 @@
         </p>
     </section>
 
-    <!-- INSPECTIONS TODAY -->
-    <section class="panel">
-        <h3>Inspections Today (3)</h3>
-
-        <table class="qc-table">
-            <thead>
-                <tr>
-                    <th>Batch ID</th>
-                    <th>Inspector</th>
-                    <th>Location</th>
-                    <th>Product</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>B-201</td>
-                    <td>Juan Dela Cruz</td>
-                    <td>Dock A</td>
-                    <td>Milkfish</td>
-                    <td class="status success">Passed</td>
-                </tr>
-                <tr>
-                    <td>B-202</td>
-                    <td>Maria Santos</td>
-                    <td>Cold Storage</td>
-                    <td>Tuna</td>
-                    <td class="status warning">With Issues</td>
-                </tr>
-                <tr>
-                    <td>B-203</td>
-                    <td>Jose Ramirez</td>
-                    <td>Processing Area</td>
-                    <td>Tilapia</td>
-                    <td class="status danger">Rejected</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
-
-    <section class="panel success-panel">
-    <h3>Passed Inspections (5)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Remarks</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-198</td>
-                <td>Milkfish</td>
-                <td>Dock A</td>
-                <td>No issues found</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-199</td>
-                <td>Tuna</td>
-                <td>Dock B</td>
-                <td>Meets quality standards</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-200</td>
-                <td>Tilapia</td>
-                <td>Cold Storage</td>
-                <td>Acceptable condition</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-201</td>
-                <td>Milkfish</td>
-                <td>Dock A</td>
-                <td>Fresh and intact</td>
-                <td class="status success">Passed</td>
-            </tr>
-            <tr>
-                <td>B-204</td>
-                <td>Shrimp</td>
-                <td>Processing Area</td>
-                <td>No abnormalities</td>
-                <td class="status success">Passed</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <section class="panel warning-panel">
-    <h3>Inspections With Issues (2)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Issue Noted</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-195</td>
-                <td>Tuna</td>
-                <td>Cold Storage</td>
-                <td>Temperature deviation detected</td>
-                <td class="status warning">With Issues</td>
-            </tr>
-            <tr>
-                <td>B-202</td>
-                <td>Milkfish</td>
-                <td>Dock B</td>
-                <td>Minor packaging damage</td>
-                <td class="status warning">With Issues</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <section class="panel danger-panel">
-    <h3>Rejected Inspections (1)</h3>
-
-    <table class="qc-table">
-        <thead>
-            <tr>
-                <th>Batch ID</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Reason for Rejection</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>B-203</td>
-                <td>Tilapia</td>
-                <td>Processing Area</td>
-                <td>Unacceptable odor and gill discoloration</td>
-                <td class="status danger">Rejected</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-    <!-- ADD / NEW INSPECTION -->
-    <section class="panel">
-        <h3>New Inspection Log</h3>
-
-        <div class="form-grid">
-            <input type="text" placeholder="Batch ID">
-            <input type="text" placeholder="Inspector Name">
-            <input type="text" placeholder="Inspection Location">
-            <input type="text" placeholder="Product Type">
+    <section class="panel border-left-teal" id="new-inspection-section">
+        <div class="panel-header-flex">
+            <h3>New Inspection Log</h3>
         </div>
 
-        <table class="qc-table">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Batch ID</label>
+                <input type="text" id="batch-code" placeholder="e.g. B-012">
+            </div>
+            <div class="form-group">
+                <label>Inspector Name</label>
+                <input type="text" id="inspector-name" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Inspection Location</label>
+                <input type="text" id="inspection-location" placeholder="Warehouse A">
+            </div>
+            <div class="form-group">
+                <label>Product Type</label>
+                <input type="text" id="product-type" placeholder="e.g. Tilapia">
+            </div>
+        </div>
+
+        <div class="sensor-dashboard">
+            <div class="sensor-card">
+                <div class="sensor-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                <div class="sensor-input-group">
+                    <label for="temperature">Temperature (°C)</label>
+                    <input type="number" id="temperature" step="0.1" value="4.0" required>
+                </div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-icon"><i class="fa-solid fa-droplet"></i></div>
+                <div class="sensor-input-group">
+                    <label for="ph-level">pH Level</label>
+                    <input type="number" id="ph-level" step="0.1" value="6.5" required>
+                </div>
+            </div>
+        </div>
+
+        <table class="qc-table" style="margin-top: 24px;">
             <thead>
                 <tr>
                     <th>Criteria</th>
@@ -273,52 +146,158 @@
                     <th>Remarks</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="new-inspection-tbody">
                 <tr>
-                    <td>Eye Clarity</td>
+                    <td><strong>Eye Clarity</strong></td>
                     <td>
-                        <select>
+                        <select class="criteria-select" data-criteria="Eye Clarity">
                             <option>Excellent</option>
                             <option>Acceptable</option>
                             <option>Rejected</option>
                         </select>
                     </td>
-                    <td><input type="text"></td>
+                    <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                 </tr>
                 <tr>
-                    <td>Gill Color</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
+                    <td><strong>Gill Color</strong></td>
+                    <td>
+                        <select class="criteria-select" data-criteria="Gill Color">
+                            <option>Excellent</option>
+                            <option>Acceptable</option>
+                            <option>Rejected</option>
+                        </select>
+                    </td>
+                    <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                 </tr>
                 <tr>
-                    <td>Body Firmness</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
+                    <td><strong>Body Firmness</strong></td>
+                    <td>
+                        <select class="criteria-select" data-criteria="Body Firmness">
+                            <option>Excellent</option>
+                            <option>Acceptable</option>
+                            <option>Rejected</option>
+                        </select>
+                    </td>
+                    <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                 </tr>
-                 <tr>
-                    <td>Odor</td>
-                    <td><select><option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option></select></td>
-                    <td><input type="text"></td>
+                <tr>
+                    <td><strong>Odor</strong></td>
+                    <td>
+                        <select class="criteria-select" data-criteria="Odor">
+                            <option>Excellent</option>
+                            <option>Acceptable</option>
+                            <option>Rejected</option>
+                        </select>
+                    </td>
+                    <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                 </tr>
             </tbody>
         </table>
 
-        <div class="action-buttons">
-            <button class="secondary-btn">Add Another Inspection</button>
-            <button class="submit-btn">Save Inspection Log</button>
+        <div id="score-container" class="score-widget">
+            <div class="score-details">
+                <span class="score-label">Live Freshness Score</span>
+                <div class="score-value-wrapper">
+                    <span id="live-score" class="score-val">100</span>
+                    <span class="score-max">/ 100</span>
+                </div>
+            </div>
+            <div class="score-status-box">
+                <span class="status-label">Classification</span>
+                <div id="live-classification" class="status success"><i class="fa-solid fa-check"></i> Passed</div>
+            </div>
         </div>
+
+        <div class="action-buttons">
+            <button class="secondary-btn" id="add-inspection-btn">Clear Form</button>
+            <button class="submit-btn" id="save-inspection-btn">Save Inspection Log</button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Inspections Today (<span id="inspections-today-count">0</span>)</h3>
+            <button id="download-report-btn" class="secondary-btn" style="margin-left:auto;">
+                <i class="fa-solid fa-file-excel"></i> Download Daily Report
+            </button>
+        </div>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Inspector</th>
+                    <th>Location</th>
+                    <th>Product</th>
+                    <th class="text-right">Status</th>
+                </tr>
+            </thead>
+            <tbody id="inspections-today-body"></tbody>
+        </table>
+    </section>
+
+    <section class="panel border-left-green">
+        <div class="panel-header-flex">
+            <h3>Passed Inspections (<span id="passed-count">0</span>)</h3>
+        </div>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Remarks</th>
+                    <th class="text-right">Status</th>
+                </tr>
+            </thead>
+            <tbody id="passed-body"></tbody>
+        </table>
+    </section>
+
+    <section class="panel border-left-yellow">
+        <div class="panel-header-flex">
+            <h3>Inspections With Issues (<span id="issues-count">0</span>)</h3>
+        </div>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Issue Noted</th>
+                    <th class="text-right">Status</th>
+                </tr>
+            </thead>
+            <tbody id="issues-body"></tbody>
+        </table>
+    </section>
+
+    <section class="panel border-left-red">
+        <div class="panel-header-flex">
+            <h3>Rejected Inspections (<span id="rejected-count">0</span>)</h3>
+        </div>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Reason for Rejection</th>
+                    <th class="text-right">Status</th>
+                </tr>
+            </thead>
+            <tbody id="rejected-body"></tbody>
+        </table>
     </section>
 
 </main>
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+
+<!-- Excel Library -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script type="module" src="QualityControl.js"></script>
 
 </body>
 </html>

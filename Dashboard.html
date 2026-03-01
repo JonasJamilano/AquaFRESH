@@ -5,111 +5,103 @@
     <title>AquaFRESH Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <link rel="stylesheet" href="Dashboard.css">
 </head>
 <body>
 
 <input type="checkbox" id="nav-toggle">
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
         <h1>AquaFRESH</h1>
         <p>Aquaculture Freshness Monitoring System</p>
     </div>
 
-        <nav class="menu">
-                <ul>
-            <!-- ADMIN / MANAGER DASHBOARD -->
+    <nav class="menu">
+        <ul>
             <li data-role="superadmin admin manager">
                 <a href="Dashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-gauge"></i>
                     <span class="label">Dashboard</span>
                 </a>
             </li>
 
-            <!-- INSPECTOR DASHBOARD -->
             <li data-role="inspector">
                 <a href="InspectorDashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-clipboard-check"></i>
                     <span class="label">Inspector Dashboard</span>
                 </a>
             </li>
 
-            <!-- DELIVERY DASHBOARD -->
             <li data-role="delivery">
                 <a href="DeliveryDashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-truck"></i>
                     <span class="label">Delivery Dashboard</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector delivery">
                 <a href="FreshnessEvaluation.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-water"></i>
                     <span class="label">Freshness Evaluation</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager delivery">
                 <a href="TransportDelivery.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-route"></i>
                     <span class="label">Transport & Delivery</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector">
                 <a href="AnalyticsReporting.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-chart-line"></i>
                     <span class="label">Analytics & Reporting</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-shield-halved"></i>
                     <span class="label">Quality Control</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager">
                 <a href="UserManagement.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-users"></i>
                     <span class="label">User Management</span>
                 </a>
             </li>
         </ul>
-        </nav>
+    </nav>
 </aside>
 
-<!-- TOP BAR -->
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
 
    <div class="profile-dropdown">
-    <input type="checkbox" id="profile-toggle">
-    <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
-    </label>
+        <input type="checkbox" id="profile-toggle">
+        <label for="profile-toggle" class="profile-trigger">
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+        </label>
 
-    <div class="dropdown-menu">
-        <a href="Profile.html">Profile</a>  
-        <a href="Login.html" class="logout">Logout</a>
+        <div class="dropdown-menu">
+            <a href="Profile.html">Profile</a>  
+            <a href="Login.html" class="logout">Logout</a>
+        </div>
     </div>
-</div>
-
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="content">
     <h2>Dashboard</h2>
     <p>Here's your AquaFRESH system overview for today.</p>
 
-    <!-- KPI CARDS -->
     <div class="kpi-grid">
         <div class="kpi-card">
             <h3>Total Batches</h3>
@@ -132,9 +124,11 @@
         </div>
     </div>
 
-    <!-- SENSOR STATUS TABLE -->
     <section class="panel">
-        <h3>Sensor Status</h3>
+        <div class="panel-header-flex">
+            <h3>Sensor Status</h3>
+            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Live Tracking</span>
+        </div>
 
         <table class="status-table">
             <thead>
@@ -142,47 +136,64 @@
                     <th>Tank</th>
                     <th>Temperature (°C)</th>
                     <th>pH Level</th>
-                    <th>Status</th>
+                    <th class="text-right">Status</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Tank 1</td>
-                    <td>25</td>
+                    <td><strong>Tank 1</strong></td>
+                    <td>25.0</td>
                     <td>7.2</td>
-                    <td class="status good">Good</td>
+                    <td class="text-right">
+                        <span class="status good"><i class="fa-solid fa-check"></i> Good</span>
+                    </td>
                 </tr>
                 <tr>
-                    <td>Tank 2</td>
-                    <td>28</td>
+                    <td><strong>Tank 2</strong></td>
+                    <td>28.5</td>
                     <td>6.8</td>
-                    <td class="status warning">Warning</td>
+                    <td class="text-right">
+                        <span class="status warning"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span>
+                    </td>
                 </tr>
                 <tr>
-                    <td>Tank 3</td>
-                    <td>30</td>
+                    <td><strong>Tank 3</strong></td>
+                    <td>30.2</td>
                     <td>6.5</td>
-                    <td class="status alert">Alert</td>
+                    <td class="text-right">
+                        <span class="status alert"><i class="fa-solid fa-circle-exclamation"></i> Alert</span>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </section>
 
-    <!-- RECENT ALERTS -->
     <section class="panel">
         <h3>Recent Alerts</h3>
 
         <ul class="alert-list">
-            <li>
-                <span class="alert-text">Tank 3: Temperature too high</span>
+            <li class="alert-item critical">
+                <div class="alert-icon"><i class="fa-solid fa-temperature-arrow-up"></i></div>
+                <div class="alert-content">
+                    <span class="alert-text">Tank 3: Temperature critically high</span>
+                    <span class="alert-subtext">Requires immediate cooling</span>
+                </div>
                 <span class="alert-time">10:15 AM</span>
             </li>
-            <li>
-                <span class="alert-text">Batch 12: Freshness warning</span>
+            <li class="alert-item warn">
+                <div class="alert-icon"><i class="fa-solid fa-fish-fins"></i></div>
+                <div class="alert-content">
+                    <span class="alert-text">Batch 12: Freshness warning</span>
+                    <span class="alert-subtext">Ammonia levels slightly elevated</span>
+                </div>
                 <span class="alert-time">9:42 AM</span>
             </li>
-            <li>
-                <span class="alert-text">Sensor 5 offline</span>
+            <li class="alert-item offline">
+                <div class="alert-icon"><i class="fa-solid fa-wifi"></i></div>
+                <div class="alert-content">
+                    <span class="alert-text">Sensor 5 offline</span>
+                    <span class="alert-subtext">Connection lost in Sector B</span>
+                </div>
                 <span class="alert-time">8:30 AM</span>
             </li>
         </ul>
@@ -193,6 +204,4 @@
 <script type="module" src="role-ui.js"></script>
 
 </body>
-</html> 
-<!-- This area is reserved for AquaFRESH system data and monitoring panels-->
-
+</html>

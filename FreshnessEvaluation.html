@@ -5,17 +5,16 @@
     <title>Freshness Evaluation | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="FreshnessEvaluation.css">
 </head>
 <body>
 
 <input type="checkbox" id="nav-toggle">
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
         <h1>AquaFRESH</h1>
@@ -24,88 +23,78 @@
 
     <nav class="menu">
         <ul>
-    <li data-role="superadmin admin manager">
-        <a href="Dashboard.html">
-            <span class="icon"></span>
-            <span class="label">Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="inspector">
-        <a href="InspectorDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Inspector Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="delivery">
-        <a href="DeliveryDashboard.html">
-            <span class="icon"></span>
-            <span class="label">Delivery Dashboard</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector delivery">
-        <a href="FreshnessEvaluation.html">
-            <span class="icon"></span>
-            <span class="label">Freshness Evaluation</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager delivery">
-        <a href="TransportDelivery.html">
-            <span class="icon"></span>
-            <span class="label">Transport & Delivery</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="AnalyticsReporting.html">
-            <span class="icon"></span>
-            <span class="label">Analytics & Reporting</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager inspector">
-        <a href="QualityControl.html">
-            <span class="icon"></span>
-            <span class="label">Quality Control</span>
-        </a>
-    </li>
-
-    <li data-role="superadmin admin manager">
-        <a href="UserManagement.html">
-            <span class="icon"></span>
-            <span class="label">User Management</span>
-        </a>
-    </li>
-</ul>
+            <li data-role="superadmin admin manager">
+                <a href="Dashboard.html">
+                    <i class="fa-solid fa-gauge"></i>
+                    <span class="label">Dashboard</span>
+                </a>
+            </li>
+            <li data-role="inspector">
+                <a href="InspectorDashboard.html">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span class="label">Inspector Dashboard</span>
+                </a>
+            </li>
+            <li data-role="delivery">
+                <a href="DeliveryDashboard.html">
+                    <i class="fa-solid fa-truck"></i>
+                    <span class="label">Delivery Dashboard</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <i class="fa-solid fa-water"></i>
+                    <span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <i class="fa-solid fa-route"></i>
+                    <span class="label">Transport & Delivery</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="AnalyticsReporting.html">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span class="label">Analytics & Reporting</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager inspector">
+                <a href="QualityControl.html">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="label">Quality Control</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager">
+                <a href="UserManagement.html">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="label">User Management</span>
+                </a>
+            </li>
+        </ul>
     </nav>
 </aside>
 
-<!-- TOP BAR -->
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
 
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
-            <a href="#">Profile</a>
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="content">
 
     <h2>Freshness Evaluation</h2>
     <p class="subtitle">Real-time assessment of fish freshness based on sensor data</p>
 
-    <!-- SUMMARY CARDS -->
     <div class="summary-cards">
         <div class="card success">
             <h3>Fresh</h3>
@@ -121,11 +110,13 @@
         </div>
     </div>
 
-    <!-- FRESHNESS TABLE -->
-    <section class="evaluation-table">
-        <h3>Batch Evaluation</h3>
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Batch Evaluation</h3>
+            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Real-Time Sync</span>
+        </div>
 
-        <table>
+        <table class="evaluation-table">
             <thead>
                 <tr>
                     <th>Batch ID</th>
@@ -138,27 +129,27 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>B-001</td>
+                    <td><strong>B-001</strong></td>
                     <td>Tank 1</td>
-                    <td>25</td>
+                    <td>25.0</td>
                     <td>7.1</td>
-                    <td class="fresh">Fresh</td>
+                    <td><span class="status fresh"><i class="fa-solid fa-check"></i> Fresh</span></td>
                     <td>10:20 AM</td>
                 </tr>
                 <tr>
-                    <td>B-002</td>
+                    <td><strong>B-002</strong></td>
                     <td>Tank 2</td>
-                    <td>28</td>
+                    <td>28.5</td>
                     <td>6.9</td>
-                    <td class="moderate">Moderate</td>
+                    <td><span class="status moderate"><i class="fa-solid fa-triangle-exclamation"></i> Moderate</span></td>
                     <td>10:18 AM</td>
                 </tr>
                 <tr>
-                    <td>B-003</td>
+                    <td><strong>B-003</strong></td>
                     <td>Tank 3</td>
-                    <td>31</td>
+                    <td>31.2</td>
                     <td>6.4</td>
-                    <td class="spoiled">Spoiled</td>
+                    <td><span class="status spoiled"><i class="fa-solid fa-circle-exclamation"></i> Spoiled</span></td>
                     <td>10:10 AM</td>
                 </tr>
             </tbody>

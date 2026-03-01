@@ -5,12 +5,16 @@
     <title>Transport & Delivery | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="TransportDelivery.css">
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
         <h1>AquaFRESH</h1>
@@ -19,61 +23,58 @@
 
     <nav class="menu">
         <ul>
-            <!-- ADMIN / MANAGER DASHBOARD -->
             <li data-role="superadmin admin manager">
                 <a href="Dashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-gauge"></i>
                     <span class="label">Dashboard</span>
                 </a>
             </li>
 
-            <!-- INSPECTOR DASHBOARD -->
             <li data-role="inspector">
                 <a href="InspectorDashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-clipboard-check"></i>
                     <span class="label">Inspector Dashboard</span>
                 </a>
             </li>
 
-            <!-- DELIVERY DASHBOARD -->
             <li data-role="delivery">
                 <a href="DeliveryDashboard.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-truck"></i>
                     <span class="label">Delivery Dashboard</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector delivery">
                 <a href="FreshnessEvaluation.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-water"></i>
                     <span class="label">Freshness Evaluation</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager delivery">
                 <a href="TransportDelivery.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-route"></i>
                     <span class="label">Transport & Delivery</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector">
                 <a href="AnalyticsReporting.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-chart-line"></i>
                     <span class="label">Analytics & Reporting</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-shield-halved"></i>
                     <span class="label">Quality Control</span>
                 </a>
             </li>
 
             <li data-role="superadmin admin manager">
                 <a href="UserManagement.html">
-                    <span class="icon"></span>
+                    <i class="fa-solid fa-users"></i>
                     <span class="label">User Management</span>
                 </a>
             </li>
@@ -81,7 +82,6 @@
     </nav>
 </aside>
 
-<!-- TOP BAR -->
 <header class="topbar">
     <span class="menu-btn">☰</span>
 
@@ -97,7 +97,6 @@
     </div>
 </header>
 
-<!-- MAIN CONTENT -->
 <main class="content">
 
     <h2>Transport & Delivery</h2>
@@ -105,7 +104,6 @@
         Monitoring delivery progress, environmental conditions, and potential freshness risks
     </p>
 
-    <!-- DELIVERY SUMMARY -->
     <div class="summary-cards">
         <div class="card success">
             <h3>Early</h3>
@@ -125,7 +123,59 @@
         </div>
     </div>
 
-    <!-- DELIVERY STATUS TABLE -->
+        <section class="panel create-panel" id="createDeliveryPanel" style="display:none;">
+        <div class="panel-header">
+            <h3>Create New Delivery</h3>
+            <p class="panel-subtitle">
+                Assign a batch to a delivery personnel and schedule transport
+            </p>
+        </div>
+
+        <div class="form-grid delivery-form">
+            <div class="form-group">
+                <label>Delivery Code</label>
+                <input type="text" id="deliveryCode" placeholder="e.g. D-010">
+            </div>
+
+            <div class="form-group">
+                <label>Select Batch</label>
+                <select id="batchSelect"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Assign Driver</label>
+                <select id="driverSelect"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Origin</label>
+                <input type="text" id="origin" placeholder="Warehouse A">
+            </div>
+
+            <div class="form-group">
+                <label>Destination</label>
+                <input type="text" id="destination" placeholder="Market B">
+            </div>
+
+            <div class="form-group">
+                <label>Estimated Arrival</label>
+                <input type="datetime-local" id="eta">
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="submit-btn" onclick="createDelivery()">
+                <i class="fa-solid fa-plus"></i> Create Delivery
+            </button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h3>Live GPS Tracking</h3>
+        <p id="map-status" style="font-size: 13px; margin-bottom: 10px; color: #7b8a8b;">Initializing map...</p>
+        <div id="delivery-map"></div>
+    </section>
+
     <section class="panel">
         <h3>Active Deliveries</h3>
 
@@ -138,49 +188,21 @@
                     <th>Avg Temp (°C)</th>
                     <th>Status</th>
                     <th>ETA</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>D-101</td>
-                    <td>B-001</td>
-                    <td>En Route – Highway</td>
-                    <td>4.2</td>
-                    <td class="on-time">On Time</td>
-                    <td>11:30 AM</td>
-                </tr>
-                <tr>
-                    <td>D-102</td>
-                    <td>B-002</td>
-                    <td>Checkpoint Delay</td>
-                    <td>6.8</td>
-                    <td class="delayed">Delayed</td>
-                    <td>12:15 PM</td>
-                </tr>
-                <tr>
-                    <td>D-103</td>
-                    <td>B-003</td>
-                    <td>En Route – Highway</td>
-                    <td>4.1</td>
-                    <td class="early">Early</td>
-                    <td>11:00 AM</td>
-                </tr>
-                <tr>
-                    <td>D-104</td>
-                    <td>B-004</td>
-                    <td>Urban Area</td>
-                    <td>8.1</td>
-                    <td class="late">Late</td>
-                    <td>12:45 PM</td>
-                </tr>
+               
             </tbody>
         </table>
     </section>
 
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script type="module" src="TransportDelivery.js"></script>
 
 </body>
 </html>

@@ -20,16 +20,29 @@
 
         <form class="signup-form" id="signupForm">
 
+            <!-- FULL NAME -->
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" id="fullName" placeholder="Enter full name" required>
+                <input 
+                    type="text" 
+                    id="fullName" 
+                    placeholder="e.g. Juan Dela Cruz" 
+                    required
+                >
             </div>
 
+            <!-- EMAIL -->
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="signupEmail" placeholder="Enter email address" required>
+                <input 
+                    type="email" 
+                    id="signupEmail" 
+                    placeholder="e.g. juan@email.com" 
+                    required
+                >
             </div>
 
+            <!-- PHONE -->
             <div class="form-group">
                 <label>Phone Number</label>
                 <input
@@ -37,36 +50,64 @@
                     id="phone"
                     placeholder="09XXXXXXXXX"
                     pattern="[0-9]{11}"
+                    title="Enter 11-digit mobile number"
                     required
                 >
             </div>
 
+            <!-- ADDRESS -->
             <div class="form-group">
                 <label>Address</label>
-                <input type="text" id="address" placeholder="Enter complete address" required>
+                <input 
+                    type="text" 
+                    id="address" 
+                    placeholder="Complete home address" 
+                    required
+                >
             </div>
 
             <!-- ROLE SELECTION -->
             <div class="form-group">
                 <label>Register As</label>
                 <select id="role" required>
-                    <option value="" disabled selected>Select role</option>
+                    <option value="" disabled selected>Select your role</option>
+
+                    <!-- Public Roles -->
                     <option value="inspector">Inspector</option>
                     <option value="delivery">Delivery Staff</option>
+
+                    <!-- TEMPORARY FOR TESTING -->
+                    <option value="manager">Manager (Testing)</option>
+                    <option value="admin">Admin (Testing)</option>
+                    <option value="superadmin">Super Admin (Testing)</option>
                 </select>
             </div>
 
+            <!-- PASSWORD -->
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="signupPassword" placeholder="Create password" required>
+                <input 
+                    type="password" 
+                    id="signupPassword" 
+                    placeholder="Minimum 6 characters" 
+                    required
+                >
             </div>
 
+            <!-- CONFIRM PASSWORD -->
             <div class="form-group">
                 <label>Confirm Password</label>
-                <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    placeholder="Re-enter password" 
+                    required
+                >
             </div>
 
-            <button type="submit" class="signup-btn">Create Account</button>
+            <button type="submit" class="signup-btn">
+                Create Account
+            </button>
 
             <p class="login-link">
                 Already have an account?
