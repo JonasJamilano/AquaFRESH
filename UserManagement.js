@@ -7,7 +7,8 @@ import {
   deleteDoc,
   setDoc,
   getDoc,
-  serverTimestamp
+  serverTimestamp,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -16,6 +17,24 @@ import {
 
 const role = localStorage.getItem("role");
 const usersCollection = collection(db, "users");
+
+async function generateUserCustomId() {
+  const counterRef = doc(db, "counters", "users");
+  const snap = await getDoc(counterRef);
+
+  if (!snap.exists()) {
+    throw new Error("Users counter not found.");
+  }
+
+  const current = snap.data().lastNumber || 0;
+  const newNumber = current + 1;
+
+  await updateDoc(counterRef, {
+    lastNumber: increment(1)
+  });
+
+  return `U-${String(newNumber).padStart(3, "0")}`;
+}
 
 /* =========================
    LOAD USERS
@@ -27,6 +46,15 @@ async function loadUsers() {
   snapshot.forEach(docSnap => {
     users.push({ id: docSnap.id, ...docSnap.data() });
   });
+
+  users.sort((a, b) => {
+  if (!a.customId || !b.customId) return 0;
+
+  const numA = parseInt(a.customId.split("-")[1]);
+  const numB = parseInt(b.customId.split("-")[1]);
+
+  return numA - numB;
+});
 
   // Summary counts
   const totalUsers = users.length;
@@ -46,7 +74,7 @@ async function loadUsers() {
 
     const row = `
       <tr>
-        <td>${user.id}</td>
+        <td>${user.customId || user.id}</td>
         <td>${user.fullName}</td>
         <td>${user.email}</td>
         <td>${user.phone || "-"}</td>
@@ -174,7 +202,10 @@ window.createUser = async function () {
     const newUser = userCredential.user;
 
     // Save in Firestore
+    const customId = await generateUserCustomId();
+
     await setDoc(doc(db, "users", newUser.uid), {
+      customId,
       fullName,
       email,
       phone,
