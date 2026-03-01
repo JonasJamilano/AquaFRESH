@@ -216,4 +216,52 @@ async function loadInspections() {
   document.getElementById("rejected-count").textContent = rejected;
 }
 
+/* ==========================
+   DOWNLOAD DAILY REPORT (FIRESTORE VERSION)
+========================== */
+document
+  .getElementById("download-report-btn")
+  .addEventListener("click", async () => {
+
+    try {
+      const snapshot = await getDocs(inspectionsCol);
+
+      if (snapshot.empty) {
+        alert("No inspection data available.");
+        return;
+      }
+
+      const formattedData = [];
+
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+
+        formattedData.push({
+          "Batch ID": d.batchCode,
+          "Inspector": d.inspectorName,
+          "Location": d.location,
+          "Product Type": d.productType,
+          "Temperature (°C)": d.temperature,
+          "pH Level": d.phLevel,
+          "Score": d.score,
+          "Status": d.overallStatus,
+          "Date": d.createdAt?.toDate
+            ? d.createdAt.toDate().toLocaleString()
+            : ""
+        });
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Daily Report");
+
+      const today = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(workbook, `QualityControl_Report_${today}.xlsx`);
+
+    } catch (err) {
+      console.error("Download error:", err);
+      alert("Failed to generate report.");
+    }
+  });
+
 loadInspections();
