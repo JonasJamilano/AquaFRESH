@@ -499,7 +499,7 @@
             <h3>
                 <i class="fa-solid fa-microchip"></i>
                 Sensor List
-                <span class="modal-count-badge" id="sensorCount">0</span>
+                <span class="modal-count-badge" id="sensorCount">3</span>
             </h3>
 
             <button class="qc-modal-close" onclick="closeSensorModal()">
@@ -518,60 +518,33 @@
 
             <div class="sensor-type-grid">
 
-                <!-- TEMPERATURE -->
-
                 <div class="sensor-type-card">
-
                     <i class="fa-solid fa-temperature-half"></i>
 
                     <div>
-                        <div class="sensor-type-title">
-                            Temperature Sensor
-                        </div>
-
-                        <div class="sensor-type-sub">
-                            Water Temperature Monitoring
-                        </div>
+                        <div class="sensor-type-title">Temperature Sensor</div>
+                        <div class="sensor-type-sub">Water Temperature Monitoring</div>
                     </div>
-
                 </div>
 
 
-                <!-- PH -->
-
                 <div class="sensor-type-card">
-
                     <i class="fa-solid fa-droplet"></i>
 
                     <div>
-                        <div class="sensor-type-title">
-                            pH Sensor
-                        </div>
-
-                        <div class="sensor-type-sub">
-                            Water Acidity Monitoring
-                        </div>
+                        <div class="sensor-type-title">pH Sensor</div>
+                        <div class="sensor-type-sub">Water Acidity Monitoring</div>
                     </div>
-
                 </div>
 
 
-                <!-- HUMIDITY -->
-
                 <div class="sensor-type-card">
-
                     <i class="fa-solid fa-cloud"></i>
 
                     <div>
-                        <div class="sensor-type-title">
-                            Humidity Sensor
-                        </div>
-
-                        <div class="sensor-type-sub">
-                            Environmental Humidity
-                        </div>
+                        <div class="sensor-type-title">Humidity Sensor</div>
+                        <div class="sensor-type-sub">Environmental Humidity</div>
                     </div>
-
                 </div>
 
             </div>
@@ -593,190 +566,178 @@
             </div>
 
 
-            <div class="sensor-overview-grid">
+            <!-- ============================= -->
+            <!-- TRUCK A -->
+            <!-- ============================= -->
 
+            <h4 class="truck-group-title">
+                <i class="fa-solid fa-truck"></i> Truck A
+            </h4>
 
-                <!-- TEMPERATURE SENSOR -->
+            <table class="status-table">
 
-                <div class="sensor-overview-card">
+                <thead>
+                    <tr>
+                        <th>Tank</th>
+                        <th>Temperature</th>
+                        <th>pH</th>
+                        <th>Humidity</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
 
-                    <div class="sensor-overview-header">
+                <tbody>
 
-                        <div class="sensor-overview-icon temp">
+                    <tr>
+
+                        <td><strong>Tank 1</strong></td>
+
+                        <td>
                             <i class="fa-solid fa-temperature-half"></i>
-                        </div>
+                            25.3°C
+                        </td>
 
-                        <div>
-                            <div class="sensor-overview-title">
-                                Temperature Sensor
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <!-- LOCATION -->
-
-                    <div class="sensor-location">
-
-                        <div class="tank-id">
-                            Tank 1
-                        </div>
-
-                        <div class="truck-id">
-                            <i class="fa-solid fa-truck"></i>
-                            Truck A
-                        </div>
-
-                    </div>
-
-
-                    <!-- VALUE -->
-
-                    <div class="sensor-reading">
-                        25.3°C
-                    </div>
-
-
-                    <!-- STATUS -->
-
-                    <div class="sensor-details">
-
-                        <span class="status good">
-                            <i class="fa-solid fa-check"></i>
-                            Normal
-                        </span>
-
-                        <span class="sensor-meta">
-                            Updated 10:22 AM
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PH SENSOR -->
-
-                <div class="sensor-overview-card">
-
-                    <div class="sensor-overview-header">
-
-                        <div class="sensor-overview-icon ph">
+                        <td>
                             <i class="fa-solid fa-droplet"></i>
-                        </div>
+                            7.1
+                        </td>
 
-                        <div>
-                            <div class="sensor-overview-title">
-                                pH Sensor
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <!-- LOCATION -->
-
-                    <div class="sensor-location">
-
-                        <div class="tank-id">
-                            Tank 2
-                        </div>
-
-                        <div class="truck-id">
-                            <i class="fa-solid fa-truck"></i>
-                            Truck B
-                        </div>
-
-                    </div>
-
-
-                    <!-- VALUE -->
-
-                    <div class="sensor-reading">
-                        7.1
-                    </div>
-
-
-                    <!-- STATUS -->
-
-                    <div class="sensor-details">
-
-                        <span class="status warning-status">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                            Warning
-                        </span>
-
-                        <span class="sensor-meta">
-                            Updated 10:21 AM
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- HUMIDITY SENSOR -->
-
-                <div class="sensor-overview-card">
-
-                    <div class="sensor-overview-header">
-
-                        <div class="sensor-overview-icon humidity">
+                        <td>
                             <i class="fa-solid fa-cloud"></i>
-                        </div>
+                            64%
+                        </td>
 
-                        <div>
-                            <div class="sensor-overview-title">
-                                Humidity Sensor
-                            </div>
-                        </div>
+                        <td>
+                            <span class="status good">
+                                <i class="fa-solid fa-check"></i>
+                                Normal
+                            </span>
+                        </td>
 
-                    </div>
+                        <td>10:22 AM</td>
 
+                    </tr>
 
-                    <!-- LOCATION -->
+                </tbody>
 
-                    <div class="sensor-location">
-
-                        <div class="tank-id">
-                            Tank 3
-                        </div>
-
-                        <div class="truck-id">
-                            <i class="fa-solid fa-truck"></i>
-                            Truck C
-                        </div>
-
-                    </div>
+            </table>
 
 
-                    <!-- VALUE -->
+            <!-- ============================= -->
+            <!-- TRUCK B -->
+            <!-- ============================= -->
 
-                    <div class="sensor-reading">
-                        64%
-                    </div>
+            <h4 class="truck-group-title">
+                <i class="fa-solid fa-truck"></i> Truck B
+            </h4>
+
+            <table class="status-table">
+
+                <thead>
+                    <tr>
+                        <th>Tank</th>
+                        <th>Temperature</th>
+                        <th>pH</th>
+                        <th>Humidity</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td><strong>Tank 2</strong></td>
+
+                        <td>
+                            <i class="fa-solid fa-temperature-half"></i>
+                            29.1°C
+                        </td>
+
+                        <td>
+                            <i class="fa-solid fa-droplet"></i>
+                            6.8
+                        </td>
+
+                        <td>
+                            <i class="fa-solid fa-cloud"></i>
+                            70%
+                        </td>
+
+                        <td>
+                            <span class="status warning-status">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                Warning
+                            </span>
+                        </td>
+
+                        <td>10:21 AM</td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
 
 
-                    <!-- STATUS -->
+            <!-- ============================= -->
+            <!-- TRUCK C -->
+            <!-- ============================= -->
 
-                    <div class="sensor-details">
+            <h4 class="truck-group-title">
+                <i class="fa-solid fa-truck"></i> Truck C
+            </h4>
 
-                        <span class="status alert">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            Alert
-                        </span>
+            <table class="status-table">
 
-                        <span class="sensor-meta">
-                            Updated 10:10 AM
-                        </span>
+                <thead>
+                    <tr>
+                        <th>Tank</th>
+                        <th>Temperature</th>
+                        <th>pH</th>
+                        <th>Humidity</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
 
-                    </div>
+                <tbody>
 
-                </div>
+                    <tr>
 
+                        <td><strong>Tank 3</strong></td>
 
-            </div>
+                        <td>
+                            <i class="fa-solid fa-temperature-half"></i>
+                            32.4°C
+                        </td>
+
+                        <td>
+                            <i class="fa-solid fa-droplet"></i>
+                            6.3
+                        </td>
+
+                        <td>
+                            <i class="fa-solid fa-cloud"></i>
+                            75%
+                        </td>
+
+                        <td>
+                            <span class="status alert">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Alert
+                            </span>
+                        </td>
+
+                        <td>10:10 AM</td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
 
         </div>
 
@@ -847,7 +808,6 @@ function closeSensorModal() {
 }
 
 </script>
-
 
 </body>
 </html>
