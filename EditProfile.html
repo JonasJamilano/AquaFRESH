@@ -107,58 +107,73 @@
 
 <!-- MAIN CONTENT -->
 <main class="content">
-    <h2>Edit Profile</h2>
-    <p>Update your personal information below.</p>
 
-    <form class="profile-container" id="editProfileForm">
+    <div class="page-header">
+        <div>
+            <h2>Edit Profile</h2>
+            <p class="subtitle">Update your personal information below</p>
+        </div>
+    </div>
 
-        <!-- HEADER -->
-        <div class="profile-header">
-            <div class="avatar" id="editAvatar">--</div>
-            <div class="profile-info">
-                <h2 id="editHeaderName">Loading...</h2>
-                <p class="email" id="editHeaderEmail">Loading...</p>
+    <form id="editProfileForm">
+        <div class="profile-card">
+
+            <!-- Banner + avatar -->
+            <div class="profile-banner">
+                <div class="avatar" id="editAvatar">--</div>
+            </div>
+
+            <!-- Name / email / role -->
+            <div class="profile-identity">
+                <h3 id="editHeaderName">Loading...</h3>
+                <p id="editHeaderEmail">Loading...</p>
                 <span class="role-badge" id="editHeaderRole">Loading...</span>
             </div>
+
+            <!-- Divider -->
+            <div class="profile-divider"></div>
+
+            <!-- Editable fields grid -->
+            <div class="profile-details">
+
+                <div class="form-field">
+                    <label for="editFullName">Full Name</label>
+                    <input type="text" id="editFullName" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="editEmail">Email Address</label>
+                    <input type="email" id="editEmail" placeholder="Enter email" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="editPhone">Phone Number</label>
+                    <input type="text" id="editPhone" placeholder="Enter phone number">
+                </div>
+
+                <div class="form-field">
+                    <label for="editAddress">Address</label>
+                    <input type="text" id="editAddress" placeholder="Enter address">
+                </div>
+
+                <div class="form-field">
+                    <label for="editRole">Role</label>
+                    <input type="text" id="editRole" disabled>
+                </div>
+
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="Profile.html" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+            </div>
+
         </div>
-
-        <!-- EDITABLE FIELDS -->
-        <div class="profile-details">
-
-            <div class="form-group accent">
-                <label>Full Name</label>
-                <input type="text" id="editFullName" required>
-            </div>
-
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="editEmail" required>
-            </div>
-
-            <div class="form-group">
-                <label>Address</label>
-                <input type="text" id="editAddress">
-            </div>
-
-            <div class="form-group">
-                <label>Phone</label>
-                <input type="text" id="editPhone">
-            </div>
-
-            <div class="form-group readonly">
-                <label>Role</label>
-                <input type="text" id="editRole" disabled>
-            </div>
-
-        </div>
-
-        <!-- ACTIONS -->
-        <div class="form-actions">
-            <a href="Profile.html" class="btn cancel">Cancel</a>
-            <button type="submit" class="btn save">Save Changes</button>
-        </div>
-
     </form>
+
 </main>
 
 <!-- EDIT PROFILE SCRIPT — Firebase only, no localhost -->
