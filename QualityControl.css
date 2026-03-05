@@ -176,9 +176,9 @@ body {
 }
 
 .subtitle {
-    font-size: 14px;
+    font-size: px;
     color: #64748b;
-    margin-top: 8px;
+    margin-bottom: 24px; 
 }
 
 /* =====================
