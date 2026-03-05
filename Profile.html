@@ -107,55 +107,66 @@
 
 <!-- MAIN CONTENT -->
 <main class="content">
-    <h2>My Profile</h2>
-    <p>View your account information below.</p>
 
-    <div class="profile-container">
-
-        <!-- ACTION BAR -->
-        <div class="profile-actions">
-            <a href="EditProfile.html" class="edit-btn">Edit Profile</a>
+    <div class="page-header">
+        <div>
+            <h2>My Profile</h2>
+            <p class="subtitle">View and manage your account information</p>
         </div>
+        <a href="EditProfile.html" class="edit-btn">
+            <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+        </a>
+    </div>
 
-        <!-- PROFILE HEADER -->
-        <div class="profile-header">
+    <div class="profile-card">
+
+        <!-- Top banner + avatar -->
+        <div class="profile-banner">
             <div class="avatar" id="profileAvatar">--</div>
-            <div class="profile-info">
-                <h2 id="profileName">Loading...</h2>
-                <p class="email" id="profileEmail">Loading...</p>
-                <span class="role-badge" id="profileRoleBadge">Loading...</span>
-            </div>
         </div>
 
-        <!-- PROFILE DETAILS -->
+        <!-- Name / email / role -->
+        <div class="profile-identity">
+            <h3 id="profileName">Loading...</h3>
+            <p id="profileEmail">Loading...</p>
+            <span class="role-badge" id="profileRoleBadge">Loading...</span>
+        </div>
+
+        <!-- Divider -->
+        <div class="profile-divider"></div>
+
+        <!-- Details grid -->
         <div class="profile-details">
-            <div class="detail-item accent">
-                <label>Full Name</label>
-                <p id="detailFullName">Loading...</p>
+
+            <div class="detail-item">
+                <span class="detail-label">Full Name</span>
+                <span class="detail-value" id="detailFullName">Loading...</span>
             </div>
 
             <div class="detail-item">
-                <label>Email</label>
-                <p id="detailEmail">Loading...</p>
+                <span class="detail-label">Email Address</span>
+                <span class="detail-value" id="detailEmail">Loading...</span>
             </div>
 
             <div class="detail-item">
-                <label>Address</label>
-                <p id="detailAddress">Loading...</p>
+                <span class="detail-label">Phone Number</span>
+                <span class="detail-value" id="detailPhone">Loading...</span>
             </div>
 
             <div class="detail-item">
-                <label>Phone</label>
-                <p id="detailPhone">Loading...</p>
+                <span class="detail-label">Address</span>
+                <span class="detail-value" id="detailAddress">Loading...</span>
             </div>
 
-            <div class="detail-item role">
-                <label>Role</label>
-                <p id="detailRole">Loading...</p>
+            <div class="detail-item">
+                <span class="detail-label">Role</span>
+                <span class="detail-value" id="detailRole">Loading...</span>
             </div>
+
         </div>
 
     </div>
+
 </main>
 
 <!-- PROFILE SCRIPT — reads directly from Firebase, no localhost needed -->
