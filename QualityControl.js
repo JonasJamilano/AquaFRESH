@@ -8,6 +8,9 @@ import {
     serverTimestamp,
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// Read the logged-in user's full name directly from localStorage
+// (set by auth.js on login as "userFullName")
+const currentInspectorName = localStorage.getItem("userFullName") || "Unknown";
 
 
 // ==========================
@@ -128,11 +131,14 @@ document.getElementById("save-inspection-btn")
         const temperature = parseFloat(document.getElementById("temperature").value);
         const phLevel     = parseFloat(document.getElementById("ph-level").value);
 
+        const inspectorName = currentInspectorName;
+
         try {
             await addDoc(collection(db, "qualityControl"), {
                 batchCode,
                 productType,
                 location,
+                inspectorName,
                 criteria,
                 temperature,
                 phLevel,
