@@ -176,9 +176,9 @@ body {
 }
 
 .subtitle {
-    font-size: px;
+    font-size: 14px;
     color: #64748b;
-    margin-bottom: 24px; 
+    margin-top: 8px;
 }
 
 /* =====================
@@ -1045,3 +1045,109 @@ body {
 }
 
 .ni-btn-save:hover { opacity: 0.88; }
+
+/* =====================
+   CLEAR DANGER BUTTON
+===================== */
+.clear-danger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.clear-danger-btn:hover {
+    background: #fecaca;
+    border-color: #f87171;
+}
+
+/* =====================
+   DATA MANAGEMENT ACTION CARDS
+===================== */
+.qc-action-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .qc-action-cards { grid-template-columns: 1fr; }
+}
+
+.qc-action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.qc-action-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border-color: #cbd5e1;
+}
+
+.qc-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.qc-action-icon.blue { background: #dbeafe; color: #2563eb; }
+.qc-action-icon.red  { background: #fee2e2; color: #dc2626; }
+
+.qc-action-info {
+    flex: 1;
+}
+
+.qc-action-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.qc-action-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.qc-action-btn {
+    flex-shrink: 0;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity 0.15s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.qc-action-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.qc-action-btn.blue { background: #2563eb; color: #fff; }
+.qc-action-btn.red  { background: #dc2626; color: #fff; }
