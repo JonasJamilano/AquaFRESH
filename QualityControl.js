@@ -223,10 +223,11 @@ async function loadInspectionsToday() {
             const r  = doc.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><strong>${r.batchCode   ?? ""}</strong></td>
-                <td>${r.location            ?? ""}</td>
-                <td>${r.productType         ?? ""}</td>
-                <td>${getStatusBadgeHTML(r.overallStatus)}</td>
+                <td><strong>${r.batchCode      ?? ""}</strong></td>
+                <td>${r.inspectorName          ?? "—"}</td>
+                <td>${r.location               ?? ""}</td>
+                <td>${r.productType            ?? ""}</td>
+                <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
             `;
             tbody.appendChild(tr);
         });
