@@ -3,6 +3,8 @@ import {
     collection,
     addDoc,
     getDocs,
+    deleteDoc,
+    doc,
     query,
     where,
     serverTimestamp,
@@ -403,3 +405,52 @@ window.addEventListener("DOMContentLoaded", () => {
     loadInspectionsToday();
     loadInspectionsByStatus();
 });
+
+
+// ==========================
+// Clear All Inspection Data
+// ==========================
+document.getElementById("clear-all-data-btn")
+    .addEventListener("click", () => {
+        // Open the warning modal
+        document.getElementById("modal-clear-warning").classList.add("active");
+        document.body.style.overflow = "hidden";
+    });
+
+document.getElementById("cancel-clear-btn")
+    .addEventListener("click", () => {
+        document.getElementById("modal-clear-warning").classList.remove("active");
+        document.body.style.overflow = "";
+    });
+
+document.getElementById("confirm-clear-btn")
+    .addEventListener("click", async () => {
+        const confirmBtn = document.getElementById("confirm-clear-btn");
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+
+        try {
+            // Fetch all docs in qualityControl and delete them one by one
+            const snapshot = await getDocs(collection(db, "qualityControl"));
+
+            const deletions = snapshot.docs.map(d => deleteDoc(doc(db, "qualityControl", d.id)));
+            await Promise.all(deletions);
+
+            // Close modal
+            document.getElementById("modal-clear-warning").classList.remove("active");
+            document.body.style.overflow = "";
+
+            alert(`Successfully deleted ${snapshot.size} inspection record(s).`);
+
+            // Refresh all tables to reflect empty state
+            await loadInspectionsToday();
+            await loadInspectionsByStatus();
+
+        } catch (error) {
+            console.error("Error clearing inspection data:", error);
+            alert("Failed to clear data. Check console for details.");
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Yes, Delete All';
+        }
+    });
