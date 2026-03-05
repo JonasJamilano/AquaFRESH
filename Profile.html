@@ -95,7 +95,7 @@
 
         <!-- PROFILE HEADER -->
         <div class="profile-header">
-            <div class="avatar" id="profileAvatar">JS</div>
+            <div class="avatar" id="profileAvatar">--</div>
             <div class="profile-info">
                 <h2 id="profileName">Loading...</h2>
                 <p class="email" id="profileEmail">Loading...</p>
@@ -134,87 +134,75 @@
     </div>
 </main>
 
-<!-- PROFILE SCRIPT -->
-<script>
-  const API_BASE_URL = "http://localhost:3000";
+<!-- PROFILE SCRIPT — reads directly from Firebase, no localhost needed -->
+<script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  function getInitials(fullName) {
-    if (!fullName) return "U";
-    const parts = fullName.trim().split(" ");
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (
-      parts[0].charAt(0).toUpperCase() +
-      parts[parts.length - 1].charAt(0).toUpperCase()
-    );
-  }
-
-  function formatRole(role) {
-    if (!role) return "";
-    return role.charAt(0).toUpperCase() + role.slice(1);
-  }
-
-  async function loadUserProfile() {
-    const userId = localStorage.getItem("userId");
-    const storedFullName = localStorage.getItem("userFullName");
-    const storedRole = localStorage.getItem("userRole");
-
-    console.log("Profile page - userId:", userId);
-    console.log("Profile page - storedFullName:", storedFullName);
-    console.log("Profile page - storedRole:", storedRole);
-
-    if (!userId) {
-      console.warn("No userId in localStorage, redirecting to login");
-      window.location.href = "Login.html";
-      return;
+    function getInitials(fullName) {
+        if (!fullName) return "U";
+        const parts = fullName.trim().split(" ");
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (
+            parts[0].charAt(0).toUpperCase() +
+            parts[parts.length - 1].charAt(0).toUpperCase()
+        );
     }
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/users/${userId}`);
-      console.log("Profile fetch status:", res.status);
-
-      if (!res.ok) {
-        throw new Error("Failed to load profile");
-      }
-
-      const user = await res.json();
-      console.log("Profile data from server:", user);
-
-      const avatarEl = document.getElementById("profileAvatar");
-      const profileNameEl = document.getElementById("profileName");
-      const profileEmailEl = document.getElementById("profileEmail");
-      const profileRoleBadgeEl = document.getElementById("profileRoleBadge");
-
-      const detailFullNameEl = document.getElementById("detailFullName");
-      const detailEmailEl = document.getElementById("detailEmail");
-      const detailAddressEl = document.getElementById("detailAddress");
-      const detailPhoneEl = document.getElementById("detailPhone");
-      const detailRoleEl = document.getElementById("detailRole");
-
-      const userRoleLabelEl = document.getElementById("userRoleLabel");
-
-      const fullName = user.fullName || storedFullName || "Unknown User";
-      const role = user.role || storedRole || "user";
-
-      avatarEl.textContent = getInitials(fullName);
-      profileNameEl.textContent = fullName;
-      profileEmailEl.textContent = user.email || "No email";
-      profileRoleBadgeEl.textContent = formatRole(role);
-
-      detailFullNameEl.textContent = fullName;
-      detailEmailEl.textContent = user.email || "";
-      detailAddressEl.textContent = user.address || "No address provided";
-      detailPhoneEl.textContent = user.phone || "No phone provided";
-      detailRoleEl.textContent = formatRole(role);
-
-      userRoleLabelEl.textContent = formatRole(role);
-    } catch (err) {
-      console.error("Error loading profile:", err);
-      alert("Failed to load profile. Please log in again.");
-      window.location.href = "Login.html";
+    function formatRole(role) {
+        if (!role) return "";
+        return role.charAt(0).toUpperCase() + role.slice(1);
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", loadUserProfile);
+    onAuthStateChanged(auth, async (user) => {
+        // Not logged in — redirect to login
+        if (!user) {
+            window.location.href = "Login.html";
+            return;
+        }
+
+        try {
+            // Fetch the user document from Firestore using the Firebase UID
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+
+            if (!userDoc.exists()) {
+                alert("User profile not found.");
+                window.location.href = "Login.html";
+                return;
+            }
+
+            const data = userDoc.data();
+
+            const fullName = data.fullName || localStorage.getItem("userFullName") || "Unknown User";
+            const role     = data.role     || localStorage.getItem("userRole")     || "user";
+            const email    = data.email    || user.email || "";
+
+            // Update localStorage so other pages stay in sync
+            localStorage.setItem("userFullName", fullName);
+            localStorage.setItem("userRole", role);
+
+            // Populate header avatar & info
+            document.getElementById("profileAvatar").textContent    = getInitials(fullName);
+            document.getElementById("profileName").textContent      = fullName;
+            document.getElementById("profileEmail").textContent     = email;
+            document.getElementById("profileRoleBadge").textContent = formatRole(role);
+
+            // Populate detail fields
+            document.getElementById("detailFullName").textContent = fullName;
+            document.getElementById("detailEmail").textContent    = email;
+            document.getElementById("detailAddress").textContent  = data.address || "No address provided";
+            document.getElementById("detailPhone").textContent    = data.phone   || "No phone provided";
+            document.getElementById("detailRole").textContent     = formatRole(role);
+
+            // Update topbar label
+            document.getElementById("userRoleLabel").textContent = fullName;
+
+        } catch (err) {
+            console.error("Error loading profile from Firestore:", err);
+            alert("Failed to load profile. Please try again.");
+        }
+    });
 </script>
 
 <script type="module" src="sidebar.js"></script>

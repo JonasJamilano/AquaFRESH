@@ -76,7 +76,7 @@
 
         <!-- HEADER -->
         <div class="profile-header">
-            <div class="avatar" id="editAvatar">JS</div>
+            <div class="avatar" id="editAvatar">--</div>
             <div class="profile-info">
                 <h2 id="editHeaderName">Loading...</h2>
                 <p class="email" id="editHeaderEmail">Loading...</p>
@@ -123,135 +123,130 @@
     </form>
 </main>
 
-<!-- EDIT PROFILE SCRIPT -->
-<script>
-  const API_BASE_URL = "http://localhost:3000";
+<!-- EDIT PROFILE SCRIPT — Firebase only, no localhost -->
+<script type="module">
+    import { auth, db } from "./firebase.js";
+    import {
+        onAuthStateChanged,
+        updateEmail
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        doc,
+        getDoc,
+        updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  function getInitials(fullName) {
-    if (!fullName) return "U";
-    const parts = fullName.trim().split(" ");
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (
-      parts[0].charAt(0).toUpperCase() +
-      parts[parts.length - 1].charAt(0).toUpperCase()
-    );
-  }
+    let currentUser = null;
 
-  function formatRole(role) {
-    if (!role) return "";
-    return role.charAt(0).toUpperCase() + role.slice(1);
-  }
-
-  async function loadEditProfile() {
-    const userId = localStorage.getItem("userId");
-    const storedFullName = localStorage.getItem("userFullName");
-    const storedRole = localStorage.getItem("userRole");
-
-    console.log("EditProfile - userId:", userId);
-
-    if (!userId) {
-      window.location.href = "Login.html";
-      return;
+    function getInitials(fullName) {
+        if (!fullName) return "U";
+        const parts = fullName.trim().split(" ");
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (
+            parts[0].charAt(0).toUpperCase() +
+            parts[parts.length - 1].charAt(0).toUpperCase()
+        );
     }
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/users/${userId}`);
-      console.log("EditProfile fetch status:", res.status);
-
-      if (!res.ok) {
-        throw new Error("Failed to load profile");
-      }
-
-      const user = await res.json();
-      console.log("EditProfile data from server:", user);
-
-      const fullName = user.fullName || storedFullName || "";
-      const role = user.role || storedRole || "user";
-
-      // Header
-      document.getElementById("editAvatar").textContent = getInitials(fullName);
-      document.getElementById("editHeaderName").textContent = fullName || "Unknown User";
-      document.getElementById("editHeaderEmail").textContent = user.email || "No email";
-      document.getElementById("editHeaderRole").textContent = formatRole(role);
-
-      // Form fields
-      document.getElementById("editFullName").value = fullName;
-      document.getElementById("editEmail").value = user.email || "";
-      document.getElementById("editAddress").value = user.address || "";
-      document.getElementById("editPhone").value = user.phone || "";
-      document.getElementById("editRole").value = formatRole(role);
-
-      // Topbar label
-      const userRoleLabelEl = document.getElementById("userRoleLabel");
-      if (userRoleLabelEl) {
-        userRoleLabelEl.textContent = formatRole(role);
-      }
-    } catch (err) {
-      console.error("Error loading edit profile:", err);
-      alert("Failed to load profile. Please log in again.");
-      window.location.href = "Login.html";
-    }
-  }
-
-  async function handleEditProfileSubmit(event) {
-    event.preventDefault();
-
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("User not logged in");
-      window.location.href = "Login.html";
-      return;
+    function formatRole(role) {
+        if (!role) return "";
+        return role.charAt(0).toUpperCase() + role.slice(1);
     }
 
-    const fullName = document.getElementById("editFullName").value.trim();
-    const email = document.getElementById("editEmail").value.trim();
-    const address = document.getElementById("editAddress").value.trim();
-    const phone = document.getElementById("editPhone").value.trim();
+    // ── Load profile from Firestore on auth ready ──
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = "Login.html";
+            return;
+        }
 
-    const body = {
-      fullName,
-      email,
-      address,
-      phone
-    };
+        currentUser = user;
 
-    console.log("Submitting edit profile for user", userId, "with body:", body);
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
+            if (!userDoc.exists()) {
+                alert("User profile not found.");
+                window.location.href = "Login.html";
+                return;
+            }
 
-      const data = await res.json();
-      console.log("EditProfile update response:", res.status, data);
+            const data = userDoc.data();
 
-      if (!res.ok) {
-        alert(data.error || "Failed to update profile");
-        return;
-      }
+            const fullName = data.fullName || localStorage.getItem("userFullName") || "";
+            const role     = data.role     || localStorage.getItem("userRole")     || "user";
+            const email    = data.email    || user.email || "";
 
-      // Update stored name/email so Profile.html and topbar etc. are in sync
-      localStorage.setItem("userFullName", fullName);
-      localStorage.setItem("userEmail", email);
+            // Populate header
+            document.getElementById("editAvatar").textContent      = getInitials(fullName);
+            document.getElementById("editHeaderName").textContent  = fullName || "Unknown User";
+            document.getElementById("editHeaderEmail").textContent = email;
+            document.getElementById("editHeaderRole").textContent  = formatRole(role);
 
-      alert("Profile updated successfully!");
-      window.location.href = "Profile.html";
-    } catch (err) {
-      console.error("Error updating profile:", err);
-      alert("Failed to update profile. Please try again.");
-    }
-  }
+            // Populate form fields
+            document.getElementById("editFullName").value = fullName;
+            document.getElementById("editEmail").value    = email;
+            document.getElementById("editAddress").value  = data.address || "";
+            document.getElementById("editPhone").value    = data.phone   || "";
+            document.getElementById("editRole").value     = formatRole(role);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    loadEditProfile();
+            // Topbar
+            document.getElementById("userRoleLabel").textContent = fullName;
 
-    const form = document.getElementById("editProfileForm");
-    if (form) {
-      form.addEventListener("submit", handleEditProfileSubmit);
-    }
-  });
+        } catch (err) {
+            console.error("Error loading edit profile:", err);
+            alert("Failed to load profile. Please try again.");
+        }
+    });
+
+    // ── Save changes to Firestore (and Auth email if changed) ──
+    document.getElementById("editProfileForm")
+        .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) {
+                alert("You are not logged in.");
+                window.location.href = "Login.html";
+                return;
+            }
+
+            const fullName = document.getElementById("editFullName").value.trim();
+            const email    = document.getElementById("editEmail").value.trim();
+            const address  = document.getElementById("editAddress").value.trim();
+            const phone    = document.getElementById("editPhone").value.trim();
+
+            try {
+                // Update Firestore document
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    fullName,
+                    email,
+                    address,
+                    phone
+                });
+
+                // Update Firebase Auth email only if it changed
+                if (email !== currentUser.email) {
+                    await updateEmail(currentUser, email);
+                }
+
+                // Keep localStorage in sync
+                localStorage.setItem("userFullName", fullName);
+                localStorage.setItem("userEmail",    email);
+
+                alert("Profile updated successfully!");
+                window.location.href = "Profile.html";
+
+            } catch (err) {
+                console.error("Error updating profile:", err);
+
+                // Firebase throws a specific error if re-authentication is needed
+                if (err.code === "auth/requires-recent-login") {
+                    alert("For security, please log out and log back in before changing your email.");
+                } else {
+                    alert("Failed to update profile: " + err.message);
+                }
+            }
+        });
 </script>
 
 <script type="module" src="sidebar.js"></script>
