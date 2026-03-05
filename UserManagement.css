@@ -438,6 +438,284 @@ body {
   gap: 12px;
 }
 
+/* ==============================================
+NEW USER — TRIGGER BUTTON
+============================================== */
+
+.new-user-trigger{
+
+display:flex;
+align-items:center;
+gap:20px;
+
+background:linear-gradient(135deg,#0f766e 0%,#0d9488 100%);
+border-radius:14px;
+
+padding:24px 28px;
+
+cursor:pointer;
+border:none;
+width:100%;
+text-align:left;
+
+color:#fff;
+
+transition:transform .15s,box-shadow .15s;
+
+box-shadow:0 4px 20px rgba(13,148,136,.35);
+
+}
+
+.new-user-trigger:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 28px rgba(13,148,136,.45);
+}
+
+.ni-trigger-icon{
+
+width:56px;
+height:56px;
+
+background:rgba(255,255,255,.18);
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:1.5rem;
+
+}
+
+.ni-trigger-text{
+flex:1;
+}
+
+.ni-trigger-text h3{
+margin:0 0 4px;
+font-size:1.1rem;
+font-weight:700;
+}
+
+.ni-trigger-text p{
+margin:0;
+font-size:.84rem;
+opacity:.8;
+}
+
+.ni-trigger-arrow{
+
+font-size:1.3rem;
+opacity:.6;
+
+transition:opacity .15s,transform .15s;
+
+}
+
+.new-user-trigger:hover .ni-trigger-arrow{
+opacity:1;
+transform:translateX(4px);
+}
+
+/* ================================
+   NEW USER MODAL
+================================ */
+
+.qc-modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    z-index:1000;
+
+    align-items:center;
+    justify-content:center;
+}
+
+.qc-modal-overlay.active{
+    display:flex;
+}
+
+.qc-modal{
+    background:#ffffff;
+    border-radius:14px;
+    width:90%;
+    max-width:750px;
+    max-height:85vh;
+
+    display:flex;
+    flex-direction:column;
+
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    overflow:hidden;
+}
+
+/* ================================
+   MODAL ACTION BUTTONS
+================================ */
+
+.ni-btn-clear{
+    padding:10px 20px;
+    border:1.5px solid #cbd5e1;
+    background:#ffffff;
+
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:600;
+
+    color:#475569;
+
+    cursor:pointer;
+
+    transition:all .2s ease;
+}
+
+.ni-btn-clear:hover{
+    background:#f1f5f9;
+    border-color:#94a3b8;
+}
+
+/* CREATE USER BUTTON */
+
+.ni-btn-save{
+
+    padding:10px 22px;
+
+    background:linear-gradient(135deg,#0f766e,#0d9488);
+
+    border:none;
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:700;
+
+    color:#ffffff;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    box-shadow:0 4px 14px rgba(13,148,136,.35);
+
+    transition:all .2s ease;
+
+}
+
+.ni-btn-save:hover{
+
+    transform:translateY(-1px);
+
+    box-shadow:0 8px 20px rgba(13,148,136,.45);
+
+}
+
+.ni-btn-save:active{
+
+    transform:translateY(0);
+
+}
+
+/* HEADER */
+
+.qc-modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 24px;
+    color:#fff;
+}
+
+.qc-modal-header.teal{
+    background:linear-gradient(135deg,#0f766e,#0d9488);
+}
+
+.qc-modal-header h3{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+/* CLOSE BUTTON */
+
+.qc-modal-close{
+    border:none;
+    background:rgba(255,255,255,0.2);
+    color:#fff;
+
+    width:32px;
+    height:32px;
+    border-radius:50%;
+
+    cursor:pointer;
+}
+
+/* BODY */
+
+.qc-modal-body{
+    padding:24px;
+    overflow-y:auto;
+}
+
+/* DIVIDER */
+
+.ni-divider{
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+
+    color:#64748b;
+
+    border-bottom:1px solid #e2e8f0;
+    padding-bottom:8px;
+    margin-bottom:16px;
+
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+/* FORM GRID */
+
+.ni-modal-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.ni-form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.ni-form-group label{
+    font-size:12px;
+    font-weight:600;
+    color:#475569;
+}
+
+.ni-form-group input,
+.ni-form-group select{
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+    padding:10px;
+}
+
+/* FOOTER */
+
+.ni-modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+
+    padding:16px 24px;
+    border-top:1px solid #e2e8f0;
+}
+
 /* DELETE MODAL */
 .modal {
   display: none;

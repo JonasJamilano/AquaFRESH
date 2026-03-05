@@ -213,270 +213,206 @@
     </section>
 
 
-    <!-- ============================= -->
-    <!-- SENSOR TRENDS -->
-    <!-- ============================= -->
-
-    <section class="panel">
-
-        <div class="panel-header-flex">
-            <h3>Sensor Trends</h3>
-        </div>
-
-        <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
-            Visual placeholders for historical sensor data (prototype view)
-        </p>
-
-        <div class="trend-tabs">
-
-            <div class="trend-card active" data-trend="temp">
-                <div class="trend-icon">
-                    <i class="fa-solid fa-temperature-half"></i>
-                </div>
-
-                <div class="trend-info">
-                    <div class="trend-title">Temperature</div>
-                    <div class="trend-value">Trend</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right trend-arrow"></i>
-            </div>
-
-
-            <div class="trend-card" data-trend="ph">
-
-                <div class="trend-icon">
-                    <i class="fa-solid fa-droplet"></i>
-                </div>
-
-                <div class="trend-info">
-                    <div class="trend-title">pH Level</div>
-                    <div class="trend-value">Trend</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-            </div>
-
-
-            <div class="trend-card" data-trend="humidity">
-
-                <div class="trend-icon">
-                    <i class="fa-solid fa-cloud"></i>
-                </div>
-
-                <div class="trend-info">
-                    <div class="trend-title">Humidity</div>
-                    <div class="trend-value">Trend</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-            </div>
-
-        </div>
-
-
-        <div class="trend-content active" id="temp">
-            <div class="chart-box">
-                <i class="fa-solid fa-chart-line"></i> Temperature Chart
-            </div>
-        </div>
-
-        <div class="trend-content" id="ph">
-            <div class="chart-box">
-                <i class="fa-solid fa-chart-line"></i> pH Chart
-            </div>
-        </div>
-
-        <div class="trend-content" id="humidity">
-            <div class="chart-box">
-                <i class="fa-solid fa-chart-line"></i> Humidity Chart
-            </div>
-        </div>
-
-    </section>
-
-
- <!-- ============================= -->
-<!-- FRESHNESS TRENDS -->
+  <!-- ============================= -->
+<!-- ANALYTICS TRENDS -->
 <!-- ============================= -->
 
 <section class="panel">
 
-    <div class="panel-header-flex">
-        <h3>Freshness Trends</h3>
+<div class="panel-header-flex">
+<h3>Trends</h3>
+</div>
+
+<p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
+Analytics insights across sensors, freshness evaluation, and delivery performance
+</p>
+
+
+<!-- MAIN TREND TABS -->
+
+<div class="trends-tabs">
+
+    <div class="trends-tab active" data-trendtab="sensor">
+    Sensor Trends
     </div>
 
-    <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
-        Distribution of freshness outcomes across monitored batches
-    </p>
+    <div class="trends-tab" data-trendtab="freshness">
+    Freshness Trends
+    </div>
+
+    <div class="trends-tab" data-trendtab="delivery">
+    Delivery Performance
+    </div>
+
+</div>
+
+
+
+<!-- ================= SENSOR TRENDS ================= -->
+
+<div class="trends-panel active" id="sensor">
 
     <div class="trend-tabs">
 
-        <!-- FRESH -->
-        <div class="trend-card active" data-trend="fresh">
+    <div class="trend-card active" data-trend="temp">
+    <div class="trend-icon"><i class="fa-solid fa-temperature-half"></i></div>
 
-            <div class="trend-icon">
-                <i class="fa-solid fa-fish"></i>
-            </div>
+    <div class="trend-info">
+    <div class="trend-title">Temperature</div>
+    <div class="trend-value">Trend</div>
+    </div>
 
-            <div class="trend-info">
-                <div class="trend-title">Fresh</div>
-                <div class="trend-value">76%</div>
-            </div>
-
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
-
-
-        <!-- MODERATE -->
-        <div class="trend-card" data-trend="moderate">
-
-            <div class="trend-icon">
-                <i class="fa-solid fa-water"></i>
-            </div>
-
-            <div class="trend-info">
-                <div class="trend-title">Moderate</div>
-                <div class="trend-value">18%</div>
-            </div>
-
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
-
-
-        <!-- SPOILED -->
-        <div class="trend-card" data-trend="spoiled">
-
-            <div class="trend-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-
-            <div class="trend-info">
-                <div class="trend-title">Spoiled</div>
-                <div class="trend-value">6%</div>
-            </div>
-
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
-
+    <i class="fa-solid fa-chevron-right trend-arrow"></i>
     </div>
 
 
-    <!-- TREND CONTENT -->
+    <div class="trend-card" data-trend="ph">
+    <div class="trend-icon"><i class="fa-solid fa-droplet"></i></div>
 
-    <div class="trend-content active" id="fresh">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
-        </div>
+    <div class="trend-info">
+    <div class="trend-title">pH Level</div>
+    <div class="trend-value">Trend</div>
     </div>
 
-    <div class="trend-content" id="moderate">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Moderate Quality Chart
-        </div>
-    </div>
-
-    <div class="trend-content" id="spoiled">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Spoiled Trend Chart
-        </div>
-    </div>
-
-</section>
-
- <!-- ============================= -->
-<!-- DELIVERY PERFORMANCE -->
-<!-- ============================= -->
-
-<section class="panel">
-
-    <div class="panel-header-flex">
-        <h3>Delivery Performance</h3>
-    </div>
-
-    <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
-        Operational insights based on delivery timeliness and conditions
-    </p>
-
-    <div class="trend-tabs">
-
-        <!-- ON TIME -->
-        <div class="trend-card active" data-trend="ontime">
-
-            <div class="trend-icon">
-                <i class="fa-solid fa-truck-fast"></i>
-            </div>
-
-            <div class="trend-info">
-                <div class="trend-title">On-Time Rate</div>
-                <div class="trend-value">82%</div>
-            </div>
-
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
+    <i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
 
 
-        <!-- DELAY -->
-        <div class="trend-card" data-trend="delay">
+<div class="trend-card" data-trend="humidity">
+<div class="trend-icon"><i class="fa-solid fa-cloud"></i></div>
 
-            <div class="trend-icon">
-                <i class="fa-solid fa-clock"></i>
-            </div>
+<div class="trend-info">
+<div class="trend-title">Humidity</div>
+<div class="trend-value">Trend</div>
+</div>
 
-            <div class="trend-info">
-                <div class="trend-title">Average Delay</div>
-                <div class="trend-value">18m</div>
-            </div>
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
 
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
+</div>
 
 
-        <!-- LATE -->
-        <div class="trend-card" data-trend="late">
+<div class="trend-content active" id="temp">
+<div class="chart-box">
+<i class="fa-solid fa-chart-line"></i> Temperature Chart
+</div>
+</div>
 
-            <div class="trend-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
+<div class="trend-content" id="ph">
+<div class="chart-box">
+<i class="fa-solid fa-chart-line"></i> pH Chart
+</div>
+</div>
 
-            <div class="trend-info">
-                <div class="trend-title">Late Deliveries</div>
-                <div class="trend-value">3</div>
-            </div>
+<div class="trend-content" id="humidity">
+<div class="chart-box">
+<i class="fa-solid fa-chart-line"></i> Humidity Chart
+</div>
+</div>
 
-            <i class="fa-solid fa-chevron-right trend-arrow"></i>
-
-        </div>
-
-    </div>
+</div>
 
 
-    <!-- TREND CONTENT -->
 
-    <div class="trend-content active" id="ontime">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart
-        </div>
-    </div>
+<!-- ================= FRESHNESS TRENDS ================= -->
 
-    <div class="trend-content" id="delay">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Delivery Delay Chart
-        </div>
-    </div>
+<div class="trends-panel" id="freshness">
 
-    <div class="trend-content" id="late">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Late Deliveries Trend
-        </div>
-    </div>
+<div class="trend-tabs">
+
+<div class="trend-card active">
+<div class="trend-icon"><i class="fa-solid fa-fish"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">Fresh</div>
+<div class="trend-value">76%</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+
+<div class="trend-card">
+<div class="trend-icon"><i class="fa-solid fa-water"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">Moderate</div>
+<div class="trend-value">18%</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+
+<div class="trend-card">
+<div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">Spoiled</div>
+<div class="trend-value">6%</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+</div>
+
+<div class="chart-box">
+<i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
+</div>
+
+</div>
+
+
+
+<!-- ================= DELIVERY PERFORMANCE ================= -->
+
+<div class="trends-panel" id="delivery">
+
+<div class="trend-tabs">
+
+<div class="trend-card active">
+<div class="trend-icon"><i class="fa-solid fa-truck-fast"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">On-Time Rate</div>
+<div class="trend-value">82%</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+
+<div class="trend-card">
+<div class="trend-icon"><i class="fa-solid fa-clock"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">Average Delay</div>
+<div class="trend-value">18m</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+
+<div class="trend-card">
+<div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+
+<div class="trend-info">
+<div class="trend-title">Late Deliveries</div>
+<div class="trend-value">3</div>
+</div>
+
+<i class="fa-solid fa-chevron-right trend-arrow"></i>
+</div>
+
+</div>
+
+<div class="chart-box">
+<i class="fa-solid fa-chart-line"></i> Delivery Performance Chart
+</div>
+
+</div>
 
 </section>
 
@@ -777,8 +713,37 @@ document.querySelectorAll(".trend-card").forEach(card => {
 
 })
 
-</script>
+/* =========================================
+MAIN TRENDS TAB SWITCH
+========================================= */
 
+document.querySelectorAll(".trends-tab").forEach(tab => {
+
+    tab.addEventListener("click", () => {
+
+        /* remove active state */
+
+        document.querySelectorAll(".trends-tab")
+        .forEach(t => t.classList.remove("active"))
+
+        document.querySelectorAll(".trends-panel")
+        .forEach(p => p.classList.remove("active"))
+
+        /* activate selected tab */
+
+        tab.classList.add("active")
+
+        const panel = tab.dataset.trendtab
+
+        document
+        .getElementById(panel)
+        .classList.add("active")
+
+    })
+
+})
+
+</script>
 
 <script>
 
