@@ -335,21 +335,21 @@ async function loadInspectionsByStatus() {
 
 
 // ==========================
-// Download Delivery Report (Excel)
+// Download Inspection Report (Excel)
 // ==========================
 document.getElementById("download-delivery-report-btn")
     ?.addEventListener("click", async () => {
 
         try {
             const q = query(
-                collection(db, "deliveries"),
+                collection(db, "qualityControl"),
                 orderBy("createdAt", "desc")
             );
 
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
-                alert("No delivery data found.");
+                alert("No inspection data found.");
                 return;
             }
 
@@ -357,31 +357,41 @@ document.getElementById("download-delivery-report-btn")
 
             snapshot.forEach(doc => {
                 const d = doc.data();
+
+                // Flatten criteria into readable strings
+                const criteriaStr = (d.criteria || [])
+                    .map(c => `${c.criteriaName}: ${c.assessment}${c.remarks ? ` (${c.remarks})` : ""}`)
+                    .join(" | ");
+
                 formattedData.push({
-                    "Delivery ID":      d.deliveryId  || "",
-                    "Driver Name":      d.driverName  || "",
-                    "Vehicle":          d.vehicle     || "",
-                    "Destination":      d.destination || "",
-                    "Product Type":     d.productType || "",
-                    "Quantity":         d.quantity    || "",
-                    "Status":           d.status      || "",
-                    "Temperature (°C)": d.temperature || "",
-                    "Created At": d.createdAt?.toDate
-                        ? d.createdAt.toDate().toLocaleString()
+                    "Batch ID":         d.batchCode      || "",
+                    "Inspector":        d.inspectorName  || "",
+                    "Location":         d.location       || "",
+                    "Product Type":     d.productType    || "",
+                    "Temperature (°C)": d.temperature    || "",
+                    "pH Level":         d.phLevel        || "",
+                    "Criteria":         criteriaStr      || "",
+                    "Freshness Score":  d.score          ?? "",
+                    "Overall Status":   d.overallStatus  || "",
+                    "Date":             d.createdAt?.toDate
+                        ? d.createdAt.toDate().toLocaleString("en-PH", {
+                            month: "short", day: "numeric", year: "numeric",
+                            hour: "numeric", minute: "2-digit", hour12: true
+                          })
                         : ""
                 });
             });
 
             const worksheet = XLSX.utils.json_to_sheet(formattedData);
             const workbook  = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Delivery Report");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inspection Report");
 
             const today = new Date().toISOString().split("T")[0];
-            XLSX.writeFile(workbook, `Delivery_Report_${today}.xlsx`);
+            XLSX.writeFile(workbook, `Inspection_Report_${today}.xlsx`);
 
         } catch (error) {
-            console.error("Delivery report error:", error);
-            alert("Failed to generate delivery report.");
+            console.error("Inspection report error:", error);
+            alert("Failed to generate inspection report.");
         }
     });
 
