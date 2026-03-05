@@ -1,19 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Analytics & Reporting | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
 
+    <!-- CSS -->
     <link rel="stylesheet" href="AnalyticsReporting.css">
 </head>
+
 <body>
 
+<!-- ============================= -->
+<!-- SIDEBAR -->
+<!-- ============================= -->
+
 <aside class="sidebar">
+
     <div class="brand">
         <h1>AquaFRESH</h1>
         <p>Aquaculture Freshness Monitoring System</p>
@@ -21,231 +33,821 @@
 
     <nav class="menu">
         <ul>
+
             <li data-role="superadmin admin manager">
                 <a href="Dashboard.html">
                     <i class="fa-solid fa-gauge"></i>
                     <span class="label">Dashboard</span>
                 </a>
             </li>
+
             <li data-role="inspector">
                 <a href="InspectorDashboard.html">
                     <i class="fa-solid fa-clipboard-check"></i>
                     <span class="label">Inspector Dashboard</span>
                 </a>
             </li>
+
             <li data-role="delivery">
                 <a href="DeliveryDashboard.html">
-                   <i class="fa-solid fa-truck"></i>
+                    <i class="fa-solid fa-truck"></i>
                     <span class="label">Delivery Dashboard</span>
                 </a>
             </li>
+
             <li data-role="superadmin admin manager inspector delivery">
                 <a href="FreshnessEvaluation.html">
                     <i class="fa-solid fa-water"></i>
                     <span class="label">Freshness Evaluation</span>
                 </a>
             </li>
+
             <li data-role="superadmin admin manager delivery">
                 <a href="TransportDelivery.html">
                     <i class="fa-solid fa-route"></i>
                     <span class="label">Transport & Delivery</span>
                 </a>
             </li>
+
             <li data-role="superadmin admin manager inspector">
                 <a href="AnalyticsReporting.html" class="active">
-                   <i class="fa-solid fa-chart-line"></i>
+                    <i class="fa-solid fa-chart-line"></i>
                     <span class="label">Analytics & Reporting</span>
                 </a>
             </li>
+
             <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
                     <i class="fa-solid fa-shield-halved"></i>
                     <span class="label">Quality Control</span>
                 </a>
             </li>
+
             <li data-role="superadmin admin manager">
                 <a href="UserManagement.html">
                     <i class="fa-solid fa-users"></i>
                     <span class="label">User Management</span>
                 </a>
             </li>
+
         </ul>
     </nav>
+
 </aside>
 
+
+<!-- ============================= -->
+<!-- TOPBAR -->
+<!-- ============================= -->
+
 <header class="topbar">
+
     <span class="menu-btn">☰</span>
 
     <div class="profile-dropdown">
+
         <input type="checkbox" id="profile-toggle">
+
         <label for="profile-toggle" class="profile-trigger">
-            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span>
+            <span class="caret">▾</span>
         </label>
+
         <div class="dropdown-menu">
             <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
+
     </div>
+
 </header>
+
+
+<!-- ============================= -->
+<!-- MAIN CONTENT -->
+<!-- ============================= -->
 
 <main class="content">
 
-    <h2>Sensor Monitoring</h2>
+    <h2>Analytics Monitoring</h2>
+
     <p class="subtitle">
         Real-time environmental readings, sensor health, and connectivity status
     </p>
 
-    <div class="summary-cards">
-        <div class="card success">
-            <h3>Normal</h3>
-            <p>6 Sensors</p>
-        </div>
-        <div class="card warning">
-            <h3>Warning</h3>
-            <p>2 Sensors</p>
-        </div>
-        <div class="card danger">
-            <h3>Alert</h3>
-            <p>1 Sensor</p>
-        </div>
-    </div>
+
+    <!-- ============================= -->
+    <!-- SENSOR SUMMARY -->
+    <!-- ============================= -->
 
     <section class="panel">
+
         <div class="panel-header-flex">
-            <h3>Sensor Status Overview</h3>
-            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Live Data Feed</span>
+            <h3>Sensors</h3>
         </div>
 
-        <table class="status-table">
-            <thead>
-                <tr>
-                    <th>Tank ID</th>
-                    <th>Temperature (°C)</th>
-                    <th>pH Level</th>
-                    <th>Status</th>
-                    <th>Connection</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Tank 1</strong></td>
-                    <td>25.3</td>
-                    <td>7.1</td>
-                    <td><span class="status good"><i class="fa-solid fa-check"></i> Normal</span></td>
-                    <td><span class="status online"><i class="fa-solid fa-wifi"></i> Online</span></td>
-                    <td>10:22 AM</td>
-                </tr>
-                <tr>
-                    <td><strong>Tank 2</strong></td>
-                    <td>29.1</td>
-                    <td>6.8</td>
-                    <td><span class="status warning-status"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></td>
-                    <td><span class="status online"><i class="fa-solid fa-wifi"></i> Online</span></td>
-                    <td>10:21 AM</td>
-                </tr>
-                <tr>
-                    <td><strong>Tank 3</strong></td>
-                    <td>32.4</td>
-                    <td>6.3</td>
-                    <td><span class="status alert"><i class="fa-solid fa-circle-exclamation"></i> Alert</span></td>
-                    <td><span class="status offline"><i class="fa-solid fa-plug-circle-xmark"></i> Offline</span></td>
-                    <td>10:10 AM</td>
-                </tr>
-            </tbody>
-        </table>
+        <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
+            Overview of sensor conditions across monitored tanks
+        </p>
+
+        <div class="qc-status-cards">
+
+            <!-- NORMAL -->
+            <div class="qc-status-card green"
+                onclick="openSensorModal('normal')">
+
+                <div class="card-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+
+                <div class="card-info">
+                    <div class="card-title">Normal</div>
+                    <div class="card-count">6</div>
+                    <div class="card-cta">View sensors</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+
+            </div>
+
+
+            <!-- WARNING -->
+            <div class="qc-status-card yellow"
+                onclick="openSensorModal('warning')">
+
+                <div class="card-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+
+                <div class="card-info">
+                    <div class="card-title">Warning</div>
+                    <div class="card-count">2</div>
+                    <div class="card-cta">View sensors</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+
+            </div>
+
+
+            <!-- ALERT -->
+            <div class="qc-status-card red"
+                onclick="openSensorModal('alert')">
+
+                <div class="card-icon">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+
+                <div class="card-info">
+                    <div class="card-title">Alert</div>
+                    <div class="card-count">1</div>
+                    <div class="card-cta">View sensors</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+
+            </div>
+
+        </div>
+
     </section>
 
+
+    <!-- ============================= -->
+    <!-- SENSOR TRENDS -->
+    <!-- ============================= -->
+
     <section class="panel">
+
         <div class="panel-header-flex">
             <h3>Sensor Trends</h3>
         </div>
-        <p class="subtitle" style="margin-top: -10px; margin-bottom: 20px;">
+
+        <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
             Visual placeholders for historical sensor data (prototype view)
         </p>
 
-        <div class="chart-grid">
-            <div class="chart-card">
-                <h4>Temperature Trend</h4>
-                <div class="chart-placeholder">
-                    <i class="fa-solid fa-chart-line"></i> Line Chart
+        <div class="trend-tabs">
+
+            <div class="trend-card active" data-trend="temp">
+                <div class="trend-icon">
+                    <i class="fa-solid fa-temperature-half"></i>
                 </div>
+
+                <div class="trend-info">
+                    <div class="trend-title">Temperature</div>
+                    <div class="trend-value">Trend</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right trend-arrow"></i>
             </div>
 
-            <div class="chart-card">
-                <h4>pH Level Trend</h4>
-                <div class="chart-placeholder">
-                    <i class="fa-solid fa-chart-line"></i> Line Chart
+
+            <div class="trend-card" data-trend="ph">
+
+                <div class="trend-icon">
+                    <i class="fa-solid fa-droplet"></i>
                 </div>
+
+                <div class="trend-info">
+                    <div class="trend-title">pH Level</div>
+                    <div class="trend-value">Trend</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
             </div>
 
-            <div class="chart-card">
-                <h4>Humidity Trend</h4>
-                <div class="chart-placeholder">
-                    <i class="fa-solid fa-chart-line"></i> Line Chart
+
+            <div class="trend-card" data-trend="humidity">
+
+                <div class="trend-icon">
+                    <i class="fa-solid fa-cloud"></i>
                 </div>
+
+                <div class="trend-info">
+                    <div class="trend-title">Humidity</div>
+                    <div class="trend-value">Trend</div>
+                </div>
+
+                <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
+            </div>
+
+        </div>
+
+
+        <div class="trend-content active" id="temp">
+            <div class="chart-box">
+                <i class="fa-solid fa-chart-line"></i> Temperature Chart
             </div>
         </div>
+
+        <div class="trend-content" id="ph">
+            <div class="chart-box">
+                <i class="fa-solid fa-chart-line"></i> pH Chart
+            </div>
+        </div>
+
+        <div class="trend-content" id="humidity">
+            <div class="chart-box">
+                <i class="fa-solid fa-chart-line"></i> Humidity Chart
+            </div>
+        </div>
+
     </section>
 
-    <section class="analytics-section">
-        <h2>Freshness Trends</h2>
-        <p class="subtitle">Distribution of freshness outcomes across monitored batches</p>
 
-        <div class="summary-cards">
-            <div class="card success">
-                <h3>Fresh</h3>
-                <p>76%</p>
+ <!-- ============================= -->
+<!-- FRESHNESS TRENDS -->
+<!-- ============================= -->
+
+<section class="panel">
+
+    <div class="panel-header-flex">
+        <h3>Freshness Trends</h3>
+    </div>
+
+    <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
+        Distribution of freshness outcomes across monitored batches
+    </p>
+
+    <div class="trend-tabs">
+
+        <!-- FRESH -->
+        <div class="trend-card active" data-trend="fresh">
+
+            <div class="trend-icon">
+                <i class="fa-solid fa-fish"></i>
             </div>
-            <div class="card warning">
-                <h3>Moderate</h3>
-                <p>18%</p>
+
+            <div class="trend-info">
+                <div class="trend-title">Fresh</div>
+                <div class="trend-value">76%</div>
             </div>
-            <div class="card danger">
-                <h3>Spoiled</h3>
-                <p>6%</p>
-            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
         </div>
 
-        <div class="panel">
-            <h3>Freshness Outcome Trend</h3>
-            <div class="chart-placeholder large">
-                <i class="fa-solid fa-chart-column"></i> Bar / Line Chart
-            </div>
-        </div>
-    </section>
 
-    <section class="analytics-section">
-        <h2>Delivery Performance</h2>
-        <p class="subtitle">Operational insights based on delivery timeliness and conditions</p>
+        <!-- MODERATE -->
+        <div class="trend-card" data-trend="moderate">
 
-        <div class="summary-cards">
-            <div class="card success">
-                <h3>On-Time Rate</h3>
-                <p>82%</p>
+            <div class="trend-icon">
+                <i class="fa-solid fa-water"></i>
             </div>
-            <div class="card warning">
-                <h3>Avg Delay</h3>
-                <p>18 mins</p>
+
+            <div class="trend-info">
+                <div class="trend-title">Moderate</div>
+                <div class="trend-value">18%</div>
             </div>
-            <div class="card danger">
-                <h3>Late Deliveries</h3>
-                <p>3</p>
-            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
         </div>
 
-        <div class="panel">
-            <h3>Delivery Timeliness Trend</h3>
-            <div class="chart-placeholder large">
-                <i class="fa-solid fa-chart-column"></i> Bar Chart
+
+        <!-- SPOILED -->
+        <div class="trend-card" data-trend="spoiled">
+
+            <div class="trend-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Spoiled</div>
+                <div class="trend-value">6%</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
         </div>
-    </section>
+
+    </div>
+
+
+    <!-- TREND CONTENT -->
+
+    <div class="trend-content active" id="fresh">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="moderate">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Moderate Quality Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="spoiled">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Spoiled Trend Chart
+        </div>
+    </div>
+
+</section>
+
+ <!-- ============================= -->
+<!-- DELIVERY PERFORMANCE -->
+<!-- ============================= -->
+
+<section class="panel">
+
+    <div class="panel-header-flex">
+        <h3>Delivery Performance</h3>
+    </div>
+
+    <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">
+        Operational insights based on delivery timeliness and conditions
+    </p>
+
+    <div class="trend-tabs">
+
+        <!-- ON TIME -->
+        <div class="trend-card active" data-trend="ontime">
+
+            <div class="trend-icon">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">On-Time Rate</div>
+                <div class="trend-value">82%</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
+        </div>
+
+
+        <!-- DELAY -->
+        <div class="trend-card" data-trend="delay">
+
+            <div class="trend-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Average Delay</div>
+                <div class="trend-value">18m</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
+        </div>
+
+
+        <!-- LATE -->
+        <div class="trend-card" data-trend="late">
+
+            <div class="trend-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Late Deliveries</div>
+                <div class="trend-value">3</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
+        </div>
+
+    </div>
+
+
+    <!-- TREND CONTENT -->
+
+    <div class="trend-content active" id="ontime">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="delay">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Delivery Delay Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="late">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Late Deliveries Trend
+        </div>
+    </div>
+
+</section>
+
 
 </main>
 
+
+<!-- ============================= -->
+<!-- SENSOR MODAL -->
+<!-- ============================= -->
+
+<div class="qc-modal-overlay" id="sensorModal">
+
+    <div class="qc-modal">
+
+        <!-- MODAL HEADER -->
+
+        <div class="qc-modal-header teal">
+
+            <h3>
+                <i class="fa-solid fa-microchip"></i>
+                Sensor List
+                <span class="modal-count-badge" id="sensorCount">0</span>
+            </h3>
+
+            <button class="qc-modal-close" onclick="closeSensorModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <!-- MODAL BODY -->
+
+        <div class="qc-modal-body">
+
+
+            <!-- SENSOR TYPES -->
+
+            <div class="sensor-type-grid">
+
+                <!-- TEMPERATURE -->
+
+                <div class="sensor-type-card">
+
+                    <i class="fa-solid fa-temperature-half"></i>
+
+                    <div>
+                        <div class="sensor-type-title">
+                            Temperature Sensor
+                        </div>
+
+                        <div class="sensor-type-sub">
+                            Water Temperature Monitoring
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- PH -->
+
+                <div class="sensor-type-card">
+
+                    <i class="fa-solid fa-droplet"></i>
+
+                    <div>
+                        <div class="sensor-type-title">
+                            pH Sensor
+                        </div>
+
+                        <div class="sensor-type-sub">
+                            Water Acidity Monitoring
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- HUMIDITY -->
+
+                <div class="sensor-type-card">
+
+                    <i class="fa-solid fa-cloud"></i>
+
+                    <div>
+                        <div class="sensor-type-title">
+                            Humidity Sensor
+                        </div>
+
+                        <div class="sensor-type-sub">
+                            Environmental Humidity
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ============================= -->
+            <!-- SENSOR STATUS OVERVIEW -->
+            <!-- ============================= -->
+
+            <div class="panel-header-flex" style="margin-top:24px;">
+
+                <h3>Sensor Status Overview</h3>
+
+                <span class="live-indicator">
+                    <i class="fa-solid fa-circle-dot"></i>
+                    Live Data Feed
+                </span>
+
+            </div>
+
+
+            <div class="sensor-overview-grid">
+
+
+                <!-- TEMPERATURE SENSOR -->
+
+                <div class="sensor-overview-card">
+
+                    <div class="sensor-overview-header">
+
+                        <div class="sensor-overview-icon temp">
+                            <i class="fa-solid fa-temperature-half"></i>
+                        </div>
+
+                        <div>
+                            <div class="sensor-overview-title">
+                                Temperature Sensor
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="sensor-location">
+
+                        <div class="tank-id">
+                            Tank 1
+                        </div>
+
+                        <div class="truck-id">
+                            <i class="fa-solid fa-truck"></i>
+                            Truck A
+                        </div>
+
+                    </div>
+
+
+                    <!-- VALUE -->
+
+                    <div class="sensor-reading">
+                        25.3°C
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="sensor-details">
+
+                        <span class="status good">
+                            <i class="fa-solid fa-check"></i>
+                            Normal
+                        </span>
+
+                        <span class="sensor-meta">
+                            Updated 10:22 AM
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PH SENSOR -->
+
+                <div class="sensor-overview-card">
+
+                    <div class="sensor-overview-header">
+
+                        <div class="sensor-overview-icon ph">
+                            <i class="fa-solid fa-droplet"></i>
+                        </div>
+
+                        <div>
+                            <div class="sensor-overview-title">
+                                pH Sensor
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="sensor-location">
+
+                        <div class="tank-id">
+                            Tank 2
+                        </div>
+
+                        <div class="truck-id">
+                            <i class="fa-solid fa-truck"></i>
+                            Truck B
+                        </div>
+
+                    </div>
+
+
+                    <!-- VALUE -->
+
+                    <div class="sensor-reading">
+                        7.1
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="sensor-details">
+
+                        <span class="status warning-status">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Warning
+                        </span>
+
+                        <span class="sensor-meta">
+                            Updated 10:21 AM
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- HUMIDITY SENSOR -->
+
+                <div class="sensor-overview-card">
+
+                    <div class="sensor-overview-header">
+
+                        <div class="sensor-overview-icon humidity">
+                            <i class="fa-solid fa-cloud"></i>
+                        </div>
+
+                        <div>
+                            <div class="sensor-overview-title">
+                                Humidity Sensor
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="sensor-location">
+
+                        <div class="tank-id">
+                            Tank 3
+                        </div>
+
+                        <div class="truck-id">
+                            <i class="fa-solid fa-truck"></i>
+                            Truck C
+                        </div>
+
+                    </div>
+
+
+                    <!-- VALUE -->
+
+                    <div class="sensor-reading">
+                        64%
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="sensor-details">
+
+                        <span class="status alert">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            Alert
+                        </span>
+
+                        <span class="sensor-meta">
+                            Updated 10:10 AM
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================= -->
+<!-- SCRIPTS -->
+<!-- ============================= -->
+
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+
+
+<script>
+
+document.querySelectorAll(".trend-card").forEach(card => {
+
+    card.addEventListener("click", () => {
+
+        const container = card.closest(".panel")
+
+        const cards = container.querySelectorAll(".trend-card")
+        const contents = container.querySelectorAll(".trend-content")
+
+        cards.forEach(c => c.classList.remove("active"))
+        contents.forEach(c => c.classList.remove("active"))
+
+        card.classList.add("active")
+
+        const id = card.dataset.trend
+        container.querySelector("#" + id).classList.add("active")
+
+    })
+
+})
+
+</script>
+
+
+<script>
+
+function openSensorModal(type) {
+
+    const modal = document.getElementById("sensorModal")
+
+    const title = {
+        normal: "Normal Sensors",
+        warning: "Warning Sensors",
+        alert: "Alert Sensors"
+    }
+
+    document.querySelector(".qc-modal-header h3").innerHTML =
+`<i class="fa-solid fa-microchip"></i> ${title[type]} <span class="modal-count-badge">${type === "normal" ? 6 : type === "warning" ? 2 : 1}</span>`
+
+    modal.classList.add("active")
+
+}
+
+function closeSensorModal() {
+
+    document
+        .getElementById("sensorModal")
+        .classList.remove("active")
+
+}
+
+</script>
+
 
 </body>
 </html>
