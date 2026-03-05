@@ -208,6 +208,23 @@ function getStatusBadgeHTML(status) {
 
 
 // ==========================
+// Format Timestamp Helper
+// ==========================
+function formatDate(timestamp) {
+    if (!timestamp) return "—";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString("en-PH", {
+        month:  "short",
+        day:    "numeric",
+        year:   "numeric",
+        hour:   "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
+}
+
+
+// ==========================
 // Load Today's Inspections
 // ==========================
 async function loadInspectionsToday() {
@@ -229,10 +246,11 @@ async function loadInspectionsToday() {
             const r  = doc.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><strong>${r.batchCode      ?? ""}</strong></td>
-                <td>${r.inspectorName          ?? "—"}</td>
-                <td>${r.location               ?? ""}</td>
-                <td>${r.productType            ?? ""}</td>
+                <td><strong>${r.batchCode   ?? ""}</strong></td>
+                <td>${r.inspectorName       ?? "—"}</td>
+                <td>${r.location            ?? ""}</td>
+                <td>${r.productType         ?? ""}</td>
+                <td>${formatDate(r.createdAt)}</td>
                 <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
             `;
             tbody.appendChild(tr);
@@ -297,10 +315,11 @@ async function loadInspectionsByStatus() {
                 }
 
                 tr.innerHTML = `
-                    <td><strong>${r.batchCode  ?? ""}</strong></td>
-                    <td>${r.productType         ?? ""}</td>
-                    <td>${r.location            ?? ""}</td>
+                    <td><strong>${r.batchCode ?? ""}</strong></td>
+                    <td>${r.productType       ?? ""}</td>
+                    <td>${r.location          ?? ""}</td>
                     <td>${detailCell}</td>
+                    <td>${formatDate(r.createdAt)}</td>
                     <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
                 `;
                 tbody.appendChild(tr);
