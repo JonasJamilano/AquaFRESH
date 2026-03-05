@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>AquaFRESH Dashboard</title>
+    <title>Dashboard | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <link rel="stylesheet" href="Dashboard.css">
 </head>
 <body>
@@ -24,58 +22,43 @@
     <nav class="menu">
         <ul>
             <li data-role="superadmin admin manager">
-                <a href="Dashboard.html">
-                    <i class="fa-solid fa-gauge"></i>
-                    <span class="label">Dashboard</span>
+                <a href="Dashboard.html" class="active">
+                    <i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span>
                 </a>
             </li>
-
             <li data-role="inspector">
                 <a href="InspectorDashboard.html">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                    <span class="label">Inspector Dashboard</span>
+                    <i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span>
                 </a>
             </li>
-
             <li data-role="delivery">
                 <a href="DeliveryDashboard.html">
-                    <i class="fa-solid fa-truck"></i>
-                    <span class="label">Delivery Dashboard</span>
+                    <i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span>
                 </a>
             </li>
-
             <li data-role="superadmin admin manager inspector delivery">
                 <a href="FreshnessEvaluation.html">
-                    <i class="fa-solid fa-water"></i>
-                    <span class="label">Freshness Evaluation</span>
+                    <i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span>
                 </a>
             </li>
-
             <li data-role="superadmin admin manager delivery">
                 <a href="TransportDelivery.html">
-                    <i class="fa-solid fa-route"></i>
-                    <span class="label">Transport & Delivery</span>
+                    <i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span>
                 </a>
             </li>
-
             <li data-role="superadmin admin manager inspector">
                 <a href="AnalyticsReporting.html">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span class="label">Analytics & Reporting</span>
+                    <i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span>
                 </a>
             </li>
-
             <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span class="label">Quality Control</span>
+                    <i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span>
                 </a>
             </li>
-
             <li data-role="superadmin admin manager">
                 <a href="UserManagement.html">
-                    <i class="fa-solid fa-users"></i>
-                    <span class="label">User Management</span>
+                    <i class="fa-solid fa-users"></i><span class="label">User Management</span>
                 </a>
             </li>
         </ul>
@@ -84,124 +67,134 @@
 
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
-
-   <div class="profile-dropdown">
+    <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
             <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
-
         <div class="dropdown-menu">
-            <a href="Profile.html">Profile</a>  
+            <a href="Profile.html">Profile</a>
             <a href="Login.html" class="logout">Logout</a>
         </div>
     </div>
 </header>
 
 <main class="content">
-    <h2>Dashboard</h2>
-    <p>Here's your AquaFRESH system overview for today.</p>
 
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <h3>Total Batches</h3>
-            <p class="kpi-number">24</p>
+    <section class="page-header">
+        <h2>System Dashboard</h2>
+        <p class="subtitle">Real-time overview of all aquaculture operations</p>
+    </section>
+
+    <div class="summary-cards">
+        <div class="card blue" onclick="window.location.href='TransportDelivery.html'">
+            <h3>Active Deliveries</h3>
+            <p id="kpi-deliveries">0</p>
+            <div class="card-link">View Details &rarr;</div>
         </div>
-
-        <div class="kpi-card warning">
-            <h3>Freshness Warnings</h3>
-            <p class="kpi-number">6</p>
+        <div class="card green" onclick="window.location.href='QualityControl.html'">
+            <h3>Inspections Today</h3>
+            <p id="kpi-inspections">0</p>
+            <div class="card-link">View Details &rarr;</div>
         </div>
-
-        <div class="kpi-card success">
-            <h3>Fresh Batches</h3>
-            <p class="kpi-number">18</p>
+        <div class="card yellow" onclick="window.location.href='QualityControl.html'">
+            <h3>Batches with Issues</h3>
+            <p id="kpi-issues">0</p>
+            <div class="card-link">View Details &rarr;</div>
         </div>
-
-        <div class="kpi-card">
-            <h3>Sensors Online</h3>
-            <p class="kpi-number">12 / 12</p>
+        <div class="card teal" onclick="window.location.href='UserManagement.html'">
+            <h3>Active Personnel</h3>
+            <p id="kpi-users">0</p>
+            <div class="card-link">View Details &rarr;</div>
         </div>
     </div>
 
-    <section class="panel">
-        <div class="panel-header-flex">
-            <h3>Sensor Status</h3>
-            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Live Tracking</span>
+    <section class="panel tabular-panel">
+        
+        <div class="tabs-nav">
+            <button class="tab-btn active" data-target="tab-recent"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</button>
+            <button class="tab-btn" data-target="tab-qc"><i class="fa-solid fa-shield-halved"></i> Quality Control</button>
+            <button class="tab-btn" data-target="tab-transport"><i class="fa-solid fa-truck"></i> Transport</button>
         </div>
 
-        <table class="status-table">
-            <thead>
-                <tr>
-                    <th>Tank</th>
-                    <th>Temperature (°C)</th>
-                    <th>pH Level</th>
-                    <th class="text-right">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Tank 1</strong></td>
-                    <td>25.0</td>
-                    <td>7.2</td>
-                    <td class="text-right">
-                        <span class="status good"><i class="fa-solid fa-check"></i> Good</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Tank 2</strong></td>
-                    <td>28.5</td>
-                    <td>6.8</td>
-                    <td class="text-right">
-                        <span class="status warning"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Tank 3</strong></td>
-                    <td>30.2</td>
-                    <td>6.5</td>
-                    <td class="text-right">
-                        <span class="status alert"><i class="fa-solid fa-circle-exclamation"></i> Alert</span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="tab-content active" id="tab-recent">
+            <div class="panel-header-flex">
+                <h3>Latest System Actions</h3>
+                <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Live</span>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Module</th>
+                            <th>Action Details</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-activity-body">
+                        <tr><td colspan="4" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-qc">
+            <div class="panel-header-flex">
+                <h3>Today's Inspections</h3>
+                <a href="QualityControl.html" class="view-all-link">View All →</a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Batch ID</th>
+                            <th>Inspector</th>
+                            <th>Location</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="qc-summary-body">
+                        <tr><td colspan="4" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-transport">
+            <div class="panel-header-flex">
+                <h3>Active Deliveries</h3>
+                <a href="TransportDelivery.html" class="view-all-link">View All →</a>
+            </div>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Delivery ID</th>
+                            <th>Batch</th>
+                            <th>Truck</th>
+                            <th>Driver</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Temp (°C)</th>
+                            <th>ETA</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transport-summary-body">
+                        <tr><td colspan="9" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </section>
 
-    <section class="panel">
-        <h3>Recent Alerts</h3>
-
-        <ul class="alert-list">
-            <li class="alert-item critical">
-                <div class="alert-icon"><i class="fa-solid fa-temperature-arrow-up"></i></div>
-                <div class="alert-content">
-                    <span class="alert-text">Tank 3: Temperature critically high</span>
-                    <span class="alert-subtext">Requires immediate cooling</span>
-                </div>
-                <span class="alert-time">10:15 AM</span>
-            </li>
-            <li class="alert-item warn">
-                <div class="alert-icon"><i class="fa-solid fa-fish-fins"></i></div>
-                <div class="alert-content">
-                    <span class="alert-text">Batch 12: Freshness warning</span>
-                    <span class="alert-subtext">Ammonia levels slightly elevated</span>
-                </div>
-                <span class="alert-time">9:42 AM</span>
-            </li>
-            <li class="alert-item offline">
-                <div class="alert-icon"><i class="fa-solid fa-wifi"></i></div>
-                <div class="alert-content">
-                    <span class="alert-text">Sensor 5 offline</span>
-                    <span class="alert-subtext">Connection lost in Sector B</span>
-                </div>
-                <span class="alert-time">8:30 AM</span>
-            </li>
-        </ul>
-    </section>
 </main>
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script type="module" src="Dashboard.js"></script>
 
 </body>
 </html>

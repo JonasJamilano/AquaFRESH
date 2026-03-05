@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <title>Transport & Delivery | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="TransportDelivery.css">
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 
@@ -20,75 +21,26 @@
         <h1>AquaFRESH</h1>
         <p>Aquaculture Freshness Monitoring System</p>
     </div>
-
     <nav class="menu">
         <ul>
-            <li data-role="superadmin admin manager">
-                <a href="Dashboard.html">
-                    <i class="fa-solid fa-gauge"></i>
-                    <span class="label">Dashboard</span>
-                </a>
-            </li>
-
-            <li data-role="inspector">
-                <a href="InspectorDashboard.html">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                    <span class="label">Inspector Dashboard</span>
-                </a>
-            </li>
-
-            <li data-role="delivery">
-                <a href="DeliveryDashboard.html">
-                    <i class="fa-solid fa-truck"></i>
-                    <span class="label">Delivery Dashboard</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager inspector delivery">
-                <a href="FreshnessEvaluation.html">
-                    <i class="fa-solid fa-water"></i>
-                    <span class="label">Freshness Evaluation</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager delivery">
-                <a href="TransportDelivery.html">
-                    <i class="fa-solid fa-route"></i>
-                    <span class="label">Transport & Delivery</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager inspector">
-                <a href="AnalyticsReporting.html">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span class="label">Analytics & Reporting</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager inspector">
-                <a href="QualityControl.html">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span class="label">Quality Control</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager">
-                <a href="UserManagement.html">
-                    <i class="fa-solid fa-users"></i>
-                    <span class="label">User Management</span>
-                </a>
-            </li>
+            <li data-role="superadmin admin manager"><a href="Dashboard.html"><i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span></a></li>
+            <li data-role="inspector"><a href="InspectorDashboard.html"><i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span></a></li>
+            <li data-role="delivery"><a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a></li>
+            <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
+            <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html" class="active"><i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span></a></li>
+            <li data-role="superadmin admin manager inspector"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
+            <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
+            <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
 </aside>
 
 <header class="topbar">
     <span class="menu-btn">☰</span>
-
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span><span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
             <a href="Profile.html">Profile</a>
@@ -99,110 +51,264 @@
 
 <main class="content">
 
-    <h2>Transport & Delivery</h2>
-    <p class="subtitle">
-        Monitoring delivery progress, environmental conditions, and potential freshness risks
-    </p>
+    <section class="page-header">
+        <h2>Transport & Delivery</h2>
+        <p class="subtitle">Monitoring delivery progress, environmental conditions, and routes</p>
+    </section>
 
-    <div class="summary-cards">
-        <div class="card success">
-            <h3>Early</h3>
-            <p>5</p>
-        </div>
-        <div class="card success">
-            <h3>On-Time</h3>
-            <p>5</p>
-        </div>
-        <div class="card warning">
-            <h3>Delayed</h3>
-            <p>2</p>
-        </div>
-        <div class="card danger">
-            <h3>Late</h3>
-            <p>1</p>
-        </div>
-    </div>
+    <section class="panel panel-trigger" id="createDeliveryWrapper" style="display:none;">
+        <button class="new-inspection-trigger" id="btn-new-delivery" aria-label="Open New Delivery Log">
+            <div class="ni-trigger-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div class="ni-trigger-text">
+                <h3>Schedule New Delivery</h3>
+                <p>Assign batches, select drivers, and route destinations</p>
+            </div>
+            <i class="fa-solid fa-arrow-right ni-trigger-arrow"></i>
+        </button>
+    </section>
 
-        <section class="panel create-panel" id="createDeliveryPanel" style="display:none;">
-        <div class="panel-header">
-            <h3>Create New Delivery</h3>
-            <p class="panel-subtitle">
-                Assign a batch to a delivery personnel and schedule transport
-            </p>
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Delivery Status Summary</h3>
+            <span class="summary-hint">Click a card to view details</span>
         </div>
-
-        <div class="form-grid delivery-form">
-            <div class="form-group">
-                <label>Delivery Code</label>
-                <input type="text" id="deliveryCode" placeholder="e.g. D-010">
+        <div class="qc-status-cards">
+            <div class="qc-status-card yellow" id="btn-pending" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Pending</div>
+                    <div class="card-count" id="pending-count">0</div>
+                    <div class="card-cta">View records →</div>
+                </div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
             </div>
 
-            <div class="form-group">
-                <label>Select Batch</label>
-                <select id="batchSelect"></select>
+            <div class="qc-status-card blue" id="btn-enroute" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
+                <div class="card-info">
+                    <div class="card-title">En Route</div>
+                    <div class="card-count" id="enroute-count">0</div>
+                    <div class="card-cta">View records →</div>
+                </div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
             </div>
 
-            <div class="form-group">
-                <label>Assign Driver</label>
-                <select id="driverSelect"></select>
+            <div class="qc-status-card green" id="btn-delivered" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-box-check"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Delivered</div>
+                    <div class="card-count" id="delivered-count">0</div>
+                    <div class="card-cta">View records →</div>
+                </div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
             </div>
 
-            <div class="form-group">
-                <label>Origin</label>
-                <input type="text" id="origin" placeholder="Warehouse A">
+            <div class="qc-status-card red" id="btn-delayed" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Delayed</div>
+                    <div class="card-count" id="delayed-count">0</div>
+                    <div class="card-cta">View records →</div>
+                </div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
             </div>
-
-            <div class="form-group">
-                <label>Destination</label>
-                <input type="text" id="destination" placeholder="Market B">
-            </div>
-
-            <div class="form-group">
-                <label>Estimated Arrival</label>
-                <input type="datetime-local" id="eta">
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <button class="submit-btn" onclick="createDelivery()">
-                <i class="fa-solid fa-plus"></i> Create Delivery
-            </button>
         </div>
     </section>
 
     <section class="panel">
-        <h3>Live GPS Tracking</h3>
-        <p id="map-status" style="font-size: 13px; margin-bottom: 10px; color: #7b8a8b;">Initializing map...</p>
+        <div class="panel-header-flex">
+            <h3>Live GPS Tracking</h3>
+            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Real-Time</span>
+        </div>
+        <p id="map-status" style="font-size: 13px; margin-bottom: 16px; color: #64748b;">Initializing map...</p>
         <div id="delivery-map"></div>
     </section>
 
     <section class="panel">
-        <h3>Active Deliveries</h3>
-
-        <table class="delivery-table">
+        <div class="panel-header-flex">
+            <h3>All Active Deliveries</h3>
+        </div>
+        <table class="delivery-table qc-table">
             <thead>
                 <tr>
                     <th>Delivery ID</th>
-                    <th>Batch ID</th>
-                    <th>Current Location</th>
+                    <th>Batch</th>
+                    <th>Truck</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
                     <th>Avg Temp (°C)</th>
-                    <th>Status</th>
                     <th>ETA</th>
-                    <th>Action</th>
+                    <th>Status / Action</th>
                 </tr>
             </thead>
-            <tbody>
-               
-            </tbody>
+            <tbody id="all-deliveries-body"></tbody>
         </table>
     </section>
 
 </main>
 
+<div class="qc-modal-overlay" id="modal-new-delivery">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header teal">
+            <h3><i class="fa-solid fa-truck-fast"></i> Schedule New Delivery</h3>
+            <button class="qc-modal-close" data-close="modal-new-delivery"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <div class="ni-divider"><i class="fa-solid fa-circle-info"></i> Delivery Details</div>
+            
+            <div class="ni-modal-grid">
+                <div class="ni-form-group">
+                    <label>Delivery Code</label>
+                    <input type="text" id="deliveryCode" placeholder="e.g. D-010">
+                </div>
+                <div class="ni-form-group">
+                    <label>Select Batch</label>
+                    <select id="batchSelect"></select>
+                </div>
+                <div class="ni-form-group">
+                    <label>Assign Driver</label>
+                    <select id="driverSelect"></select>
+                </div>
+                
+                <div class="ni-form-group">
+                    <label>Select Truck</label>
+                    <select id="truckSelect">
+                        <option value="" disabled selected>Select a truck</option>
+                        <option value="Truck 1">Truck 1</option>
+                        <option value="Truck 2">Truck 2</option>
+                        <option value="Truck 3">Truck 3</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="ni-divider"><i class="fa-solid fa-map-location-dot"></i> Routing Info</div>
+            <div class="ni-modal-grid">
+                <div class="ni-form-group position-relative">
+                    <label>Origin</label>
+                    <input type="text" id="origin" placeholder="Type to search..." autocomplete="off">
+                    <div id="origin-suggestions" class="autocomplete-dropdown"></div>
+                </div>
+                <div class="ni-form-group position-relative">
+                    <label>Destination</label>
+                    <input type="text" id="destination" placeholder="Type to search..." autocomplete="off">
+                    <div id="dest-suggestions" class="autocomplete-dropdown"></div>
+                </div>
+                <div class="ni-form-group">
+                    <label>Estimated Arrival</label>
+                    <input type="datetime-local" id="eta">
+                </div>
+            </div>
+        </div>
+        <div class="ni-modal-footer">
+            <button class="ni-btn-clear" data-close="modal-new-delivery">Cancel</button>
+            <button class="ni-btn-save" onclick="createDelivery()"><i class="fa-solid fa-check"></i> Create Delivery</button>
+        </div>
+    </div>
+</div>
+
+<div class="qc-modal-overlay" id="modal-pending">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header yellow">
+            <h3><i class="fa-solid fa-hourglass-half"></i> Pending Deliveries <span class="modal-count-badge" id="modal-pending-count">0</span></h3>
+            <button class="qc-modal-close" data-close="modal-pending"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <table class="delivery-table qc-table">
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <tbody id="pending-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="qc-modal-overlay" id="modal-enroute">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header blue">
+            <h3><i class="fa-solid fa-truck"></i> En Route Deliveries <span class="modal-count-badge" id="modal-enroute-count">0</span></h3>
+            <button class="qc-modal-close" data-close="modal-enroute"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <table class="delivery-table qc-table">
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <tbody id="enroute-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="qc-modal-overlay" id="modal-delivered">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header green">
+            <h3><i class="fa-solid fa-box-check"></i> Delivered <span class="modal-count-badge" id="modal-delivered-count">0</span></h3>
+            <button class="qc-modal-close" data-close="modal-delivered"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <table class="delivery-table qc-table">
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>Delivered At</th><th>Status</th></tr></thead>
+                <tbody id="delivered-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="qc-modal-overlay" id="modal-delayed">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header red">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> Delayed Deliveries <span class="modal-count-badge" id="modal-delayed-count">0</span></h3>
+            <button class="qc-modal-close" data-close="modal-delayed"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <table class="delivery-table qc-table">
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <tbody id="delayed-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="TransportDelivery.js"></script>
+
+<script>
+    (function () {
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Triggers
+        document.getElementById('btn-new-delivery')?.addEventListener('click', () => openModal('modal-new-delivery'));
+        document.getElementById('btn-pending')?.addEventListener('click', () => openModal('modal-pending'));
+        document.getElementById('btn-enroute')?.addEventListener('click', () => openModal('modal-enroute'));
+        document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
+        document.getElementById('btn-delayed')?.addEventListener('click', () => openModal('modal-delayed'));
+
+        // Close functions
+        document.querySelectorAll('.qc-modal-close').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(btn.dataset.close));
+        });
+        document.querySelectorAll('.ni-btn-clear').forEach(btn => {
+            if(btn.dataset.close) btn.addEventListener('click', () => closeModal(btn.dataset.close));
+        });
+        document.querySelectorAll('.qc-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') document.querySelectorAll('.qc-modal-overlay.active').forEach(el => closeModal(el.id));
+        });
+
+        window.closeModal = closeModal;
+    })();
+</script>
 
 </body>
 </html>
