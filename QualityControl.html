@@ -128,17 +128,83 @@
         </div>
     </section>
 
-    <!-- Delivery Reports -->
-    <section class="panel border-left-blue">
-        <div class="panel-header-flex">
-            <h3>Inspection Reports</h3>
-            <button id="download-delivery-report-btn" class="secondary-btn" style="margin-left:auto;">
-                <i class="fa-solid fa-file-excel"></i> Download Inspection Report
-            </button>
+    <!-- Inspection Reports + Clear Records — side by side -->
+    <section class="panel">
+        <div class="panel-header-flex" style="margin-bottom: 16px;">
+            <h3>Data Management</h3>
+        </div>
+        <div class="qc-action-cards">
+
+            <!-- Download Report -->
+            <div class="qc-action-card">
+                <div class="qc-action-icon blue">
+                    <i class="fa-solid fa-file-excel"></i>
+                </div>
+                <div class="qc-action-info">
+                    <div class="qc-action-title">Inspection Reports</div>
+                    <div class="qc-action-desc">Export all inspection logs as a spreadsheet file.</div>
+                </div>
+                <button id="download-delivery-report-btn" class="qc-action-btn blue">
+                    <i class="fa-solid fa-download"></i> Download Report
+                </button>
+            </div>
+
+            <!-- Clear Records -->
+            <div class="qc-action-card">
+                <div class="qc-action-icon red">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div class="qc-action-info">
+                    <div class="qc-action-title">Clear Inspection Records</div>
+                    <div class="qc-action-desc">Remove all inspection records from the system. This action cannot be undone.</div>
+                </div>
+                <button id="clear-all-data-btn" class="qc-action-btn red">
+                    <i class="fa-solid fa-trash-can"></i> Clear Records
+                </button>
+            </div>
+
         </div>
     </section>
 
 </main>
+
+<!-- ===================== MODAL: Clear Data Warning ===================== -->
+<div class="qc-modal-overlay" id="modal-clear-warning">
+    <div class="qc-modal" style="max-width:480px;">
+        <div class="qc-modal-header red">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> Clear All Data</h3>
+            <button class="qc-modal-close" data-close="modal-clear-warning" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body" style="padding: 28px 24px;">
+            <div style="text-align:center; margin-bottom: 20px;">
+                <div style="width:64px;height:64px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem;color:#dc2626;">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <p style="font-size:0.95rem;color:#1e293b;font-weight:600;margin-bottom:8px;">Clear all inspection records?</p>
+                <p style="font-size:0.84rem;color:#64748b;">All inspection logs will be permanently removed. This action cannot be undone.</p>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button class="ni-btn-clear" data-close="modal-clear-warning" id="cancel-clear-btn" style="min-width:120px;">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </button>
+                <button id="confirm-clear-btn" style="
+                    min-width:120px;
+                    padding: 9px 22px;
+                    background: #dc2626;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 0.88rem;
+                    font-weight: 700;
+                    color: #fff;
+                    cursor: pointer;
+                    transition: opacity 0.15s;
+                ">
+                    <i class="fa-solid fa-trash-can"></i> Yes, Delete All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ===================== MODAL: New Inspection Log ===================== -->
 <div class="qc-modal-overlay" id="modal-new-inspection">
