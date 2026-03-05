@@ -1,267 +1,314 @@
 import { db } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
+import { 
+    collection, 
+    addDoc, 
+    getDocs, 
+    query, 
+    where, 
+    serverTimestamp,
+    orderBy
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const inspectionsCol = collection(db, "inspections");
-const batchesCol = collection(db, "batches");
 
-/* ==========================
-   Helper: Collect Criteria
-========================== */
+// ==========================
+// Helper: Collect Criteria Data
+// ==========================
 function getCriteriaData() {
-  const rows = document.querySelectorAll("#new-inspection-tbody tr");
+    const inspectionSection = document
+        .getElementById("save-inspection-btn")
+        .closest("section");
 
-  return Array.from(rows).map(row => ({
-    criteriaName: row.querySelector(".criteria-select").dataset.criteria,
-    assessment: row.querySelector(".criteria-select").value,
-    remarks: row.querySelector(".criteria-remarks").value || ""
-  }));
+    const rows = inspectionSection.querySelectorAll("tbody tr");
+
+    return Array.from(rows).map(row => ({
+        criteriaName: row.querySelector(".criteria-select").dataset.criteria,
+        assessment: row.querySelector(".criteria-select").value,
+        remarks: row.querySelector(".criteria-remarks").value || ""
+    }));
 }
 
-/* ==========================
-   Calculate Score
-========================== */
+
+// ==========================
+// Calculate Freshness Score
+// ==========================
 function calculateScore() {
-  const scoreMap = { Excellent: 100, Acceptable: 50, Rejected: 0 };
 
-  let sensoryTotal = 0;
-  document.querySelectorAll(".criteria-select").forEach(sel => {
-    sensoryTotal += scoreMap[sel.value];
-  });
+    let sensoryTotal = 0;
+    const scoreMap = { "Excellent": 100, "Acceptable": 50, "Rejected": 0 };
 
-  const sensoryAverage = sensoryTotal / 4;
+    $(".criteria-select").each(function() {
+        let val = $(this).val();
+        sensoryTotal += scoreMap[val] ?? 0;
+    });
 
-  const temp = parseFloat(document.getElementById("temperature").value) || 0;
-  const tempScore = temp <= 4 ? 100 : temp <= 8 ? 50 : 0;
+    let sensoryAverage = sensoryTotal / 4;
 
-  const ph = parseFloat(document.getElementById("ph-level").value) || 0;
-  const phScore =
-    ph >= 6.5 && ph <= 6.8
-      ? 100
-      : (ph >= 6 && ph < 6.5) || (ph > 6.8 && ph <= 7.2)
-      ? 50
-      : 0;
+    let tempValue = parseFloat($("#temperature").val()) || 0;
+    let tempScore = tempValue <= 4.0 ? 100 : (tempValue <= 8.0 ? 50 : 0);
 
-  const finalScore = Math.round(
-    sensoryAverage * 0.5 + tempScore * 0.25 + phScore * 0.25
-  );
+    let phValue = parseFloat($("#ph-level").val()) || 0;
+    let phScore =
+        (phValue >= 6.5 && phValue <= 6.8) ? 100 :
+        ((phValue >= 6.0 && phValue < 6.5) ||
+        (phValue > 6.8 && phValue <= 7.2)) ? 50 : 0;
 
-  let classification = "Rejected";
-  let className = "danger";
+    let finalScore = Math.round(
+        (sensoryAverage * 0.50) +
+        (tempScore * 0.25) +
+        (phScore * 0.25)
+    );
 
-  if (finalScore >= 80) {
-    classification = "Passed";
-    className = "success";
-  } else if (finalScore >= 50) {
-    classification = "With Issues";
-    className = "warning";
-  }
+    let classification = "";
+    let statusClass = "";
+    let iconHTML = "";
 
-  document.getElementById("live-score").textContent = finalScore;
-  document.getElementById("live-classification").className =
-    "status " + className;
-  document.getElementById("live-classification").innerHTML =
-    classification;
+    if (finalScore >= 80) {
+        classification = "Passed";
+        statusClass = "success";
+        iconHTML = '<i class="fa-solid fa-check"></i> ';
+    } else if (finalScore >= 50) {
+        classification = "With Issues";
+        statusClass = "warning";
+        iconHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ';
+    } else {
+        classification = "Rejected";
+        statusClass = "danger";
+        iconHTML = '<i class="fa-solid fa-circle-xmark"></i> ';
+    }
 
-  return { finalScore, classification };
+    $("#live-score").text(finalScore);
+    $("#live-classification")
+        .html(iconHTML + classification)
+        .attr("class", "status " + statusClass);
+
+    return { finalScore, classification };
 }
 
-/* Live score binding */
-document.addEventListener("change", calculateScore);
-document.addEventListener("input", calculateScore);
-calculateScore();
 
-/* ==========================
-   SAVE INSPECTION
-========================== */
-document
-  .getElementById("save-inspection-btn")
-  .addEventListener("click", async () => {
+// ==========================
+// Bind Live Calculation
+// ==========================
+$(document).ready(function() {
+    $(document).on(
+        "change input",
+        ".criteria-select, #temperature, #ph-level",
+        calculateScore
+    );
+    calculateScore();
+});
+
+
+// ==========================
+// Save Inspection (Firestore)
+// ==========================
+document.getElementById("save-inspection-btn")
+.addEventListener("click", async () => {
+
     const batchCode = document.getElementById("batch-code").value.trim();
     const productType = document.getElementById("product-type").value.trim();
     const location = document.getElementById("inspection-location").value.trim();
-    const inspectorName =
-      localStorage.getItem("userFullName") || "Unknown";
 
     if (!batchCode || !productType || !location) {
-      alert("Fill required fields.");
-      return;
+        alert("Please fill required fields.");
+        return;
     }
 
     const criteria = getCriteriaData();
     const { finalScore, classification } = calculateScore();
 
     try {
-      /* ---- Create batch if not exists ---- */
-      const batchQuery = query(
-        batchesCol,
-        where("batchCode", "==", batchCode)
-      );
-      const batchSnapshot = await getDocs(batchQuery);
-
-      let batchId;
-
-      if (batchSnapshot.empty) {
-        const newBatch = await addDoc(batchesCol, {
-          batchCode,
-          productType,
-          location,
-          createdAt: serverTimestamp()
+        await addDoc(collection(db, "qualityControl"), {
+            batchCode,
+            productType,
+            location,
+            criteria,
+            temperature: parseFloat($("#temperature").val()),
+            phLevel: parseFloat($("#ph-level").val()),
+            score: finalScore,
+            overallStatus: classification,
+            createdAt: serverTimestamp()
         });
-        batchId = newBatch.id;
-      } else {
-        batchId = batchSnapshot.docs[0].id;
-      }
 
-      /* ---- Save inspection ---- */
-      await addDoc(inspectionsCol, {
-        batchId,
-        batchCode,
-        productType,
-        location,
-        inspectorName,
-        inspectorId: localStorage.getItem("userId"),
-        temperature: parseFloat(document.getElementById("temperature").value),
-        phLevel: parseFloat(document.getElementById("ph-level").value),
-        score: finalScore,
-        overallStatus: classification,
-        criteria,
-        createdAt: serverTimestamp()
-      });
+        alert("Inspection saved successfully!");
+        resetInspectionForm();
+        loadInspectionsToday();
+        loadInspectionsByStatus();
 
-      alert("Inspection saved!");
-      resetForm();
-      loadInspections();
-
-    } catch (err) {
-      console.error(err);
-      alert("Error saving inspection.");
+    } catch (error) {
+        console.error("Firestore save error:", error);
+        alert("Failed to save inspection.");
     }
-  });
+});
 
-/* ==========================
-   RESET FORM
-========================== */
-function resetForm() {
-  document.getElementById("batch-code").value = "";
-  document.getElementById("product-type").value = "";
-  document.getElementById("inspection-location").value = "";
-  document.getElementById("temperature").value = "4.0";
-  document.getElementById("ph-level").value = "6.5";
-  document
-    .querySelectorAll(".criteria-select")
-    .forEach(sel => (sel.value = "Excellent"));
-  document
-    .querySelectorAll(".criteria-remarks")
-    .forEach(inp => (inp.value = ""));
-  calculateScore();
+
+// ==========================
+// Reset Form
+// ==========================
+function resetInspectionForm() {
+    document.getElementById("batch-code").value = "";
+    document.getElementById("product-type").value = "";
+    document.getElementById("inspection-location").value = "";
+    document.getElementById("temperature").value = "4.0";
+    document.getElementById("ph-level").value = "6.5";
+
+    document.querySelectorAll(".criteria-select")
+        .forEach(sel => sel.value = "Excellent");
+
+    document.querySelectorAll(".criteria-remarks")
+        .forEach(inp => inp.value = "");
 }
 
-/* ==========================
-   LOAD INSPECTIONS
-========================== */
-async function loadInspections() {
-  const snapshot = await getDocs(inspectionsCol);
 
-  const todayBody = document.getElementById("inspections-today-body");
-  const passedBody = document.getElementById("passed-body");
-  const issuesBody = document.getElementById("issues-body");
-  const rejectedBody = document.getElementById("rejected-body");
-
-  todayBody.innerHTML = "";
-  passedBody.innerHTML = "";
-  issuesBody.innerHTML = "";
-  rejectedBody.innerHTML = "";
-
-  let passed = 0,
-    issues = 0,
-    rejected = 0;
-
-  snapshot.forEach(docSnap => {
-    const d = docSnap.data();
-
-    const rowHTML = `
-      <tr>
-        <td><strong>${d.batchCode}</strong></td>
-        <td>${d.productType}</td>
-        <td>${d.location}</td>
-        <td>${d.overallStatus}</td>
-      </tr>
-    `;
-
-    todayBody.innerHTML += rowHTML;
-
-    if (d.overallStatus === "Passed") {
-      passedBody.innerHTML += rowHTML;
-      passed++;
-    } else if (d.overallStatus === "With Issues") {
-      issuesBody.innerHTML += rowHTML;
-      issues++;
-    } else {
-      rejectedBody.innerHTML += rowHTML;
-      rejected++;
-    }
-  });
-
-  document.getElementById("inspections-today-count").textContent =
-    snapshot.size;
-  document.getElementById("passed-count").textContent = passed;
-  document.getElementById("issues-count").textContent = issues;
-  document.getElementById("rejected-count").textContent = rejected;
+// ==========================
+// Status Badge Helper
+// ==========================
+function getStatusBadgeHTML(status) {
+    if (status === "Passed")
+        return `<span class="status success"><i class="fa-solid fa-check"></i> Passed</span>`;
+    if (status === "With Issues")
+        return `<span class="status warning"><i class="fa-solid fa-triangle-exclamation"></i> With Issues</span>`;
+    if (status === "Rejected")
+        return `<span class="status danger"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`;
+    return `<span>${status}</span>`;
 }
 
-/* ==========================
-   DOWNLOAD DAILY REPORT (FIRESTORE VERSION)
-========================== */
-document
-  .getElementById("download-report-btn")
-  .addEventListener("click", async () => {
+
+// ==========================
+// Load Today Inspections
+// ==========================
+async function loadInspectionsToday() {
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const q = query(
+        collection(db, "qualityControl"),
+        where("createdAt", ">=", today)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const tbody = document.getElementById("inspections-today-body");
+    tbody.innerHTML = "";
+
+    snapshot.forEach(doc => {
+        const r = doc.data();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${r.batchCode}</strong></td>
+            <td>${r.location}</td>
+            <td>${r.productType}</td>
+            <td>${getStatusBadgeHTML(r.overallStatus)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("inspections-today-count")
+        .innerText = snapshot.size;
+}
+
+
+// ==========================
+// Load By Status
+// ==========================
+async function loadInspectionsByStatus() {
+
+    const statuses = [
+        { id: "passed-body", labelId: "passed-count", status: "Passed" },
+        { id: "issues-body", labelId: "issues-count", status: "With Issues" },
+        { id: "rejected-body", labelId: "rejected-count", status: "Rejected" },
+    ];
+
+    for (let s of statuses) {
+
+        const q = query(
+            collection(db, "qualityControl"),
+            where("overallStatus", "==", s.status)
+        );
+
+        const snapshot = await getDocs(q);
+
+        const tbody = document.getElementById(s.id);
+        tbody.innerHTML = "";
+
+        snapshot.forEach(doc => {
+            const r = doc.data();
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${r.batchCode}</strong></td>
+                <td>${r.productType}</td>
+                <td>${r.location}</td>
+                <td>${getStatusBadgeHTML(r.overallStatus)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById(s.labelId)
+            .innerText = snapshot.size;
+    }
+}
+
+
+// ==========================
+// Download Delivery Report (Excel)
+// ==========================
+document.getElementById("download-delivery-report-btn")
+?.addEventListener("click", async () => {
 
     try {
-      const snapshot = await getDocs(inspectionsCol);
 
-      if (snapshot.empty) {
-        alert("No inspection data available.");
-        return;
-      }
+        const q = query(
+            collection(db, "deliveries"),
+            orderBy("createdAt", "desc")
+        );
 
-      const formattedData = [];
+        const snapshot = await getDocs(q);
 
-      snapshot.forEach(docSnap => {
-        const d = docSnap.data();
+        if (snapshot.empty) {
+            alert("No delivery data found.");
+            return;
+        }
 
-        formattedData.push({
-          "Batch ID": d.batchCode,
-          "Inspector": d.inspectorName,
-          "Location": d.location,
-          "Product Type": d.productType,
-          "Temperature (°C)": d.temperature,
-          "pH Level": d.phLevel,
-          "Score": d.score,
-          "Status": d.overallStatus,
-          "Date": d.createdAt?.toDate
-            ? d.createdAt.toDate().toLocaleString()
-            : ""
+        const formattedData = [];
+
+        snapshot.forEach(doc => {
+            const d = doc.data();
+
+            formattedData.push({
+                "Delivery ID": d.deliveryId || "",
+                "Driver Name": d.driverName || "",
+                "Vehicle": d.vehicle || "",
+                "Destination": d.destination || "",
+                "Product Type": d.productType || "",
+                "Quantity": d.quantity || "",
+                "Status": d.status || "",
+                "Temperature (°C)": d.temperature || "",
+                "Created At": d.createdAt?.toDate
+                    ? d.createdAt.toDate().toLocaleString()
+                    : ""
+            });
         });
-      });
 
-      const worksheet = XLSX.utils.json_to_sheet(formattedData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Daily Report");
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Delivery Report");
 
-      const today = new Date().toISOString().split("T")[0];
-      XLSX.writeFile(workbook, `QualityControl_Report_${today}.xlsx`);
+        const today = new Date().toISOString().split("T")[0];
+        XLSX.writeFile(workbook, `Delivery_Report_${today}.xlsx`);
 
-    } catch (err) {
-      console.error("Download error:", err);
-      alert("Failed to generate report.");
+    } catch (error) {
+        console.error("Delivery report error:", error);
+        alert("Failed to generate delivery report.");
     }
-  });
+});
 
-loadInspections();
+
+// ==========================
+// Initial Load
+// ==========================
+window.addEventListener("DOMContentLoaded", () => {
+    loadInspectionsToday();
+    loadInspectionsByStatus();
+});

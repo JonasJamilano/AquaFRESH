@@ -235,6 +235,7 @@ body {
     font-weight: 600;
 }
 
+/* Inputs & selects same style */
 .form-group input, .qc-table input, .qc-table select {
     padding: 12px 16px;
     border-radius: 8px;
@@ -248,6 +249,27 @@ body {
 
 .form-group input:focus, .qc-table input:focus, .qc-table select:focus {
     outline: none;
+    border-color: #4dd0c8;
+    box-shadow: 0 0 0 3px rgba(77, 208, 200, 0.15);
+}
+
+/* =====================
+   PRODUCT TYPE DROPDOWN (aligned with Batch ID input)
+===================== */
+#product-type {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    color: #334155;
+    background-color: #ffffff;
+    width: 100%;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#product-type:focus {
     border-color: #4dd0c8;
     box-shadow: 0 0 0 3px rgba(77, 208, 200, 0.15);
 }
