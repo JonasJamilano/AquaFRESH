@@ -136,7 +136,7 @@ document.getElementById("save-inspection-btn")
         const inspectorName = currentInspectorName;
 
         try {
-            await addDoc(collection(db, "qualityControl"), {
+            await addDoc(collection(db, "inspections"), {
                 batchCode,
                 productType,
                 location,
@@ -235,7 +235,7 @@ async function loadInspectionsToday() {
 
     try {
         const q = query(
-            collection(db, "qualityControl"),
+            collection(db, "inspections"),
             where("createdAt", ">=", today),
             orderBy("createdAt", "desc")
         );
@@ -279,7 +279,7 @@ async function loadInspectionsByStatus() {
     for (const s of statuses) {
         try {
             const q = query(
-                collection(db, "qualityControl"),
+                collection(db, "inspections"),
                 where("overallStatus", "==", s.status)
             );
 
@@ -344,7 +344,7 @@ document.getElementById("download-delivery-report-btn")
 
         try {
             const q = query(
-                collection(db, "qualityControl"),
+                collection(db, "inspections"),
                 orderBy("createdAt", "desc")
             );
 
@@ -430,10 +430,10 @@ document.getElementById("confirm-clear-btn")
         confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
 
         try {
-            // Fetch all docs in qualityControl and delete them one by one
-            const snapshot = await getDocs(collection(db, "qualityControl"));
+            // Fetch all docs in inspectionData and delete them one by one
+            const snapshot = await getDocs(collection(db, "inspections"));
 
-            const deletions = snapshot.docs.map(d => deleteDoc(doc(db, "qualityControl", d.id)));
+            const deletions = snapshot.docs.map(d => deleteDoc(doc(db, "inspections", d.id)));
             await Promise.all(deletions);
 
             // Close modal
