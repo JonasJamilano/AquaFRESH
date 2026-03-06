@@ -213,7 +213,7 @@
     </section>
 
 
-  <!-- ============================= -->
+<!-- ============================= -->
 <!-- ANALYTICS TRENDS -->
 <!-- ============================= -->
 
@@ -247,68 +247,73 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 </div>
 
 
-
 <!-- ================= SENSOR TRENDS ================= -->
 
 <div class="trends-panel active" id="sensor">
 
     <div class="trend-tabs">
 
-    <div class="trend-card active" data-trend="temp">
-    <div class="trend-icon"><i class="fa-solid fa-temperature-half"></i></div>
+        <div class="trend-card active" data-trend="temp">
+            <div class="trend-icon">
+                <i class="fa-solid fa-temperature-half"></i>
+            </div>
 
-    <div class="trend-info">
-    <div class="trend-title">Temperature</div>
-    <div class="trend-value">Trend</div>
+            <div class="trend-info">
+                <div class="trend-title">Temperature</div>
+                <div class="trend-value">Trend</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
+
+
+        <div class="trend-card" data-trend="ph">
+            <div class="trend-icon">
+                <i class="fa-solid fa-droplet"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">pH Level</div>
+                <div class="trend-value">Trend</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
+
+
+        <div class="trend-card" data-trend="humidity">
+            <div class="trend-icon">
+                <i class="fa-solid fa-cloud"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Humidity</div>
+                <div class="trend-value">Trend</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
+
     </div>
 
-    <i class="fa-solid fa-chevron-right trend-arrow"></i>
+
+    <div class="trend-content active" id="temp">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Temperature Chart
+        </div>
     </div>
 
-
-    <div class="trend-card" data-trend="ph">
-    <div class="trend-icon"><i class="fa-solid fa-droplet"></i></div>
-
-    <div class="trend-info">
-    <div class="trend-title">pH Level</div>
-    <div class="trend-value">Trend</div>
+    <div class="trend-content" id="ph">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> pH Chart
+        </div>
     </div>
 
-    <i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
-
-
-<div class="trend-card" data-trend="humidity">
-<div class="trend-icon"><i class="fa-solid fa-cloud"></i></div>
-
-<div class="trend-info">
-<div class="trend-title">Humidity</div>
-<div class="trend-value">Trend</div>
-</div>
-
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
-
-</div>
-
-
-<div class="trend-content active" id="temp">
-<div class="chart-box">
-<i class="fa-solid fa-chart-line"></i> Temperature Chart
-</div>
-</div>
-
-<div class="trend-content" id="ph">
-<div class="chart-box">
-<i class="fa-solid fa-chart-line"></i> pH Chart
-</div>
-</div>
-
-<div class="trend-content" id="humidity">
-<div class="chart-box">
-<i class="fa-solid fa-chart-line"></i> Humidity Chart
-</div>
-</div>
+    <div class="trend-content" id="humidity">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Humidity Chart
+        </div>
+    </div>
 
 </div>
 
@@ -318,48 +323,69 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
 <div class="trends-panel" id="freshness">
 
-<div class="trend-tabs">
+    <div class="trend-tabs">
 
-<div class="trend-card active">
-<div class="trend-icon"><i class="fa-solid fa-fish"></i></div>
+        <div class="trend-card active" data-trend="fresh">
+            <div class="trend-icon">
+                <i class="fa-solid fa-fish"></i>
+            </div>
 
-<div class="trend-info">
-<div class="trend-title">Fresh</div>
-<div class="trend-value">76%</div>
-</div>
+            <div class="trend-info">
+                <div class="trend-title">Fresh</div>
+                <div class="trend-value">76%</div>
+            </div>
 
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
-
-
-<div class="trend-card">
-<div class="trend-icon"><i class="fa-solid fa-water"></i></div>
-
-<div class="trend-info">
-<div class="trend-title">Moderate</div>
-<div class="trend-value">18%</div>
-</div>
-
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
 
 
-<div class="trend-card">
-<div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="trend-card" data-trend="moderate">
+            <div class="trend-icon">
+                <i class="fa-solid fa-water"></i>
+            </div>
 
-<div class="trend-info">
-<div class="trend-title">Spoiled</div>
-<div class="trend-value">6%</div>
-</div>
+            <div class="trend-info">
+                <div class="trend-title">Moderate</div>
+                <div class="trend-value">18%</div>
+            </div>
 
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
 
-</div>
 
-<div class="chart-box">
-<i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
-</div>
+        <div class="trend-card" data-trend="spoiled">
+            <div class="trend-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Spoiled</div>
+                <div class="trend-value">6%</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
+
+    </div>
+
+
+    <div class="trend-content active" id="fresh">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="moderate">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Moderate Freshness Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="spoiled">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-column"></i> Spoiled Fish Chart
+        </div>
+    </div>
 
 </div>
 
@@ -369,53 +395,73 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
 <div class="trends-panel" id="delivery">
 
-<div class="trend-tabs">
+    <div class="trend-tabs">
 
-<div class="trend-card active">
-<div class="trend-icon"><i class="fa-solid fa-truck-fast"></i></div>
+        <div class="trend-card active" data-trend="ontime">
+            <div class="trend-icon">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
 
-<div class="trend-info">
-<div class="trend-title">On-Time Rate</div>
-<div class="trend-value">82%</div>
-</div>
+            <div class="trend-info">
+                <div class="trend-title">On-Time Rate</div>
+                <div class="trend-value">82%</div>
+            </div>
 
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
-
-
-<div class="trend-card">
-<div class="trend-icon"><i class="fa-solid fa-clock"></i></div>
-
-<div class="trend-info">
-<div class="trend-title">Average Delay</div>
-<div class="trend-value">18m</div>
-</div>
-
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
 
 
-<div class="trend-card">
-<div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="trend-card" data-trend="delay">
+            <div class="trend-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
 
-<div class="trend-info">
-<div class="trend-title">Late Deliveries</div>
-<div class="trend-value">3</div>
-</div>
+            <div class="trend-info">
+                <div class="trend-title">Average Delay</div>
+                <div class="trend-value">18m</div>
+            </div>
 
-<i class="fa-solid fa-chevron-right trend-arrow"></i>
-</div>
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
 
-</div>
 
-<div class="chart-box">
-<i class="fa-solid fa-chart-line"></i> Delivery Performance Chart
-</div>
+        <div class="trend-card" data-trend="late">
+            <div class="trend-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <div class="trend-info">
+                <div class="trend-title">Late Deliveries</div>
+                <div class="trend-value">3</div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right trend-arrow"></i>
+        </div>
+
+    </div>
+
+
+    <div class="trend-content active" id="ontime">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="delay">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Average Delay Chart
+        </div>
+    </div>
+
+    <div class="trend-content" id="late">
+        <div class="chart-box">
+            <i class="fa-solid fa-chart-line"></i> Late Deliveries Chart
+        </div>
+    </div>
 
 </div>
 
 </section>
-
 
 </main>
 
