@@ -1,4 +1,6 @@
-/* GLOBAL */
+/* =====================
+   GLOBAL & TYPOGRAPHY
+===================== */
 * {
     margin: 0;
     padding: 0;
@@ -11,146 +13,83 @@ body {
     color: #2c3e50;
 }
 
-/* SIDEBAR */
-.sidebar {
-    width: 260px;
-    height: 100vh;
-    background: #0f2f3f;
-    position: fixed;
-    top: 0;
-    left: 0;
-    color: #fff;
+/* =====================
+   SIDEBAR & TOPBAR (Upgraded Modern "Pill" Design)
+===================== */
+.sidebar { 
+    width: 260px; 
+    height: 100vh; 
+    background: #0b1e2b; /* Darker, premium blue */
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    color: #fff; 
+    z-index: 100; 
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05); 
 }
 
-.brand {
-    padding: 24px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+.brand { 
+    padding: 32px 24px 24px 24px; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    margin-bottom: 16px; 
+}
+.brand h1 { color: #4dd0c8; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+.brand p { font-size: 12px; color: #94a3b8; margin-top: 8px; line-height: 1.4; }
+
+.menu ul { list-style: none; padding: 0 16px; }
+.menu li { margin-bottom: 4px; }
+.menu li a { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 16px; 
+    color: #94a3b8; 
+    text-decoration: none; 
+    border-radius: 8px; 
+    transition: all 0.2s ease; 
+    font-weight: 500; 
+    font-size: 14px; 
 }
 
-.brand h1 {
-    color: #4dd0c8;
-    font-size: 22px;
+/* Icons start gray and only light up when active/hovered! */
+.menu li a i { 
+    width: 24px; 
+    margin-right: 12px; 
+    font-size: 16px; 
+    text-align: center; 
+    color: #64748b; 
+    transition: all 0.2s ease; 
 }
 
-.brand p {
-    font-size: 12px;
-    color: #cfdfe6;
-    margin-top: 6px;
+/* Hover Animation Effect */
+.menu li a:hover { 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #ffffff; 
+    transform: translateX(4px); 
 }
+.menu li a:hover i { color: #4dd0c8; } 
 
-/* MENU */
-.menu ul {
-    list-style: none;
-    margin-top: 16px;
+/* Active State Pill */
+.menu li.active a, .menu li a.active { 
+    background: linear-gradient(90deg, rgba(77,208,200,0.12) 0%, rgba(77,208,200,0.02) 100%); 
+    color: #ffffff; 
+    border-left: 3px solid #4dd0c8; 
+    border-radius: 4px 8px 8px 4px; 
 }
+.menu li.active a i, .menu li a.active i { color: #4dd0c8; } 
+.menu li[data-role] { display: none; }
 
-.menu li {
-    border-left: 4px solid transparent;
-}
-
-.menu li a {
-    display: flex;
-    align-items: center;
-    padding: 14px 20px;
-    text-decoration: none;
-    color: #ffffff;
-}
-
-.menu li.active {
-    background: rgba(77, 208, 200, 0.15);
-    border-left: 4px solid #4dd0c8;
-}
-
-.menu li a:hover {
-    background: rgba(255,255,255,0.08);
-}
-
-/* Icon styling */
-.menu li a i {
-    width: 20px;
-    margin-right: 14px;
-    text-align: center;
-    color: #4dd0c8;
-}
-
-/* TOP BAR */
-.topbar {
-    height: 56px;
-    background: #fff;
-    border-bottom: 1px solid #e0e6e9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    margin-left: 260px;
-    position: fixed;
-    width: calc(100% - 260px);
-    top: 0;
-}
-
-.menu-btn {
-    font-size: 22px;
-    cursor: pointer;
-}
-
-/* PROFILE DROPDOWN */
-
-.profile-dropdown {
-    position: relative;
-}
-
-.profile-trigger {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    color: #34495e;
-}
-
-.user-icon {
-    font-size: 18px;
-}
-
-.caret {
-    font-size: 12px;
-}
-
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 120%;
-    background: #fff;
-    border-radius: 6px;
-    border: 1px solid #e0e6e9;
-    min-width: 120px;
-    display: none;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-
-.dropdown-menu a {
-    display: block;
-    padding: 10px 12px;
-    text-decoration: none;
-    color: #34495e;
-    font-size: 13px;
-}
-
-.dropdown-menu a.logout {
-    color: #e57373;
-}
-
-.dropdown-menu a:hover {
-    background: #f4f7f8;
-}
-
-#profile-toggle {
-    display: none;
-}
-
-#profile-toggle:checked ~ .dropdown-menu {
-    display: block;
-}
+/* Topbar */
+.topbar { height: 64px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; margin-left: 260px; position: fixed; width: calc(100% - 260px); z-index: 90; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); }
+.menu-btn { font-size: 20px; cursor: pointer; color: #64748b; }
+.profile-dropdown { position: relative; }
+.profile-trigger { cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #475569; }
+.caret { font-size: 12px; color: #94a3b8; }
+.dropdown-menu { position: absolute; right: 0; top: 130%; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; min-width: 140px; display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); overflow: hidden; }
+.dropdown-menu a { display: block; padding: 12px 16px; text-decoration: none; color: #475569; font-size: 13px; transition: background 0.2s; }
+.dropdown-menu a.logout { color: #ef4444; border-top: 1px solid #f1f5f9; }
+.dropdown-menu a:hover { background: #f8fafc; }
+#profile-toggle { display: none; }
+#profile-toggle:checked ~ .dropdown-menu { display: block; }
 
 /* CONTENT */
 .content {
