@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import {
-  collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp, onSnapshot, orderBy
+  collection, addDoc, getDocs, doc, updateDoc, query, where, serverTimestamp, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let map;
@@ -15,7 +15,6 @@ const batchesCol = collection(db, "batches");
 let selectedOrigin = { lat: null, lng: null, name: "" };
 let selectedDest = { lat: null, lng: null, name: "" };
 
-// NEW: A dictionary to translate ugly Firebase IDs into readable Batch Codes
 let batchesMap = {}; 
 
 document.addEventListener("DOMContentLoaded", initPage);
@@ -23,7 +22,6 @@ document.addEventListener("DOMContentLoaded", initPage);
 async function initPage() {
   const role = localStorage.getItem("role");
 
-  // NEW: We await loadBatches FIRST for everyone, so the dictionary is ready before the table loads
   await loadBatches();
 
   if (["superadmin", "admin", "manager"].includes(role)) {
@@ -120,10 +118,7 @@ async function loadBatches() {
   
   snapshot.forEach(docSnap => {
     const bData = docSnap.data();
-    // Grab the readable code
     const readableCode = bData.batchCode || bData.batch_code || docSnap.id;
-    
-    // Save to our dictionary map
     batchesMap[docSnap.id] = readableCode;
     
     if (select) {
@@ -179,7 +174,6 @@ window.createDelivery = async function () {
 
   alert("Delivery created successfully!");
   
-  // Reset Form
   document.getElementById("deliveryCode").value = "";
   document.getElementById("origin").value = "";
   document.getElementById("destination").value = "";
@@ -197,9 +191,9 @@ function listenToDeliveries() {
   const role = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
 
-  let q = query(deliveriesCol, orderBy("createdAt", "desc"));
+  let q = query(deliveriesCol);
   if (role === "delivery") {
-    q = query(deliveriesCol, where("driverId", "==", userId), orderBy("createdAt", "desc"));
+    q = query(deliveriesCol, where("driverId", "==", userId));
   }
 
   const truckIcon = L.divIcon({
@@ -224,31 +218,87 @@ function listenToDeliveries() {
 
     let counts = { pending: 0, enroute: 0, delivered: 0, delayed: 0 };
 
-    snapshot.forEach(docSnap => {
-      const d = docSnap.data();
-      const id = docSnap.id;
+    let docsArray = [];
+    snapshot.forEach(docSnap => docsArray.push({ id: docSnap.id, ...docSnap.data() }));
+    docsArray.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
-      // 1. Draw Routes
-      if (d.originLat && d.destLat && !deliveryRoutes[id]) {
-        deliveryRoutes[id] = L.Routing.control({
-          waypoints: [L.latLng(d.originLat, d.originLng), L.latLng(d.destLat, d.destLng)],
-          addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: true, showAlternatives: false,
-          createMarker: function() { return null; }, 
-          lineOptions: { styles: [{ color: '#3b82f6', opacity: 0.8, weight: 5 }] }
-        }).addTo(map);
+    docsArray.forEach(d => {
+      const id = d.id;
+
+      // ==========================================
+      // MAP CLEARED IF DELIVERED
+      // ==========================================
+      if (d.status === "delivered") {
+          // If it was previously drawn on the map, remove the marker
+          if (deliveryMarkers[id]) {
+              map.removeLayer(deliveryMarkers[id]);
+              delete deliveryMarkers[id];
+          }
+          // Remove the route line and widget
+          if (deliveryRoutes[id]) {
+              map.removeControl(deliveryRoutes[id]);
+              delete deliveryRoutes[id];
+          }
+      } else {
+          // ==========================================
+          // DRAW MAP ELEMENTS ONLY IF ACTIVE
+          // ==========================================
+          
+          // 1. Draw Routes with Selectable Alternatives
+          if (d.originLat && d.destLat && !deliveryRoutes[id]) {
+            deliveryRoutes[id] = L.Routing.control({
+              waypoints: [L.latLng(d.originLat, d.originLng), L.latLng(d.destLat, d.destLng)],
+              addWaypoints: false, 
+              routeWhileDragging: false, 
+              fitSelectedRoutes: true, 
+              show: true, 
+              showAlternatives: true, 
+              altLineOptions: {
+                  styles: [
+                      {color: 'black', opacity: 0.15, weight: 9},
+                      {color: 'white', opacity: 0.8, weight: 6},
+                      {color: '#64748b', opacity: 0.9, weight: 4.5} 
+                  ]
+              },
+              lineOptions: { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] }, 
+              createMarker: function() { return null; } 
+            }).addTo(map);
+
+            deliveryRoutes[id].on('routeselected', function(e) {
+                const route = e.route;
+                const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+                const hours = Math.floor(route.summary.totalTime / 3600);
+                const minutes = Math.round((route.summary.totalTime % 3600) / 60);
+                let timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
+
+                const statusBox = document.getElementById('map-status');
+                if (statusBox) {
+                    statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route Selected:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
+                }
+            });
+          }
+
+          // Focus Zoom
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('focus') === id) {
+              map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
+          }
+
+          // 2. Update Map Marker
+          if (d.currentLat && d.currentLng) {
+            if (!deliveryMarkers[id]) {
+              deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
+                .addTo(map).bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
+            } else {
+              deliveryMarkers[id].setLatLng([d.currentLat, d.currentLng]);
+              deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
+            }
+          }
       }
 
-      // 2. Update Map Marker
-      if (d.currentLat && d.currentLng) {
-        if (!deliveryMarkers[id]) {
-          deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
-            .addTo(map).bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status}`);
-        } else {
-          deliveryMarkers[id].setLatLng([d.currentLat, d.currentLng]);
-        }
-      }
-
-      // 3. Populate Tables
+      // ==========================================
+      // 3. TABLE POPULATION (Always display regardless of map)
+      // ==========================================
       let actionButton = "";
       if (role === "delivery") {
         if (d.status === "pending") actionButton = `<button class="start-btn" onclick="updateStatus('${id}', 'en_route')">Start Delivery</button>`;
@@ -257,18 +307,13 @@ function listenToDeliveries() {
           actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
       }
 
-      // Formatting details
       const shortOrigin = d.origin ? d.origin.split(',')[0] : "-";
       const shortDest = d.destination ? d.destination.split(',')[0] : "-";
       const truckName = d.truck || "-";
-      
-      // FIX: Translate the ugly ID into the clean Batch Code using our dictionary
       const displayBatch = batchesMap[d.batchId] || d.batchId || "-"; 
-      
       const formattedDate = d.eta ? new Date(d.eta).toLocaleString() : "-";
       const deliveredDate = d.deliveredAt ? d.deliveredAt.toDate().toLocaleString() : "-";
 
-      // Row for Main Table
       allBody.innerHTML += `
         <tr>
           <td><strong>${d.deliveryCode}</strong></td>
@@ -281,7 +326,6 @@ function listenToDeliveries() {
           <td>${actionButton}</td>
         </tr>`;
 
-      // Distribute into Modals and increment counts
       if (d.status === "pending") {
           counts.pending++;
           pendingBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
@@ -297,7 +341,6 @@ function listenToDeliveries() {
       }
     });
 
-    // Update DOM counts
     document.getElementById("pending-count").textContent = counts.pending;
     document.getElementById("enroute-count").textContent = counts.enroute;
     document.getElementById("delivered-count").textContent = counts.delivered;
@@ -311,36 +354,59 @@ function listenToDeliveries() {
 }
 
 /* =====================
-   UPDATE STATUS & GPS
+   UPDATE STATUS & GPS (LIVE TRACKING)
 ===================== */
 window.updateStatus = async function (id, status) {
   const updateData = { status };
+  
   if (status === "en_route") {
     updateData.startedAt = serverTimestamp();
     startTracking(id);
   }
+  
   if (status === "delivered") {
     updateData.deliveredAt = serverTimestamp();
     stopTracking();
   }
+  
   await updateDoc(doc(db, "deliveries", id), updateData);
 };
 
 function startTracking(deliveryId) {
-  if (!navigator.geolocation) return;
-  document.getElementById('map-status').innerText = "Tracking active. Broadcasting location...";
+  if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+  }
+  
+  document.getElementById('map-status').innerHTML = `<i class="fa-solid fa-circle-dot" style="color:#059669; animation: blink 1.5s infinite;"></i> Live GPS tracking active. Broadcasting location...`;
+  
   watchId = navigator.geolocation.watchPosition(async position => {
-    const lat = position.coords.latitude, lng = position.coords.longitude;
-    if (deliveryMarkers[deliveryId]) deliveryMarkers[deliveryId].setLatLng([lat, lng]);
-    await updateDoc(doc(db, "deliveries", deliveryId), { currentLat: lat, currentLng: lng });
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    
+    map.panTo([lat, lng]);
+    
+    if (deliveryMarkers[deliveryId]) {
+        deliveryMarkers[deliveryId].setLatLng([lat, lng]);
+    }
+    
+    await updateDoc(doc(db, "deliveries", deliveryId), { 
+        currentLat: lat, 
+        currentLng: lng 
+    });
+    
   }, error => {
     document.getElementById('map-status').innerText = "GPS Error: " + error.message;
-  }, { enableHighAccuracy: true });
+    console.error(error);
+  }, { 
+      enableHighAccuracy: true,
+      maximumAge: 0
+  });
 }
 
 function stopTracking() {
   if (watchId !== null) {
     navigator.geolocation.clearWatch(watchId);
-    document.getElementById('map-status').innerText = "Tracking stopped.";
+    document.getElementById('map-status').innerText = "Tracking stopped. Delivery completed.";
   }
 }
