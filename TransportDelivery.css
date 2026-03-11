@@ -211,3 +211,71 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .sidebar.collapsed .brand h1, .sidebar.collapsed .brand p, .sidebar.collapsed .menu li a span:not(.icon) { display: none; }
 .topbar.collapsed { margin-left: 80px; width: calc(100% - 80px); }
 .content.collapsed { margin-left: 80px; }
+
+.leaflet-routing-container {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+    padding: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+    width: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+    
+    /* Forces it to hover nicely in the top right */
+    position: absolute !important;
+    top: 15px !important;
+    right: 15px !important;
+    z-index: 1000 !important;
+}
+
+/* Hide the Leaflet routing default geocoders (input boxes) if they appear */
+.leaflet-routing-geocoders {
+    display: none !important;
+}
+
+/* Make each route look like a clickable button/card */
+.leaflet-routing-alt {
+    border: 2px solid #e2e8f0;
+    padding: 14px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    margin-bottom: 10px;
+    background: #f8fafc;
+}
+
+.leaflet-routing-alt:hover {
+    border-color: #94a3b8;
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Highlight the currently active route card */
+.leaflet-routing-alt-selected {
+    background: #f0fdfa !important;
+    border: 2px solid #0d9488 !important;
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+}
+
+/* Hide the ugly list of turn-by-turn text */
+.leaflet-routing-alt table {
+    display: none !important;
+}
+
+/* Style the Route Title (e.g., "Route 1") */
+.leaflet-routing-alt h2 {
+    font-size: 15px !important;
+    color: #0f172a !important;
+    margin: 0 0 6px 0 !important;
+    font-weight: 700;
+}
+
+/* Style the Distance & ETA text */
+.leaflet-routing-alt h3 {
+    font-size: 13px !important;
+    color: #0f766e !important;
+    margin: 0 !important;
+    font-weight: 600;
+}
