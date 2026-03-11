@@ -135,6 +135,21 @@
     </p>
 
 
+    <section id="alarmBanner" class="alarm-banner" role="alert" aria-live="polite" hidden>
+
+        <div class="alarm-icon">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+
+        <div class="alarm-copy">
+            <p class="alarm-title">Threshold Alert</p>
+            <ul class="alarm-list" id="alarmMessages"></ul>
+            <p class="alarm-updated" id="alarmTimestamp"></p>
+        </div>
+
+    </section>
+
+
     <!-- ============================= -->
     <!-- SENSOR SUMMARY -->
     <!-- ============================= -->
@@ -297,20 +312,41 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
 
     <div class="trend-content active" id="temp">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Temperature Chart
+        <div class="metric-panel">
+            <div class="metric-value-card">
+                <div class="metric-label">Current Temperature</div>
+                <div class="metric-reading" id="temperature-current">--</div>
+                <div class="metric-subtext" id="temperature-updated">Awaiting data</div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="temperatureChart" aria-label="Temperature trend chart"></canvas>
+            </div>
         </div>
     </div>
 
     <div class="trend-content" id="ph">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> pH Chart
+        <div class="metric-panel">
+            <div class="metric-value-card">
+                <div class="metric-label">Current pH Level</div>
+                <div class="metric-reading" id="ph-current">--</div>
+                <div class="metric-subtext" id="ph-updated">Awaiting data</div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="phChart" aria-label="pH trend chart"></canvas>
+            </div>
         </div>
     </div>
 
     <div class="trend-content" id="humidity">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Humidity Chart
+        <div class="metric-panel">
+            <div class="metric-value-card">
+                <div class="metric-label">Current Humidity</div>
+                <div class="metric-reading" id="humidity-current">--</div>
+                <div class="metric-subtext" id="humidity-updated">Awaiting data</div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="humidityChart" aria-label="Humidity trend chart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -429,8 +465,7 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
 
-            <div class="trend-info">
-                <div class="trend-title">Late Deliveries</div>
+            <div class="trend-title">Late Deliveries</div>
                 <div class="trend-value">3</div>
             </div>
 
@@ -733,6 +768,8 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="AnalyticsReporting.js"></script>
 
 
 <script>
