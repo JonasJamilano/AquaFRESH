@@ -7,6 +7,7 @@ let map;
 let deliveryMarkers = {};
 let deliveryRoutes = {}; 
 let watchId = null;
+let isNavigating = false; // Tracks if the driver is actively driving
 
 const deliveriesCol = collection(db, "deliveries");
 const usersCol = collection(db, "users");
@@ -225,29 +226,22 @@ function listenToDeliveries() {
     docsArray.forEach(d => {
       const id = d.id;
 
-      // ==========================================
       // MAP CLEARED IF DELIVERED
-      // ==========================================
       if (d.status === "delivered") {
-          // If it was previously drawn on the map, remove the marker
           if (deliveryMarkers[id]) {
               map.removeLayer(deliveryMarkers[id]);
               delete deliveryMarkers[id];
           }
-          // Remove the route line and widget
           if (deliveryRoutes[id]) {
               map.removeControl(deliveryRoutes[id]);
               delete deliveryRoutes[id];
           }
       } else {
-          // ==========================================
-          // DRAW MAP ELEMENTS ONLY IF ACTIVE
-          // ==========================================
           
           // 1. Draw Routes with Selectable Alternatives
           if (d.originLat && d.destLat && !deliveryRoutes[id]) {
             deliveryRoutes[id] = L.Routing.control({
-              waypoints: [L.latLng(d.originLat, d.originLng), L.latLng(d.destLat, d.destLng)],
+              waypoints: [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
               addWaypoints: false, 
               routeWhileDragging: false, 
               fitSelectedRoutes: true, 
@@ -273,14 +267,14 @@ function listenToDeliveries() {
 
                 const statusBox = document.getElementById('map-status');
                 if (statusBox) {
-                    statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route Selected:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
+                    statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
                 }
             });
           }
 
-          // Focus Zoom
+          // Focus Zoom on Page Load
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('focus') === id) {
+          if (urlParams.get('focus') === id && !isNavigating) {
               map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
           }
 
@@ -296,12 +290,10 @@ function listenToDeliveries() {
           }
       }
 
-      // ==========================================
-      // 3. TABLE POPULATION (Always display regardless of map)
-      // ==========================================
+      // 3. TABLE POPULATION
       let actionButton = "";
       if (role === "delivery") {
-        if (d.status === "pending") actionButton = `<button class="start-btn" onclick="updateStatus('${id}', 'en_route')">Start Delivery</button>`;
+        if (d.status === "pending") actionButton = `<button class="start-btn" onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
         else if (d.status === "en_route") actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
       } else {
           actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
@@ -354,14 +346,15 @@ function listenToDeliveries() {
 }
 
 /* =====================
-   UPDATE STATUS & GPS (LIVE TRACKING)
+   UPDATE STATUS & LIVE NAVIGATION GPS
 ===================== */
-window.updateStatus = async function (id, status) {
+// Added destLat and destLng to parameters so the router knows where to go during auto-reroute
+window.updateStatus = async function (id, status, destLat = null, destLng = null) {
   const updateData = { status };
   
   if (status === "en_route") {
     updateData.startedAt = serverTimestamp();
-    startTracking(id);
+    startTracking(id, destLat, destLng);
   }
   
   if (status === "delivered") {
@@ -372,22 +365,32 @@ window.updateStatus = async function (id, status) {
   await updateDoc(doc(db, "deliveries", id), updateData);
 };
 
-function startTracking(deliveryId) {
+function startTracking(deliveryId, destLat, destLng) {
   if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
   }
   
-  document.getElementById('map-status').innerHTML = `<i class="fa-solid fa-circle-dot" style="color:#059669; animation: blink 1.5s infinite;"></i> Live GPS tracking active. Broadcasting location...`;
+  isNavigating = true; // Activate Navigation Mode
+  document.getElementById('map-status').innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#059669; animation: blink 1.5s infinite;"></i> Navigation Mode Active. Live Rerouting Enabled.`;
   
   watchId = navigator.geolocation.watchPosition(async position => {
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
     
-    map.panTo([lat, lng]);
+    // NAVIGATION MODE: Zoom in tight to level 18 and lock center onto the truck!
+    map.setView([lat, lng], 18, { animate: true, pan: { duration: 1 } });
     
     if (deliveryMarkers[deliveryId]) {
         deliveryMarkers[deliveryId].setLatLng([lat, lng]);
+    }
+
+    // AUTO-REROUTING: Dynamically update the starting point of the route to the driver's current position!
+    if (deliveryRoutes[deliveryId] && destLat && destLng) {
+        deliveryRoutes[deliveryId].setWaypoints([
+            L.latLng(lat, lng),       // Dynamic start (Current GPS)
+            L.latLng(destLat, destLng) // Static end (Destination)
+        ]);
     }
     
     await updateDoc(doc(db, "deliveries", deliveryId), { 
@@ -396,17 +399,20 @@ function startTracking(deliveryId) {
     });
     
   }, error => {
-    document.getElementById('map-status').innerText = "GPS Error: " + error.message;
+    document.getElementById('map-status').innerText = "GPS Error: Please ensure Location Services are enabled.";
     console.error(error);
   }, { 
       enableHighAccuracy: true,
-      maximumAge: 0
+      maximumAge: 0,
+      timeout: 5000 // Forces the GPS to ping frequently
   });
 }
 
 function stopTracking() {
   if (watchId !== null) {
     navigator.geolocation.clearWatch(watchId);
+    isNavigating = false;
     document.getElementById('map-status').innerText = "Tracking stopped. Delivery completed.";
+    map.setZoom(12); // Zoom out to see the whole city again
   }
 }
