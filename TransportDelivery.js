@@ -37,7 +37,7 @@ async function initPage() {
   listenToDeliveries();
 }
 
-/* =====================
+/* ===================
    MAP INITIALIZATION
 ===================== */
 function initMap() {
@@ -48,7 +48,7 @@ function initMap() {
   document.getElementById('map-status').innerText = "Map loaded. Awaiting active deliveries.";
 }
 
-/* =====================
+/* ===================
    LOCATION AUTOCOMPLETE API
 ===================== */
 function setupLocationAutocomplete() {

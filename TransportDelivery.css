@@ -56,7 +56,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .live-indicator i { font-size: 8px; animation: blink 1.5s infinite; }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-/* ==============================================
+/* ============================================
    NEW DELIVERY — TRIGGER BUTTON
 ============================================== */
 .new-inspection-trigger { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); border-radius: 14px; padding: 24px 28px; cursor: pointer; border: none; width: 100%; text-align: left; color: #fff; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 20px rgba(13, 148, 136, 0.35); margin-bottom: 32px; }
@@ -69,7 +69,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .ni-trigger-arrow { font-size: 1.3rem; opacity: 0.6; transition: opacity 0.15s, transform 0.15s; }
 .new-inspection-trigger:hover .ni-trigger-arrow { opacity: 1; transform: translateX(4px); }
 
-/* ==============================================
+/* ===========================================
    STATUS SUMMARY CARDS
 ============================================== */
 .qc-status-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }

@@ -103,7 +103,7 @@ function listenToMyDeliveries() {
         } else {
             document.getElementById("notif-count").style.display = "flex";
         }
-
+        
         // Update the big card numbers
         document.getElementById("pending-count").textContent = counts.pending;
         document.getElementById("enroute-count").textContent = counts.enroute;
