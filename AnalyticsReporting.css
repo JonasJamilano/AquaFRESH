@@ -19,6 +19,19 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05); 
 }
 
+.sidebar.collapsed .logo-full {
+    display: none;
+}
+
+.sidebar.collapsed .logo-icon {
+    display: block;
+    margin: auto;
+}
+
+.sidebar.collapsed .brand-text {
+    display: none;
+}
+
 .brand { 
     padding: 32px 24px 24px 24px; 
     border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
@@ -26,6 +39,30 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 }
 .brand h1 { color: #4dd0c8; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
 .brand p { font-size: 12px; color: #94a3b8; margin-top: 8px; line-height: 1.4; }
+
+.brand {
+    text-align: center;
+    padding: 24px;
+}
+
+/* full logo */
+.logo-full {
+    width: 150px;
+    transition: 0.3s;
+}
+
+/* icon logo (hidden by default) */
+.logo-icon {
+    width: 40px;
+    display: none;
+}
+
+/* hide text when collapsed */
+.brand-text {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 8px;
+}
 
 .menu ul { list-style: none; padding: 0 16px; }
 .menu li { margin-bottom: 4px; }
