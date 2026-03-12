@@ -366,45 +366,66 @@ window.updateStatus = async function (id, status, destLat = null, destLng = null
 };
 
 function startTracking(deliveryId, destLat, destLng) {
+
   if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
+    alert("Geolocation is not supported by your browser.");
+    return;
   }
-  
-  isNavigating = true; // Activate Navigation Mode
-  document.getElementById('map-status').innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#059669; animation: blink 1.5s infinite;"></i> Navigation Mode Active. Live Rerouting Enabled.`;
-  
-  watchId = navigator.geolocation.watchPosition(async position => {
+
+  // Force browser to request location permission first
+  navigator.geolocation.getCurrentPosition(position => {
+
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
-    
-    // NAVIGATION MODE: Zoom in tight to level 18 and lock center onto the truck!
-    map.setView([lat, lng], 18, { animate: true, pan: { duration: 1 } });
-    
-    if (deliveryMarkers[deliveryId]) {
-        deliveryMarkers[deliveryId].setLatLng([lat, lng]);
-    }
 
-    // AUTO-REROUTING: Dynamically update the starting point of the route to the driver's current position!
-    if (deliveryRoutes[deliveryId] && destLat && destLng) {
+    isNavigating = true;
+
+    document.getElementById('map-status').innerHTML =
+      `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
+
+    // Start continuous tracking
+    watchId = navigator.geolocation.watchPosition(async pos => {
+
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      map.setView([lat, lng], 18);
+
+      if (deliveryMarkers[deliveryId]) {
+        deliveryMarkers[deliveryId].setLatLng([lat, lng]);
+      }
+
+      if (deliveryRoutes[deliveryId] && destLat && destLng) {
         deliveryRoutes[deliveryId].setWaypoints([
-            L.latLng(lat, lng),       // Dynamic start (Current GPS)
-            L.latLng(destLat, destLng) // Static end (Destination)
+          L.latLng(lat, lng),
+          L.latLng(destLat, destLng)
         ]);
-    }
-    
-    await updateDoc(doc(db, "deliveries", deliveryId), { 
-        currentLat: lat, 
-        currentLng: lng 
-    });
-    
-  }, error => {
-    document.getElementById('map-status').innerText = "GPS Error: Please ensure Location Services are enabled.";
-    console.error(error);
-  }, { 
+      }
+
+      await updateDoc(doc(db, "deliveries", deliveryId), {
+        currentLat: lat,
+        currentLng: lng
+      });
+
+    }, error => {
+
+      console.error(error);
+
+      document.getElementById('map-status').innerText =
+        "GPS Error: Please enable location services.";
+
+    }, {
       enableHighAccuracy: true,
       maximumAge: 0,
-      timeout: 5000 // Forces the GPS to ping frequently
+      timeout: 5000
+    });
+
+  }, error => {
+
+    alert("Location permission denied. Please enable location access for this site.");
+
+    console.error(error);
+
   });
 }
 
