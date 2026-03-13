@@ -8,8 +8,28 @@ import {
   doc,
   setDoc,
   getDoc,
+  updateDoc,
+  increment,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+async function generateUserCustomId() {
+  const counterRef = doc(db, "counters", "users");
+  const snap = await getDoc(counterRef);
+
+  if (!snap.exists()) {
+    throw new Error("Users counter not found.");
+  }
+
+  const current = snap.data().lastNumber || 0;
+  const newNumber = current + 1;
+
+  await updateDoc(counterRef, {
+    lastNumber: increment(1)
+  });
+
+  return `U-${String(newNumber).padStart(3, "0")}`;
+}
 
 /* ======================
    SIGN UP
@@ -44,8 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const user = userCredential.user;
 
-        // 🔥 Save additional info in Firestore
+        // generate custom ID
+        const customId = await generateUserCustomId();
+
+        // save user profile
         await setDoc(doc(db, "users", user.uid), {
+          customId,
           fullName,
           email,
           phone,
