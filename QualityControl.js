@@ -4,25 +4,49 @@ import {
     addDoc,
     getDocs,
     deleteDoc,
+    updateDoc,
     doc,
     query,
     where,
     serverTimestamp,
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 // Read the logged-in user's full name directly from localStorage
-// (set by auth.js on login as "userFullName")
 const currentInspectorName = localStorage.getItem("userFullName") || "Unknown";
+
+// Tracks whether we're editing an existing record (stores doc ID) or creating new
+let editingRecordId = null;
+
+
+// ==========================
+// Auto-Generate Batch ID
+// ==========================
+async function generateBatchId() {
+    try {
+        const snapshot = await getDocs(collection(db, "inspections"));
+        let maxNum = 0;
+        snapshot.forEach(d => {
+            const code  = d.data().batchCode || "";
+            const match = code.match(/^B0-(\d+)$/i);
+            if (match) {
+                const num = parseInt(match[1], 10);
+                if (num > maxNum) maxNum = num;
+            }
+        });
+        return "B0-" + (maxNum + 1);
+    } catch (e) {
+        console.error("Could not generate batch ID:", e);
+        return "B0-1";
+    }
+}
 
 
 // ==========================
 // Helper: Collect Criteria Data
 // ==========================
-// Previously used .closest("section") which broke when the form moved into a modal.
-// Now queries directly from the modal by ID.
 function getCriteriaData() {
     const rows = document.querySelectorAll("#new-inspection-tbody tr");
-
     return Array.from(rows).map(row => ({
         criteriaName: row.querySelector(".criteria-select").dataset.criteria,
         assessment:   row.querySelector(".criteria-select").value,
@@ -58,7 +82,6 @@ function calculateScore() {
     );
 
     let classification, statusClass, iconHTML;
-
     if (finalScore >= 80) {
         classification = "Passed";
         statusClass    = "success";
@@ -75,8 +98,8 @@ function calculateScore() {
 
     document.getElementById("live-score").textContent = finalScore;
     const classEl = document.getElementById("live-classification");
-    classEl.innerHTML   = iconHTML + classification;
-    classEl.className   = "status " + statusClass;
+    classEl.innerHTML = iconHTML + classification;
+    classEl.className = "status " + statusClass;
 
     return { finalScore, classification };
 }
@@ -85,81 +108,148 @@ function calculateScore() {
 // ==========================
 // Bind Live Score Calculation
 // ==========================
-// Use event delegation on document so it works whether the modal
-// is open or closed (elements exist in DOM but may be hidden).
 document.addEventListener("change", e => {
-    if (
-        e.target.matches(".criteria-select") ||
-        e.target.matches("#temperature") ||
-        e.target.matches("#ph-level")
-    ) {
+    if (e.target.matches(".criteria-select") || e.target.matches("#temperature") || e.target.matches("#ph-level")) {
         calculateScore();
     }
 });
-
 document.addEventListener("input", e => {
-    if (
-        e.target.matches("#temperature") ||
-        e.target.matches("#ph-level")
-    ) {
+    if (e.target.matches("#temperature") || e.target.matches("#ph-level")) {
         calculateScore();
     }
 });
-
-// Run once on load so the widget shows the default score
-document.addEventListener("DOMContentLoaded", () => {
-    calculateScore();
-});
+document.addEventListener("DOMContentLoaded", () => { calculateScore(); });
 
 
 // ==========================
-// Save Inspection (Firestore)
+// Open modal in NEW mode
+// ==========================
+document.getElementById("btn-new-inspection")
+    .addEventListener("click", async () => {
+        editingRecordId = null;
+
+        // Update modal title + button label for "new" mode
+        document.getElementById("modal-inspection-title").innerHTML =
+            '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
+        document.getElementById("save-inspection-btn").innerHTML =
+            '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
+
+        // Generate fresh batch ID
+        const batchInput    = document.getElementById("batch-code");
+        batchInput.value    = "Generating...";
+        batchInput.readOnly = true;
+        batchInput.style.color      = "#94a3b8";
+        batchInput.style.background = "#f1f5f9";
+        batchInput.value = await generateBatchId();
+
+        document.getElementById("modal-new-inspection").classList.add("active");
+        document.body.style.overflow = "hidden";
+    });
+
+
+// ==========================
+// Open modal in EDIT mode
+// ==========================
+async function openEditModal(id, data) {
+    editingRecordId = id;
+
+    // Update modal title + button label for "edit" mode
+    document.getElementById("modal-inspection-title").innerHTML =
+        '<i class="fa-solid fa-pen-to-square"></i> Edit Inspection Log';
+    document.getElementById("save-inspection-btn").innerHTML =
+        '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+
+    // Pre-fill batch details
+    const batchInput        = document.getElementById("batch-code");
+    batchInput.value        = data.batchCode    || "";
+    batchInput.readOnly     = true;
+    batchInput.style.color  = "#94a3b8";
+    batchInput.style.background = "#f1f5f9";
+
+    document.getElementById("inspection-location").value = data.location    || "";
+    document.getElementById("temperature").value         = data.temperature ?? "4.0";
+    document.getElementById("ph-level").value            = data.phLevel     ?? "6.5";
+
+    // Product type
+    const productSelect = document.getElementById("product-type");
+    productSelect.value = data.productType || "";
+
+    // Pre-fill criteria
+    const criteriaRows = document.querySelectorAll("#new-inspection-tbody tr");
+    criteriaRows.forEach(row => {
+        const name   = row.querySelector(".criteria-select").dataset.criteria;
+        const match  = (data.criteria || []).find(c => c.criteriaName === name);
+        if (match) {
+            row.querySelector(".criteria-select").value  = match.assessment || "Excellent";
+            row.querySelector(".criteria-remarks").value = match.remarks    || "";
+        }
+    });
+
+    calculateScore();
+
+    document.getElementById("modal-new-inspection").classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+
+// ==========================
+// Save / Update Inspection
 // ==========================
 document.getElementById("save-inspection-btn")
     .addEventListener("click", async () => {
 
-        const batchCode  = document.getElementById("batch-code").value.trim();
+        const batchCode   = document.getElementById("batch-code").value.trim();
         const productType = document.getElementById("product-type").value.trim();
-        const location   = document.getElementById("inspection-location").value.trim();
+        const location    = document.getElementById("inspection-location").value.trim();
 
         if (!batchCode || !productType || !location) {
             alert("Please fill in all required fields: Batch ID, Product Type, and Location.");
             return;
         }
 
-        const criteria               = getCriteriaData();
+        const criteria                       = getCriteriaData();
         const { finalScore, classification } = calculateScore();
-
         const temperature = parseFloat(document.getElementById("temperature").value);
         const phLevel     = parseFloat(document.getElementById("ph-level").value);
 
-        const inspectorName = currentInspectorName;
-
         try {
-            await addDoc(collection(db, "inspections"), {
-                batchCode,
-                productType,
-                location,
-                inspectorName,
-                criteria,
-                temperature,
-                phLevel,
-                score:         finalScore,
-                overallStatus: classification,
-                createdAt:     serverTimestamp()
-            });
+            if (editingRecordId) {
+                // ── UPDATE existing record ──
+                await updateDoc(doc(db, "inspections", editingRecordId), {
+                    batchCode,
+                    productType,
+                    location,
+                    criteria,
+                    temperature,
+                    phLevel,
+                    score:         finalScore,
+                    overallStatus: classification
+                });
+                alert("Inspection updated successfully!");
+            } else {
+                // ── CREATE new record ──
+                await addDoc(collection(db, "inspections"), {
+                    batchCode,
+                    productType,
+                    location,
+                    inspectorName: currentInspectorName,
+                    criteria,
+                    temperature,
+                    phLevel,
+                    score:         finalScore,
+                    overallStatus: classification,
+                    createdAt:     serverTimestamp()
+                });
+                alert("Inspection saved successfully!");
+            }
 
-            alert("Inspection saved successfully!");
-
-            // Reset form fields
-            resetInspectionForm();
-
-            // Refresh all tables so new data appears immediately
+            editingRecordId = null;
+            await resetInspectionForm();
             await loadInspectionsToday();
             await loadInspectionsByStatus();
 
         } catch (error) {
-            console.error("Firestore save error:", error);
+            console.error("Firestore error:", error);
             alert("Failed to save inspection. Check console for details.");
         }
     });
@@ -169,29 +259,40 @@ document.getElementById("save-inspection-btn")
 // Clear Form Button
 // ==========================
 document.getElementById("add-inspection-btn")
-    .addEventListener("click", () => {
-        resetInspectionForm();
+    .addEventListener("click", async () => {
+        await resetInspectionForm();
     });
 
 
 // ==========================
 // Reset Form
 // ==========================
-function resetInspectionForm() {
-    document.getElementById("batch-code").value          = "";
+async function resetInspectionForm() {
+    editingRecordId = null;
+
     document.getElementById("inspection-location").value = "";
     document.getElementById("product-type").value        = "";
     document.getElementById("temperature").value         = "4.0";
     document.getElementById("ph-level").value            = "6.5";
 
-    document.querySelectorAll(".criteria-select")
-        .forEach(sel => sel.value = "Excellent");
+    document.querySelectorAll(".criteria-select").forEach(sel => sel.value = "Excellent");
+    document.querySelectorAll(".criteria-remarks").forEach(inp => inp.value = "");
 
-    document.querySelectorAll(".criteria-remarks")
-        .forEach(inp => inp.value = "");
-
-    // Recalculate score to reset the live widget back to 100/Passed
     calculateScore();
+
+    // Reset modal title/button back to "new" state
+    document.getElementById("modal-inspection-title").innerHTML =
+        '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
+    document.getElementById("save-inspection-btn").innerHTML =
+        '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
+
+    // Re-generate batch ID
+    const batchInput        = document.getElementById("batch-code");
+    batchInput.value        = "Generating...";
+    batchInput.readOnly     = true;
+    batchInput.style.color  = "#94a3b8";
+    batchInput.style.background = "#f1f5f9";
+    batchInput.value = await generateBatchId();
 }
 
 
@@ -216,12 +317,8 @@ function formatDate(timestamp) {
     if (!timestamp) return "—";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleString("en-PH", {
-        month:  "short",
-        day:    "numeric",
-        year:   "numeric",
-        hour:   "numeric",
-        minute: "2-digit",
-        hour12: true
+        month: "short", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit", hour12: true
     });
 }
 
@@ -239,13 +336,12 @@ async function loadInspectionsToday() {
             where("createdAt", ">=", today),
             orderBy("createdAt", "desc")
         );
-
         const snapshot = await getDocs(q);
         const tbody    = document.getElementById("inspections-today-body");
         tbody.innerHTML = "";
 
-        snapshot.forEach(doc => {
-            const r  = doc.data();
+        snapshot.forEach(d => {
+            const r  = d.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td><strong>${r.batchCode   ?? ""}</strong></td>
@@ -259,7 +355,6 @@ async function loadInspectionsToday() {
         });
 
         document.getElementById("inspections-today-count").textContent = snapshot.size;
-
     } catch (error) {
         console.error("Error loading today's inspections:", error);
     }
@@ -282,39 +377,34 @@ async function loadInspectionsByStatus() {
                 collection(db, "inspections"),
                 where("overallStatus", "==", s.status)
             );
-
             const snapshot = await getDocs(q);
             const tbody    = document.getElementById(s.bodyId);
             tbody.innerHTML = "";
 
-            snapshot.forEach(doc => {
-                const r  = doc.data();
+            snapshot.forEach(docSnap => {
+                const r  = docSnap.data();
+                const id = docSnap.id;
                 const tr = document.createElement("tr");
 
-                // Build the 4th column based on status type
                 let detailCell = "";
                 if (s.status === "Passed") {
-                    // Show any remarks from criteria
-                    const remarks = (r.criteria || [])
-                        .filter(c => c.remarks)
-                        .map(c => c.remarks)
-                        .join(", ");
-                    detailCell = remarks || "—";
+                    detailCell = (r.criteria || []).filter(c => c.remarks).map(c => c.remarks).join(", ") || "—";
                 } else if (s.status === "With Issues") {
-                    // Show which criteria were Acceptable
-                    const issues = (r.criteria || [])
-                        .filter(c => c.assessment === "Acceptable")
-                        .map(c => c.criteriaName)
-                        .join(", ");
-                    detailCell = issues || "—";
+                    detailCell = (r.criteria || []).filter(c => c.assessment === "Acceptable").map(c => c.criteriaName).join(", ") || "—";
                 } else if (s.status === "Rejected") {
-                    // Show which criteria were Rejected
-                    const rejected = (r.criteria || [])
-                        .filter(c => c.assessment === "Rejected")
-                        .map(c => c.criteriaName)
-                        .join(", ");
-                    detailCell = rejected || "—";
+                    detailCell = (r.criteria || []).filter(c => c.assessment === "Rejected").map(c => c.criteriaName).join(", ") || "—";
                 }
+
+                // Store full record as JSON on the button so edit modal can pre-fill everything
+                const safeData = encodeURIComponent(JSON.stringify({
+                    batchCode:    r.batchCode    ?? "",
+                    productType:  r.productType  ?? "",
+                    location:     r.location     ?? "",
+                    temperature:  r.temperature  ?? 4.0,
+                    phLevel:      r.phLevel      ?? 6.5,
+                    overallStatus: r.overallStatus ?? "",
+                    criteria:     r.criteria     ?? []
+                }));
 
                 tr.innerHTML = `
                     <td><strong>${r.batchCode ?? ""}</strong></td>
@@ -323,16 +413,42 @@ async function loadInspectionsByStatus() {
                     <td>${detailCell}</td>
                     <td>${formatDate(r.createdAt)}</td>
                     <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
+                    <td>
+                        <button class="edit-record-btn" data-id="${id}" data-record="${safeData}">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
 
             document.getElementById(s.countId).textContent = snapshot.size;
-
         } catch (error) {
             console.error(`Error loading ${s.status} inspections:`, error);
         }
     }
+
+    attachEditListeners();
+}
+
+
+// ==========================
+// Attach Edit Button Listeners
+// ==========================
+function attachEditListeners() {
+    document.querySelectorAll(".edit-record-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id   = btn.dataset.id;
+            const data = JSON.parse(decodeURIComponent(btn.dataset.record));
+
+            // Close whichever status modal is currently open before opening the inspection form
+            ["modal-passed", "modal-issues", "modal-rejected"].forEach(modalId => {
+                document.getElementById(modalId)?.classList.remove("active");
+            });
+
+            openEditModal(id, data);
+        });
+    });
 }
 
 
@@ -341,42 +457,31 @@ async function loadInspectionsByStatus() {
 // ==========================
 document.getElementById("download-delivery-report-btn")
     ?.addEventListener("click", async () => {
-
         try {
-            const q = query(
-                collection(db, "inspections"),
-                orderBy("createdAt", "desc")
-            );
-
+            const q        = query(collection(db, "inspections"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
 
-            if (snapshot.empty) {
-                alert("No inspection data found.");
-                return;
-            }
+            if (snapshot.empty) { alert("No inspection data found."); return; }
 
             const formattedData = [];
-
-            snapshot.forEach(doc => {
-                const d = doc.data();
-
-                // Flatten criteria into readable strings
-                const criteriaStr = (d.criteria || [])
+            snapshot.forEach(d => {
+                const r = d.data();
+                const criteriaStr = (r.criteria || [])
                     .map(c => `${c.criteriaName}: ${c.assessment}${c.remarks ? ` (${c.remarks})` : ""}`)
                     .join(" | ");
 
                 formattedData.push({
-                    "Batch ID":         d.batchCode      || "",
-                    "Inspector":        d.inspectorName  || "",
-                    "Location":         d.location       || "",
-                    "Product Type":     d.productType    || "",
-                    "Temperature (°C)": d.temperature    || "",
-                    "pH Level":         d.phLevel        || "",
-                    "Criteria":         criteriaStr      || "",
-                    "Freshness Score":  d.score          ?? "",
-                    "Overall Status":   d.overallStatus  || "",
-                    "Date":             d.createdAt?.toDate
-                        ? d.createdAt.toDate().toLocaleString("en-PH", {
+                    "Batch ID":         r.batchCode     || "",
+                    "Inspector":        r.inspectorName || "",
+                    "Location":         r.location      || "",
+                    "Product Type":     r.productType   || "",
+                    "Temperature (°C)": r.temperature   || "",
+                    "pH Level":         r.phLevel       || "",
+                    "Criteria":         criteriaStr     || "",
+                    "Freshness Score":  r.score         ?? "",
+                    "Overall Status":   r.overallStatus || "",
+                    "Date":             r.createdAt?.toDate
+                        ? r.createdAt.toDate().toLocaleString("en-PH", {
                             month: "short", day: "numeric", year: "numeric",
                             hour: "numeric", minute: "2-digit", hour12: true
                           })
@@ -387,9 +492,7 @@ document.getElementById("download-delivery-report-btn")
             const worksheet = XLSX.utils.json_to_sheet(formattedData);
             const workbook  = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Inspection Report");
-
-            const today = new Date().toISOString().split("T")[0];
-            XLSX.writeFile(workbook, `Inspection_Report_${today}.xlsx`);
+            XLSX.writeFile(workbook, `Inspection_Report_${new Date().toISOString().split("T")[0]}.xlsx`);
 
         } catch (error) {
             console.error("Inspection report error:", error);
@@ -399,20 +502,10 @@ document.getElementById("download-delivery-report-btn")
 
 
 // ==========================
-// Initial Load
-// ==========================
-window.addEventListener("DOMContentLoaded", () => {
-    loadInspectionsToday();
-    loadInspectionsByStatus();
-});
-
-
-// ==========================
 // Clear All Inspection Data
 // ==========================
 document.getElementById("clear-all-data-btn")
     .addEventListener("click", () => {
-        // Open the warning modal
         document.getElementById("modal-clear-warning").classList.add("active");
         document.body.style.overflow = "hidden";
     });
@@ -430,19 +523,14 @@ document.getElementById("confirm-clear-btn")
         confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
 
         try {
-            // Fetch all docs in inspectionData and delete them one by one
-            const snapshot = await getDocs(collection(db, "inspections"));
-
+            const snapshot  = await getDocs(collection(db, "inspections"));
             const deletions = snapshot.docs.map(d => deleteDoc(doc(db, "inspections", d.id)));
             await Promise.all(deletions);
 
-            // Close modal
             document.getElementById("modal-clear-warning").classList.remove("active");
             document.body.style.overflow = "";
 
             alert(`Successfully deleted ${snapshot.size} inspection record(s).`);
-
-            // Refresh all tables to reflect empty state
             await loadInspectionsToday();
             await loadInspectionsByStatus();
 
@@ -454,3 +542,12 @@ document.getElementById("confirm-clear-btn")
             confirmBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Yes, Delete All';
         }
     });
+
+
+// ==========================
+// Initial Load
+// ==========================
+window.addEventListener("DOMContentLoaded", () => {
+    loadInspectionsToday();
+    loadInspectionsByStatus();
+});

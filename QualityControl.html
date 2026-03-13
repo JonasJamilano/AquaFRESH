@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="QualityControl.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
-
 </head>
 <body>
 
@@ -131,18 +130,15 @@
         </div>
     </section>
 
-    <!-- Inspection Reports + Clear Records — side by side -->
+    <!-- Data Management -->
     <section class="panel">
         <div class="panel-header-flex" style="margin-bottom: 16px;">
             <h3>Data Management</h3>
         </div>
         <div class="qc-action-cards">
 
-            <!-- Download Report -->
             <div class="qc-action-card">
-                <div class="qc-action-icon blue">
-                    <i class="fa-solid fa-file-excel"></i>
-                </div>
+                <div class="qc-action-icon blue"><i class="fa-solid fa-file-excel"></i></div>
                 <div class="qc-action-info">
                     <div class="qc-action-title">Inspection Reports</div>
                     <div class="qc-action-desc">Export all inspection logs as a spreadsheet file.</div>
@@ -152,11 +148,8 @@
                 </button>
             </div>
 
-            <!-- Clear Records -->
             <div class="qc-action-card">
-                <div class="qc-action-icon red">
-                    <i class="fa-solid fa-trash-can"></i>
-                </div>
+                <div class="qc-action-icon red"><i class="fa-solid fa-trash-can"></i></div>
                 <div class="qc-action-info">
                     <div class="qc-action-title">Clear Inspection Records</div>
                     <div class="qc-action-desc">Remove all inspection records from the system. This action cannot be undone.</div>
@@ -187,21 +180,10 @@
                 <p style="font-size:0.84rem;color:#64748b;">All inspection logs will be permanently removed. This action cannot be undone.</p>
             </div>
             <div style="display:flex;gap:12px;justify-content:center;">
-                <button class="ni-btn-clear" data-close="modal-clear-warning" id="cancel-clear-btn" style="min-width:120px;">
+                <button class="ni-btn-clear" id="cancel-clear-btn" style="min-width:120px;">
                     <i class="fa-solid fa-xmark"></i> Cancel
                 </button>
-                <button id="confirm-clear-btn" style="
-                    min-width:120px;
-                    padding: 9px 22px;
-                    background: #dc2626;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 0.88rem;
-                    font-weight: 700;
-                    color: #fff;
-                    cursor: pointer;
-                    transition: opacity 0.15s;
-                ">
+                <button id="confirm-clear-btn" style="min-width:120px;padding:9px 22px;background:#dc2626;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;color:#fff;cursor:pointer;transition:opacity 0.15s;">
                     <i class="fa-solid fa-trash-can"></i> Yes, Delete All
                 </button>
             </div>
@@ -209,11 +191,12 @@
     </div>
 </div>
 
-<!-- ===================== MODAL: New Inspection Log ===================== -->
+<!-- ===================== MODAL: New / Edit Inspection Log ===================== -->
 <div class="qc-modal-overlay" id="modal-new-inspection">
     <div class="qc-modal wide">
         <div class="qc-modal-header teal">
-            <h3><i class="fa-solid fa-clipboard-list"></i> New Inspection Log</h3>
+            <!-- Title is swapped by JS between "New Inspection Log" and "Edit Inspection Log" -->
+            <h3 id="modal-inspection-title"><i class="fa-solid fa-clipboard-list"></i> New Inspection Log</h3>
             <button class="qc-modal-close" data-close="modal-new-inspection" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
@@ -222,8 +205,9 @@
             <div class="ni-divider"><i class="fa-solid fa-tag"></i> Batch Details</div>
             <div class="ni-modal-grid">
                 <div class="ni-form-group">
-                    <label>Batch ID</label>
-                    <input type="text" id="batch-code" placeholder="e.g. B-012">
+                    <label>Batch ID <span style="font-size:0.72rem;color:#94a3b8;font-weight:400;">(auto-generated)</span></label>
+                    <input type="text" id="batch-code" placeholder="Generating..." readonly
+                        style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;">
                 </div>
                 <div class="ni-form-group">
                     <label>Inspection Location</label>
@@ -269,46 +253,22 @@
                 <tbody id="new-inspection-tbody">
                     <tr>
                         <td><strong>Eye Clarity</strong></td>
-                        <td>
-                            <select class="criteria-select" data-criteria="Eye Clarity">
-                                <option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option>
-                            </select>
-                        </td>
+                        <td><select class="criteria-select" data-criteria="Eye Clarity"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
                         <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                     </tr>
                     <tr>
                         <td><strong>Gill Color</strong></td>
-                        <td>
-                            <select class="criteria-select" data-criteria="Gill Color">
-                                <option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option>
-                            </select>
-                        </td>
+                        <td><select class="criteria-select" data-criteria="Gill Color"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
                         <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                     </tr>
                     <tr>
                         <td><strong>Body Firmness</strong></td>
-                        <td>
-                            <select class="criteria-select" data-criteria="Body Firmness">
-                                <option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option>
-                            </select>
-                        </td>
+                        <td><select class="criteria-select" data-criteria="Body Firmness"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
                         <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                     </tr>
                     <tr>
                         <td><strong>Odor</strong></td>
-                        <td>
-                            <select class="criteria-select" data-criteria="Odor">
-                                <option>Excellent</option>
-                                <option>Acceptable</option>
-                                <option>Rejected</option>
-                            </select>
-                        </td>
+                        <td><select class="criteria-select" data-criteria="Odor"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
                         <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
                     </tr>
                 </tbody>
@@ -348,12 +308,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th>
-                        <th>Product</th>
-                        <th>Location</th>
-                        <th>Remarks</th>
-                        <th>Date</th>
-                        <th class="text-right">Status</th>
+                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="passed-body"></tbody>
@@ -376,12 +331,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th>
-                        <th>Product</th>
-                        <th>Location</th>
-                        <th>Issue Noted</th>
-                        <th>Date</th>
-                        <th class="text-right">Status</th>
+                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Issue Noted</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="issues-body"></tbody>
@@ -404,12 +354,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th>
-                        <th>Product</th>
-                        <th>Location</th>
-                        <th>Reason for Rejection</th>
-                        <th>Date</th>
-                        <th class="text-right">Status</th>
+                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Reason for Rejection</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="rejected-body"></tbody>
@@ -454,11 +399,10 @@
             empty.style.display = rows.children.length === 0 ? 'block' : 'none';
         }
 
-        /* Open triggers */
-        document.getElementById('btn-new-inspection').addEventListener('click', () => openModal('modal-new-inspection'));
-        document.getElementById('btn-passed').addEventListener('click',          () => openModal('modal-passed'));
-        document.getElementById('btn-issues').addEventListener('click',          () => openModal('modal-issues'));
-        document.getElementById('btn-rejected').addEventListener('click',        () => openModal('modal-rejected'));
+        /* Status card open triggers (New Inspection is handled in QualityControl.js) */
+        document.getElementById('btn-passed').addEventListener('click',   () => openModal('modal-passed'));
+        document.getElementById('btn-issues').addEventListener('click',   () => openModal('modal-issues'));
+        document.getElementById('btn-rejected').addEventListener('click', () => openModal('modal-rejected'));
 
         /* Keyboard support for status cards */
         ['btn-passed', 'btn-issues', 'btn-rejected'].forEach(id => {
@@ -467,7 +411,7 @@
             });
         });
 
-        /* Auto-close new inspection modal after save */
+        /* Auto-close new/edit inspection modal after save */
         const saveBtn = document.getElementById('save-inspection-btn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
@@ -494,7 +438,7 @@
             }
         });
 
-        /* Keep modal count badges in sync with card counts via MutationObserver */
+        /* Keep modal count badges in sync */
         const countMap = {
             'passed-count':   'modal-passed-count',
             'issues-count':   'modal-issues-count',

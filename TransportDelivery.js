@@ -7,11 +7,11 @@ let map;
 let deliveryMarkers = {};
 let deliveryRoutes = {}; 
 let watchId = null;
-let isNavigating = false; // Tracks if the driver is actively driving
+let isNavigating = false;
 
 const deliveriesCol = collection(db, "deliveries");
 const usersCol = collection(db, "users");
-const batchesCol = collection(db, "batches");
+const inspectionsCol = collection(db, "inspections"); // ← now reads from inspections
 
 let selectedOrigin = { lat: null, lng: null, name: "" };
 let selectedDest = { lat: null, lng: null, name: "" };
@@ -109,23 +109,41 @@ function selectLocation(place, type) {
 }
 
 /* =====================
-   LOAD BATCHES & MAP DICTIONARY
+   LOAD BATCHES
+   Only shows inspections with overallStatus === "Passed"
+   so Rejected/With Issues batches never appear in the dropdown
 ===================== */
 async function loadBatches() {
-  const snapshot = await getDocs(batchesCol);
   const select = document.getElementById("batchSelect");
-  
+
   if (select) select.innerHTML = `<option value="">Select Batch</option>`;
-  
-  snapshot.forEach(docSnap => {
-    const bData = docSnap.data();
-    const readableCode = bData.batchCode || bData.batch_code || docSnap.id;
-    batchesMap[docSnap.id] = readableCode;
-    
-    if (select) {
-        select.innerHTML += `<option value="${docSnap.id}">${readableCode}</option>`;
+
+  try {
+    const q = query(inspectionsCol, where("overallStatus", "==", "Passed"));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      if (select) {
+        select.innerHTML += `<option value="" disabled>No passed batches available</option>`;
+      }
+      return;
     }
-  });
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const batchCode = data.batchCode || docSnap.id;
+
+      // Store in map so table rows can resolve batch code from doc ID
+      batchesMap[docSnap.id] = batchCode;
+
+      if (select) {
+        select.innerHTML += `<option value="${docSnap.id}">${batchCode}</option>`;
+      }
+    });
+
+  } catch (err) {
+    console.error("Error loading batches:", err);
+  }
 }
 
 async function loadDrivers() {
@@ -182,7 +200,7 @@ window.createDelivery = async function () {
   selectedOrigin = { lat: null, lng: null, name: "" };
   selectedDest = { lat: null, lng: null, name: "" };
   
-  if(window.closeModal) window.closeModal("modal-new-delivery");
+  if (window.closeModal) window.closeModal("modal-new-delivery");
 };
 
 /* =====================
@@ -228,66 +246,65 @@ function listenToDeliveries() {
 
       // MAP CLEARED IF DELIVERED
       if (d.status === "delivered") {
-          if (deliveryMarkers[id]) {
-              map.removeLayer(deliveryMarkers[id]);
-              delete deliveryMarkers[id];
-          }
-          if (deliveryRoutes[id]) {
-              map.removeControl(deliveryRoutes[id]);
-              delete deliveryRoutes[id];
-          }
+        if (deliveryMarkers[id]) {
+          map.removeLayer(deliveryMarkers[id]);
+          delete deliveryMarkers[id];
+        }
+        if (deliveryRoutes[id]) {
+          map.removeControl(deliveryRoutes[id]);
+          delete deliveryRoutes[id];
+        }
       } else {
-          
-          // 1. Draw Routes with Selectable Alternatives
-          if (d.originLat && d.destLat && !deliveryRoutes[id]) {
-            deliveryRoutes[id] = L.Routing.control({
-              waypoints: [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
-              addWaypoints: false, 
-              routeWhileDragging: false, 
-              fitSelectedRoutes: true, 
-              show: true, 
-              showAlternatives: true, 
-              altLineOptions: {
-                  styles: [
-                      {color: 'black', opacity: 0.15, weight: 9},
-                      {color: 'white', opacity: 0.8, weight: 6},
-                      {color: '#64748b', opacity: 0.9, weight: 4.5} 
-                  ]
-              },
-              lineOptions: { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] }, 
-              createMarker: function() { return null; } 
-            }).addTo(map);
+        // 1. Draw Routes with Selectable Alternatives
+        if (d.originLat && d.destLat && !deliveryRoutes[id]) {
+          deliveryRoutes[id] = L.Routing.control({
+            waypoints: [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
+            addWaypoints: false, 
+            routeWhileDragging: false, 
+            fitSelectedRoutes: true, 
+            show: true, 
+            showAlternatives: true, 
+            altLineOptions: {
+              styles: [
+                {color: 'black', opacity: 0.15, weight: 9},
+                {color: 'white', opacity: 0.8, weight: 6},
+                {color: '#64748b', opacity: 0.9, weight: 4.5} 
+              ]
+            },
+            lineOptions: { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] }, 
+            createMarker: function() { return null; } 
+          }).addTo(map);
 
-            deliveryRoutes[id].on('routeselected', function(e) {
-                const route = e.route;
-                const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
-                const hours = Math.floor(route.summary.totalTime / 3600);
-                const minutes = Math.round((route.summary.totalTime % 3600) / 60);
-                let timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
+          deliveryRoutes[id].on('routeselected', function(e) {
+            const route = e.route;
+            const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+            const hours = Math.floor(route.summary.totalTime / 3600);
+            const minutes = Math.round((route.summary.totalTime % 3600) / 60);
+            let timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
 
-                const statusBox = document.getElementById('map-status');
-                if (statusBox) {
-                    statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
-                }
-            });
-          }
-
-          // Focus Zoom on Page Load
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('focus') === id && !isNavigating) {
-              map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
-          }
-
-          // 2. Update Map Marker
-          if (d.currentLat && d.currentLng) {
-            if (!deliveryMarkers[id]) {
-              deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
-                .addTo(map).bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
-            } else {
-              deliveryMarkers[id].setLatLng([d.currentLat, d.currentLng]);
-              deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
+            const statusBox = document.getElementById('map-status');
+            if (statusBox) {
+              statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
             }
+          });
+        }
+
+        // Focus Zoom on Page Load
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('focus') === id && !isNavigating) {
+          map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
+        }
+
+        // 2. Update Map Marker
+        if (d.currentLat && d.currentLng) {
+          if (!deliveryMarkers[id]) {
+            deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
+              .addTo(map).bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
+          } else {
+            deliveryMarkers[id].setLatLng([d.currentLat, d.currentLng]);
+            deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
           }
+        }
       }
 
       // 3. TABLE POPULATION
@@ -296,13 +313,14 @@ function listenToDeliveries() {
         if (d.status === "pending") actionButton = `<button class="start-btn" onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
         else if (d.status === "en_route") actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
       } else {
-          actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
+        actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
       }
 
       const shortOrigin = d.origin ? d.origin.split(',')[0] : "-";
       const shortDest = d.destination ? d.destination.split(',')[0] : "-";
       const truckName = d.truck || "-";
-      const displayBatch = batchesMap[d.batchId] || d.batchId || "-"; 
+      // Resolve batch code: first check batchesMap, then fall back to stored batchId string
+      const displayBatch = batchesMap[d.batchId] || d.batchId || "-";
       const formattedDate = d.eta ? new Date(d.eta).toLocaleString() : "-";
       const deliveredDate = d.deliveredAt ? d.deliveredAt.toDate().toLocaleString() : "-";
 
@@ -319,17 +337,17 @@ function listenToDeliveries() {
         </tr>`;
 
       if (d.status === "pending") {
-          counts.pending++;
-          pendingBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+        counts.pending++;
+        pendingBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
       } else if (d.status === "en_route") {
-          counts.enroute++;
-          enrouteBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+        counts.enroute++;
+        enrouteBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
       } else if (d.status === "delivered") {
-          counts.delivered++;
-          deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Delivered</span></td></tr>`;
+        counts.delivered++;
+        deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Delivered</span></td></tr>`;
       } else {
-          counts.delayed++;
-          delayedBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+        counts.delayed++;
+        delayedBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
       }
     });
 
@@ -348,7 +366,6 @@ function listenToDeliveries() {
 /* =====================
    UPDATE STATUS & LIVE NAVIGATION GPS
 ===================== */
-// Added destLat and destLng to parameters so the router knows where to go during auto-reroute
 window.updateStatus = async function (id, status, destLat = null, destLng = null) {
   const updateData = { status };
   
@@ -366,26 +383,18 @@ window.updateStatus = async function (id, status, destLat = null, destLng = null
 };
 
 function startTracking(deliveryId, destLat, destLng) {
-
   if (!navigator.geolocation) {
     alert("Geolocation is not supported by your browser.");
     return;
   }
 
-  // Force browser to request location permission first
   navigator.geolocation.getCurrentPosition(position => {
-
-    const lat = position.coords.latitude;
-    const lng = position.coords.longitude;
-
     isNavigating = true;
 
     document.getElementById('map-status').innerHTML =
       `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
 
-    // Start continuous tracking
     watchId = navigator.geolocation.watchPosition(async pos => {
-
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
 
@@ -408,12 +417,8 @@ function startTracking(deliveryId, destLat, destLng) {
       });
 
     }, error => {
-
       console.error(error);
-
-      document.getElementById('map-status').innerText =
-        "GPS Error: Please enable location services.";
-
+      document.getElementById('map-status').innerText = "GPS Error: Please enable location services.";
     }, {
       enableHighAccuracy: true,
       maximumAge: 0,
@@ -421,11 +426,8 @@ function startTracking(deliveryId, destLat, destLng) {
     });
 
   }, error => {
-
     alert("Location permission denied. Please enable location access for this site.");
-
     console.error(error);
-
   });
 }
 
@@ -434,6 +436,6 @@ function stopTracking() {
     navigator.geolocation.clearWatch(watchId);
     isNavigating = false;
     document.getElementById('map-status').innerText = "Tracking stopped. Delivery completed.";
-    map.setZoom(12); // Zoom out to see the whole city again
+    map.setZoom(12);
   }
 }
