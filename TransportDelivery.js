@@ -325,6 +325,14 @@ function listenToDeliveries() {
             deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
           }
         }
+        // AUTO-RESUME GPS TRACKING AFTER PAGE REFRESH
+        if (
+          role === "delivery" &&
+          d.status === "en_route" &&
+          !isNavigating
+        ) {
+          startTracking(id, d.destLat, d.destLng);
+        }
       }
 
       // ── TABLE ROWS ──
