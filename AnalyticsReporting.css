@@ -272,7 +272,7 @@ text-transform:uppercase;
 
 .qc-status-cards{
 display:grid;
-grid-template-columns:repeat(3,1fr);
+grid-template-columns:repeat(2,1fr);
 gap:16px;
 margin:24px 0;
 }
@@ -936,6 +936,19 @@ gap:8px;
 color:#0ea5e9;
 }
 
+/* =====================
+INACTIVE TANKS
+===================== */
+
+.inactive-tank td{
+color:#94a3b8;
+background:#f8fafc;
+}
+
+.inactive-tank td i{
+opacity:0.4;
+}
+
 /* =========================================
 MAIN TRENDS TABS
 ========================================= */
@@ -979,6 +992,7 @@ display:none;
 .trends-panel.active{
 display:block;
 }
+
 
 /* =====================
 RESPONSIVE

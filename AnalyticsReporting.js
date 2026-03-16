@@ -165,6 +165,8 @@ function listenToSensorData() {
                 payload = childSnap.val();
             });
 
+            updateTankMonitoring(payload);
+
             if (!payload || typeof payload !== "object") {
                 showNoDataMessage("Latest log entry is empty.");
                 return;
@@ -420,4 +422,69 @@ function normalizeTimestampValue(value) {
     }
 
     return new Date();
+}
+
+function updateTankMonitoring(payload) {
+
+    const temp = parseNumericValue(payload.water_temp);
+    const ph = parseNumericValue(payload.ph_level);
+    const humidity = parseNumericValue(payload.humidity);
+
+    const timestampSource = payload.timestamp || Date.now();
+    const timestamp = formatTimestamp(timestampSource);
+
+    let normalCount = 0;
+    let alertCount = 0;
+
+    let status = "normal";
+
+    if (temp > 4 || ph < 6.5 || ph > 7.5) {
+        status = "alert";
+    }
+
+    if (status === "normal") {
+        normalCount++;
+    } else {
+        alertCount++;
+    }
+
+    const statusHTML =
+        status === "normal"
+            ? `
+            <span class="status good">
+                <i class="fa-solid fa-check"></i>
+                Threshold Normal
+            </span>
+        `
+            : `
+            <span class="status alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Threshold Alert
+            </span>
+        `;
+                    //truck A only has the IoT in tank1
+    const tanks = ["tank1"]; // ADD tank2 and tank3 if there are new sensors
+
+    tanks.forEach((tank) => {
+
+        const tempEl = document.getElementById(`${tank}-temp`);
+        const phEl = document.getElementById(`${tank}-ph`);
+        const humEl = document.getElementById(`${tank}-humidity`);
+        const statusEl = document.getElementById(`${tank}-status`);
+        const timeEl = document.getElementById(`${tank}-time`);
+
+        const normalEl = document.getElementById("normalCount");
+        const alertEl = document.getElementById("alertCount");
+
+        if (normalEl) normalEl.textContent = normalCount;
+        if (alertEl) alertEl.textContent = alertCount;
+
+        if (tempEl) tempEl.innerHTML = `<i class="fa-solid fa-temperature-half"></i> ${temp.toFixed(1)}°C`;
+        if (phEl) phEl.innerHTML = `<i class="fa-solid fa-droplet"></i> ${ph.toFixed(2)}`;
+        if (humEl) humEl.innerHTML = `<i class="fa-solid fa-cloud"></i> ${humidity.toFixed(1)}%`;
+
+        if (statusEl) statusEl.innerHTML = statusHTML;
+
+        if (timeEl) timeEl.textContent = timestamp;
+    });
 }

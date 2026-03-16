@@ -179,33 +179,13 @@
 
                 <div class="card-info">
                     <div class="card-title">Normal</div>
-                    <div class="card-count">6</div>
+                    <div class="card-count" id="normalCount">0</div>
                     <div class="card-cta">View tanks</div>
                 </div>
 
                 <i class="fa-solid fa-chevron-right card-arrow"></i>
 
             </div>
-
-
-            <!-- WARNING -->
-            <div class="qc-status-card yellow"
-                onclick="openSensorModal('warning')">
-
-                <div class="card-icon">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-
-                <div class="card-info">
-                    <div class="card-title">Warning</div>
-                    <div class="card-count">2</div>
-                    <div class="card-cta">View tanks</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-
-            </div>
-
 
             <!-- ALERT -->
             <div class="qc-status-card red"
@@ -217,7 +197,7 @@
 
                 <div class="card-info">
                     <div class="card-title">Alert</div>
-                    <div class="card-count">1</div>
+                    <div class="card-count" id="alertCount">0</div>
                     <div class="card-cta">View tanks</div>
                 </div>
 
@@ -608,36 +588,35 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
                 <tbody>
 
-                    <tr>
+                <tr>
 
-                        <td><strong>Tank 1</strong></td>
+                    <td><strong>Tank 1</strong></td>
 
-                        <td>
-                            <i class="fa-solid fa-temperature-half"></i>
-                            25.3°C
-                        </td>
+                    <td id="tank1-temp">
+                        <i class="fa-solid fa-temperature-half"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-droplet"></i>
-                            7.1
-                        </td>
+                    <td id="tank1-ph">
+                        <i class="fa-solid fa-droplet"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-cloud"></i>
-                            64%
-                        </td>
+                    <td id="tank1-humidity">
+                        <i class="fa-solid fa-cloud"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <span class="status good">
-                                <i class="fa-solid fa-check"></i>
-                                Normal
-                            </span>
-                        </td>
+                    <td id="tank1-status">
+                        <span class="status good">
+                            <i class="fa-solid fa-check"></i>
+                            Threshold Normal
+                        </span>
+                    </td>
 
-                        <td>10:22 AM</td>
+                    <td id="tank1-time">--</td>
 
-                    </tr>
-
+                </tr>
                 </tbody>
 
             </table>
@@ -666,35 +645,29 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
                 <tbody>
 
-                    <tr>
+                <tr class="inactive-tank">
 
-                        <td><strong>Tank 2</strong></td>
+                    <td><strong>Tank 2</strong></td>
 
-                        <td>
-                            <i class="fa-solid fa-temperature-half"></i>
-                            29.1°C
-                        </td>
+                    <td id="tank2-temp">
+                        <i class="fa-solid fa-temperature-half"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-droplet"></i>
-                            6.8
-                        </td>
+                    <td id="tank2-ph">
+                        <i class="fa-solid fa-droplet"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-cloud"></i>
-                            70%
-                        </td>
+                    <td id="tank2-humidity">
+                        <i class="fa-solid fa-cloud"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <span class="status warning-status">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                Warning
-                            </span>
-                        </td>
+                    <td id="tank2-status">--</td>
+                    <td id="tank2-time">--</td>
 
-                        <td>10:21 AM</td>
-
-                    </tr>
+                </tr>
 
                 </tbody>
 
@@ -724,35 +697,29 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
                 <tbody>
 
-                    <tr>
+                <tr class="inactive-tank">
 
-                        <td><strong>Tank 3</strong></td>
+                    <td><strong>Tank 3</strong></td>
 
-                        <td>
-                            <i class="fa-solid fa-temperature-half"></i>
-                            32.4°C
-                        </td>
+                    <td id="tank3-temp">
+                        <i class="fa-solid fa-temperature-half"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-droplet"></i>
-                            6.3
-                        </td>
+                    <td id="tank3-ph">
+                        <i class="fa-solid fa-droplet"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <i class="fa-solid fa-cloud"></i>
-                            75%
-                        </td>
+                    <td id="tank3-humidity">
+                        <i class="fa-solid fa-cloud"></i>
+                        --
+                    </td>
 
-                        <td>
-                            <span class="status alert">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                Alert
-                            </span>
-                        </td>
+                    <td id="tank3-status">--</td>
+                    <td id="tank3-time">--</td>
 
-                        <td>10:10 AM</td>
-
-                    </tr>
+                </tr>
 
                 </tbody>
 
