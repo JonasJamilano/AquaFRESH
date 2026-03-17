@@ -1,4 +1,6 @@
-@import url("Dashboard.css");
+@import url("DeliveryDashboard.css");
+
+/* Only keep inspector-specific styles below */
 
 .task-list {
     list-style: none;
@@ -6,19 +8,50 @@
 }
 
 .task-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid #e0e6e9;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
 }
 
-/* Icon styling */
-.menu li a i {
-    width: 20px;
-    margin-right: 14px;
-    text-align: center;
-    color: #4dd0c8;
+.task-list li:last-child {
+    border-bottom: none;
 }
 
-/* Hide role-based menu items by default */
-.menu li[data-role] {
-    display: none;
+.task-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.task-sub {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.task-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.task-status.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.task-status.warning {
+    background: #fef08a;
+    color: #92400e;
+}
+
+.task-status.danger {
+    background: #fee2e2;
+    color: #991b1b;
 }

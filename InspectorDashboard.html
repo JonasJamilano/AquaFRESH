@@ -64,7 +64,7 @@
                 </a>
             </li>
 
-            <li data-role="superadmin admin manager inspector">
+            <li data-role="superadmin admin manager">
                 <a href="AnalyticsReporting.html">
                     <i class="fa-solid fa-chart-line"></i>
                     <span class="label">Analytics & Reporting</span>
@@ -110,40 +110,165 @@
     <p>Overview of today’s inspection activities.</p>
 
     <!-- KPI -->
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <h3>Inspections Today</h3>
-            <p class="kpi-number">6</p>
+    <section class="panel">
+    <div class="panel-header-flex">
+        <h3>Inspection Summary</h3>
+        <span class="summary-hint">Today’s activity overview</span>
+    </div>
+
+    <div class="qc-status-cards">
+
+        <div class="qc-status-card blue" id="btn-today">
+            <div class="card-icon"><i class="fa-solid fa-clipboard"></i></div>
+            <div class="card-info">
+                <div class="card-title">Today</div>
+                <div class="card-count" id="inspections-today">0</div>
+            </div>
         </div>
 
-        <div class="kpi-card success">
-            <h3>Passed</h3>
-            <p class="kpi-number">4</p>
+        <div class="qc-status-card green" id="btn-passed">
+            <div class="card-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="card-info">
+                <div class="card-title">Passed</div>
+                <div class="card-count" id="passed-count">0</div>
+            </div>
         </div>
 
-        <div class="kpi-card warning">
-            <h3>With Issues</h3>
-            <p class="kpi-number">1</p>
+        <div class="qc-status-card yellow" id="btn-issues">
+            <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="card-info">
+                <div class="card-title">With Issues</div>
+                <div class="card-count" id="issues-count">0</div>
+            </div>
         </div>
 
-        <div class="kpi-card danger">
-            <h3>Rejected</h3>
-            <p class="kpi-number">1</p>
+        <div class="qc-status-card red" id="btn-rejected">
+            <div class="card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="card-info">
+                <div class="card-title">Rejected</div>
+                <div class="card-count" id="rejected-count">0</div>
+            </div>
+        </div>
+
+    </div>
+
+        <!-- TODAY MODAL -->
+    <div class="qc-modal-overlay" id="modal-today">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header blue">
+        <h3><i class="fa-solid fa-clipboard"></i> Today’s Inspections</h3>
+        <button class="qc-modal-close" data-close="modal-today"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+        <table class="qc-table">
+            <thead>
+            <tr>
+                <th>Batch</th>
+                <th>Product</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Date & Time</th>
+            </tr>
+            </thead>
+            <tbody id="today-body"></tbody>
+        </table>
         </div>
     </div>
+    </div>
+
+    <!-- PASSED -->
+    <div class="qc-modal-overlay" id="modal-passed">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header green">
+        <h3><i class="fa-solid fa-check"></i> Passed</h3>
+        <button class="qc-modal-close" data-close="modal-passed">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        </div>
+        <div class="qc-modal-body">
+        <table class="qc-table">
+            <thead>
+            <tr>
+                <th>Batch</th>
+                <th>Product</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Date & Time</th>
+            </tr>
+            </thead>
+            <tbody id="passed-body"></tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+
+    <!-- ISSUES -->
+    <div class="qc-modal-overlay" id="modal-issues">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header yellow">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> With Issues</h3>
+        <button class="qc-modal-close" data-close="modal-issues">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        </div>
+        <div class="qc-modal-body">
+        <table class="qc-table">
+            <thead>
+            <tr>
+                <th>Batch</th>
+                <th>Product</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Date & Time</th>
+            </tr>
+            </thead>
+            <tbody id="issues-body"></tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+
+    <!-- REJECTED -->
+    <div class="qc-modal-overlay" id="modal-rejected">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header red">
+        <h3><i class="fa-solid fa-circle-xmark"></i> Rejected</h3>
+        <button class="qc-modal-close" data-close="modal-rejected">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        </div>
+        <div class="qc-modal-body">
+        <table class="qc-table">
+            <thead>
+            <tr>
+                <th>Batch</th>
+                <th>Product</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Date & Time</th>
+            </tr>
+            </thead>
+            <tbody id="rejected-body"></tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+</section>
 
     <!-- TASKS -->
     <section class="panel">
+    <div class="panel-header-flex">
         <h3>Pending Inspections</h3>
-        <ul class="task-list">
-            <li>Batch B-204 – Milkfish (Dock A)</li>
-            <li>Batch B-207 – Tuna (Cold Storage)</li>
-        </ul>
-    </section>
+        <span class="summary-hint">Needs attention</span>
+    </div>
+
+    <ul class="task-list" id="pending-inspections"></ul>
+</section>
 </main>
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script type="module" src="InspectorDashboard.js"></script>
 
 </body>
 </html>

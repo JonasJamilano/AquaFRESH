@@ -34,7 +34,7 @@
             <li data-role="delivery"><a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html" class="active"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
             <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span></a></li>
-            <li data-role="superadmin admin manager inspector"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
+            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
@@ -74,17 +74,17 @@
                 <div class="card-icon"><i class="fa-solid fa-check-circle"></i></div>
                 <div class="card-info">
                     <div class="card-title">Fresh</div>
-                    <div class="card-count" id="fresh-count">18</div>
+                    <div class="card-count" id="fresh-count">0</div>
                     <div class="card-cta">View records →</div>
                 </div>
                 <i class="fa-solid fa-chevron-right card-arrow"></i>
             </div>
 
-            <div class="qc-status-card yellow" id="btn-moderate" role="button" tabindex="0">
+            <div class="qc-status-card yellow" id="btn-issues" role="button" tabindex="0">
                 <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="card-info">
-                    <div class="card-title">Moderate</div>
-                    <div class="card-count" id="moderate-count">4</div>
+                    <div class="card-title">With Issues</div>
+                    <div class="card-count" id="issues-count">0</div>
                     <div class="card-cta">View records →</div>
                 </div>
                 <i class="fa-solid fa-chevron-right card-arrow"></i>
@@ -94,7 +94,7 @@
                 <div class="card-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
                 <div class="card-info">
                     <div class="card-title">Spoiled</div>
-                    <div class="card-count" id="spoiled-count">2</div>
+                    <div class="card-count" id="spoiled-count">0</div>
                     <div class="card-cta">View records →</div>
                 </div>
                 <i class="fa-solid fa-chevron-right card-arrow"></i>
@@ -120,35 +120,7 @@
                     <th>Last Updated</th>
                 </tr>
             </thead>
-            <tbody id="all-freshness-body">
-                <tr>
-                    <td><strong>B-001</strong></td>
-                    <td>Tank 1</td>
-                    <td>25.0</td>
-                    <td>7.1</td>
-                    <td>82%</td>
-                    <td><span class="status fresh"><i class="fa-solid fa-check"></i> Fresh</span></td>
-                    <td>10:20 AM</td>
-                </tr>
-                <tr>
-                    <td><strong>B-002</strong></td>
-                    <td>Tank 2</td>
-                    <td>28.5</td>
-                    <td>6.9</td>
-                    <td>88%</td>
-                    <td><span class="status moderate"><i class="fa-solid fa-triangle-exclamation"></i> Moderate</span></td>
-                    <td>10:18 AM</td>
-                </tr>
-                <tr>
-                    <td><strong>B-003</strong></td>
-                    <td>Tank 3</td>
-                    <td>31.2</td>
-                    <td>6.4</td>
-                    <td>94%</td>
-                    <td><span class="status spoiled"><i class="fa-solid fa-circle-exclamation"></i> Spoiled</span></td>
-                    <td>10:10 AM</td>
-                </tr>
-            </tbody>
+            <tbody id="all-freshness-body"></tbody>
         </table>
     </section>
 
@@ -172,19 +144,17 @@
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-                <tbody id="fresh-body">
-                    <tr><td><strong>B-001</strong></td><td>Tank 1</td><td>25.0</td><td>7.1</td><td>82%</td><td>10:20 AM</td></tr>
-                </tbody>
+                <tbody id="fresh-body"></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<div class="qc-modal-overlay" id="modal-moderate">
+<div class="qc-modal-overlay" id="modal-issues">
     <div class="qc-modal wide">
         <div class="qc-modal-header yellow">
-            <h3><i class="fa-solid fa-triangle-exclamation"></i> Moderate Batches</h3>
-            <button class="qc-modal-close" data-close="modal-moderate"><i class="fa-solid fa-xmark"></i></button>
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> With Issues Batches</h3>
+            <button class="qc-modal-close" data-close="modal-issues"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
@@ -198,9 +168,7 @@
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-                <tbody id="moderate-body">
-                    <tr><td><strong>B-002</strong></td><td>Tank 2</td><td>28.5</td><td>6.9</td><td>88%</td><td>10:18 AM</td></tr>
-                </tbody>
+                <tbody id="issues-body"></tbody>
             </table>
         </div>
     </div>
@@ -224,9 +192,7 @@
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-                <tbody id="spoiled-body">
-                    <tr><td><strong>B-003</strong></td><td>Tank 3</td><td>31.2</td><td>6.4</td><td>94%</td><td>10:10 AM</td></tr>
-                </tbody>
+                <tbody id="spoiled-body"></tbody>
             </table>
         </div>
     </div>
@@ -234,6 +200,7 @@
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
+<script type="module" src="FreshnessEvaluation.js"></script>
 
 <script>
     (function () {
@@ -249,7 +216,7 @@
         }
         
         document.getElementById('btn-fresh')?.addEventListener('click', () => openModal('modal-fresh'));
-        document.getElementById('btn-moderate')?.addEventListener('click', () => openModal('modal-moderate'));
+        document.getElementById('btn-issues')?.addEventListener('click', () => openModal('modal-issues'));
         document.getElementById('btn-spoiled')?.addEventListener('click', () => openModal('modal-spoiled'));
 
         document.querySelectorAll('.qc-modal-close').forEach(btn => {
