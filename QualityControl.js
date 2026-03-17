@@ -128,13 +128,11 @@ document.getElementById("btn-new-inspection")
     .addEventListener("click", async () => {
         editingRecordId = null;
 
-        // Update modal title + button label for "new" mode
         document.getElementById("modal-inspection-title").innerHTML =
             '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
         document.getElementById("save-inspection-btn").innerHTML =
             '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
 
-        // Generate fresh batch ID
         const batchInput    = document.getElementById("batch-code");
         batchInput.value    = "Generating...";
         batchInput.readOnly = true;
@@ -153,13 +151,11 @@ document.getElementById("btn-new-inspection")
 async function openEditModal(id, data) {
     editingRecordId = id;
 
-    // Update modal title + button label for "edit" mode
     document.getElementById("modal-inspection-title").innerHTML =
         '<i class="fa-solid fa-pen-to-square"></i> Edit Inspection Log';
     document.getElementById("save-inspection-btn").innerHTML =
         '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
 
-    // Pre-fill batch details
     const batchInput        = document.getElementById("batch-code");
     batchInput.value        = data.batchCode    || "";
     batchInput.readOnly     = true;
@@ -170,11 +166,9 @@ async function openEditModal(id, data) {
     document.getElementById("temperature").value         = data.temperature ?? "4.0";
     document.getElementById("ph-level").value            = data.phLevel     ?? "6.5";
 
-    // Product type
     const productSelect = document.getElementById("product-type");
     productSelect.value = data.productType || "";
 
-    // Pre-fill criteria
     const criteriaRows = document.querySelectorAll("#new-inspection-tbody tr");
     criteriaRows.forEach(row => {
         const name   = row.querySelector(".criteria-select").dataset.criteria;
@@ -214,7 +208,6 @@ document.getElementById("save-inspection-btn")
 
         try {
             if (editingRecordId) {
-                // ── UPDATE existing record ──
                 await updateDoc(doc(db, "inspections", editingRecordId), {
                     batchCode,
                     productType,
@@ -227,7 +220,6 @@ document.getElementById("save-inspection-btn")
                 });
                 alert("Inspection updated successfully!");
             } else {
-                // ── CREATE new record ──
                 await addDoc(collection(db, "inspections"), {
                     batchCode,
                     productType,
@@ -280,13 +272,11 @@ async function resetInspectionForm() {
 
     calculateScore();
 
-    // Reset modal title/button back to "new" state
     document.getElementById("modal-inspection-title").innerHTML =
         '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
     document.getElementById("save-inspection-btn").innerHTML =
         '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
 
-    // Re-generate batch ID
     const batchInput        = document.getElementById("batch-code");
     batchInput.value        = "Generating...";
     batchInput.readOnly     = true;
@@ -395,21 +385,22 @@ async function loadInspectionsByStatus() {
                     detailCell = (r.criteria || []).filter(c => c.assessment === "Rejected").map(c => c.criteriaName).join(", ") || "—";
                 }
 
-                // Store full record as JSON on the button so edit modal can pre-fill everything
                 const safeData = encodeURIComponent(JSON.stringify({
-                    batchCode:    r.batchCode    ?? "",
-                    productType:  r.productType  ?? "",
-                    location:     r.location     ?? "",
-                    temperature:  r.temperature  ?? 4.0,
-                    phLevel:      r.phLevel      ?? 6.5,
+                    batchCode:     r.batchCode     ?? "",
+                    productType:   r.productType   ?? "",
+                    location:      r.location      ?? "",
+                    temperature:   r.temperature   ?? 4.0,
+                    phLevel:       r.phLevel        ?? 6.5,
                     overallStatus: r.overallStatus ?? "",
-                    criteria:     r.criteria     ?? []
+                    criteria:      r.criteria      ?? []
                 }));
 
+                // Inspector name included in all three status modal tables
                 tr.innerHTML = `
-                    <td><strong>${r.batchCode ?? ""}</strong></td>
-                    <td>${r.productType       ?? ""}</td>
-                    <td>${r.location          ?? ""}</td>
+                    <td><strong>${r.batchCode    ?? ""}</strong></td>
+                    <td>${r.inspectorName        ?? "—"}</td>
+                    <td>${r.productType          ?? ""}</td>
+                    <td>${r.location             ?? ""}</td>
                     <td>${detailCell}</td>
                     <td>${formatDate(r.createdAt)}</td>
                     <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
@@ -441,7 +432,6 @@ function attachEditListeners() {
             const id   = btn.dataset.id;
             const data = JSON.parse(decodeURIComponent(btn.dataset.record));
 
-            // Close whichever status modal is currently open before opening the inspection form
             ["modal-passed", "modal-issues", "modal-rejected"].forEach(modalId => {
                 document.getElementById(modalId)?.classList.remove("active");
             });

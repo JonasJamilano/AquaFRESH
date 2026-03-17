@@ -195,7 +195,6 @@
 <div class="qc-modal-overlay" id="modal-new-inspection">
     <div class="qc-modal wide">
         <div class="qc-modal-header teal">
-            <!-- Title is swapped by JS between "New Inspection Log" and "Edit Inspection Log" -->
             <h3 id="modal-inspection-title"><i class="fa-solid fa-clipboard-list"></i> New Inspection Log</h3>
             <button class="qc-modal-close" data-close="modal-new-inspection" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
@@ -308,7 +307,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
+                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="passed-body"></tbody>
@@ -331,7 +330,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Issue Noted</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
+                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Issue Noted</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="issues-body"></tbody>
@@ -354,7 +353,7 @@
             <table class="qc-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th><th>Product</th><th>Location</th><th>Reason for Rejection</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
+                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Reason for Rejection</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="rejected-body"></tbody>
@@ -399,19 +398,16 @@
             empty.style.display = rows.children.length === 0 ? 'block' : 'none';
         }
 
-        /* Status card open triggers (New Inspection is handled in QualityControl.js) */
         document.getElementById('btn-passed').addEventListener('click',   () => openModal('modal-passed'));
         document.getElementById('btn-issues').addEventListener('click',   () => openModal('modal-issues'));
         document.getElementById('btn-rejected').addEventListener('click', () => openModal('modal-rejected'));
 
-        /* Keyboard support for status cards */
         ['btn-passed', 'btn-issues', 'btn-rejected'].forEach(id => {
             document.getElementById(id).addEventListener('keydown', e => {
                 if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
             });
         });
 
-        /* Auto-close new/edit inspection modal after save */
         const saveBtn = document.getElementById('save-inspection-btn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
@@ -419,26 +415,22 @@
             }, { capture: false });
         }
 
-        /* Close buttons (x) */
         document.querySelectorAll('.qc-modal-close').forEach(btn => {
             btn.addEventListener('click', () => closeModal(btn.dataset.close));
         });
 
-        /* Click outside modal box to close */
         document.querySelectorAll('.qc-modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', e => {
                 if (e.target === overlay) closeModal(overlay.id);
             });
         });
 
-        /* Esc key */
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.qc-modal-overlay.active').forEach(el => closeModal(el.id));
             }
         });
 
-        /* Keep modal count badges in sync */
         const countMap = {
             'passed-count':   'modal-passed-count',
             'issues-count':   'modal-issues-count',
