@@ -31,11 +31,45 @@ async function initPage() {
 
     loadDrivers();
     setupLocationAutocomplete();
+
+    // Show the next delivery code as soon as the modal opens
+    document.getElementById("btn-new-delivery")?.addEventListener("click", async () => {
+      const preview = document.getElementById("deliveryCodeDisplay");
+      if (preview) {
+        preview.value = "Generating...";
+        preview.value = await generateDeliveryCode();
+      }
+    });
   }
 
   initMap();
   listenToDeliveries();
 }
+
+
+// ==========================
+// Auto-Generate Delivery Code
+// ==========================
+async function generateDeliveryCode() {
+  try {
+    const snapshot = await getDocs(deliveriesCol);
+    let maxNum = 0;
+    snapshot.forEach(d => {
+      const code  = d.data().deliveryCode || "";
+      const match = code.match(/^D-(\d+)$/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+    const nextNum = maxNum + 1;
+    return "D-" + String(nextNum).padStart(2, "0");
+  } catch (e) {
+    console.error("Could not generate delivery code:", e);
+    return "D-01";
+  }
+}
+
 
 /* ===================
    MAP INITIALIZATION
@@ -107,18 +141,12 @@ function selectLocation(place, type) {
 
 /* =====================================================================
    LOAD BATCHES
-   Rules:
-     1. Only inspections with overallStatus === "Passed" are candidates.
-     2. If a batch is already linked to ANY delivery (pending, en_route,
-        delayed, or delivered), it is hidden — it has already been used.
-     3. Only truly unscheduled Passed batches appear in the dropdown.
 ======================================================================= */
 async function loadBatches() {
   const select = document.getElementById("batchSelect");
   if (select) select.innerHTML = `<option value="">Select Batch</option>`;
 
   try {
-    // Step 1: Get all Passed inspections
     const passedSnap = await getDocs(
       query(inspectionsCol, where("overallStatus", "==", "Passed"))
     );
@@ -128,7 +156,6 @@ async function loadBatches() {
       return;
     }
 
-    // Step 2: Collect all batchIds already used in any delivery
     const deliveriesSnap = await getDocs(deliveriesCol);
     const usedBatchIds   = new Set();
     deliveriesSnap.forEach(d => {
@@ -136,19 +163,15 @@ async function loadBatches() {
       if (data.batchId) usedBatchIds.add(data.batchId);
     });
 
-    // Step 3: Populate batchesMap for ALL passed batches (so table rows
-    //         can still resolve a batch name even after it's been used)
     passedSnap.forEach(docSnap => {
       const data      = docSnap.data();
       const batchCode = data.batchCode || docSnap.id;
       batchesMap[docSnap.id] = batchCode;
     });
 
-    // Step 4: Only add UNUSED batches to the dropdown
     let availableCount = 0;
     passedSnap.forEach(docSnap => {
-      if (usedBatchIds.has(docSnap.id)) return; // already scheduled — skip
-
+      if (usedBatchIds.has(docSnap.id)) return;
       availableCount++;
       if (select) {
         select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
@@ -178,16 +201,18 @@ async function loadDrivers() {
    CREATE DELIVERY
 ===================== */
 window.createDelivery = async function () {
-  const deliveryCode = document.getElementById("deliveryCode").value;
-  const batchId      = document.getElementById("batchSelect").value;
-  const driverId     = document.getElementById("driverSelect").value;
-  const truck        = document.getElementById("truckSelect").value;
-  const eta          = document.getElementById("eta").value;
+  const batchId  = document.getElementById("batchSelect").value;
+  const driverId = document.getElementById("driverSelect").value;
+  const truck    = document.getElementById("truckSelect").value;
+  const eta      = document.getElementById("eta").value;
 
-  if (!deliveryCode || !batchId || !driverId || !truck || !selectedOrigin.lat || !selectedDest.lat) {
+  if (!batchId || !driverId || !truck || !selectedOrigin.lat || !selectedDest.lat) {
     alert("Please fill all fields, select a truck, and pick valid locations from the dropdown.");
     return;
   }
+
+  // Use the already-displayed code so it matches what the user saw
+  const deliveryCode = document.getElementById("deliveryCodeDisplay").value || await generateDeliveryCode();
 
   const driverSnap = await getDocs(query(usersCol, where("__name__", "==", driverId)));
   let driverName   = "";
@@ -213,17 +238,16 @@ window.createDelivery = async function () {
     avgTemp:     null
   });
 
-  alert("Delivery created successfully!");
+  alert(`Delivery ${deliveryCode} created successfully!`);
 
-  // Reset form fields
-  document.getElementById("deliveryCode").value = "";
-  document.getElementById("origin").value       = "";
-  document.getElementById("destination").value  = "";
-  document.getElementById("truckSelect").value  = "";
+  // Reset form
+  document.getElementById("origin").value      = "";
+  document.getElementById("destination").value = "";
+  document.getElementById("truckSelect").value = "";
+  document.getElementById("deliveryCodeDisplay").value = "";
   selectedOrigin = { lat: null, lng: null, name: "" };
   selectedDest   = { lat: null, lng: null, name: "" };
 
-  // Refresh dropdown — the batch just used will now be hidden
   await loadBatches();
 
   if (window.closeModal) window.closeModal("modal-new-delivery");
@@ -270,12 +294,10 @@ function listenToDeliveries() {
     docsArray.forEach(d => {
       const id = d.id;
 
-      // ── MAP: clean up when delivered ──
       if (d.status === "delivered") {
         if (deliveryMarkers[id]) { map.removeLayer(deliveryMarkers[id]); delete deliveryMarkers[id]; }
         if (deliveryRoutes[id])  { map.removeControl(deliveryRoutes[id]); delete deliveryRoutes[id]; }
       } else {
-        // Draw route
         if (d.originLat && d.destLat && !deliveryRoutes[id]) {
           deliveryRoutes[id] = L.Routing.control({
             waypoints:          [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
@@ -308,13 +330,11 @@ function listenToDeliveries() {
           });
         }
 
-        // Focus zoom
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('focus') === id && !isNavigating) {
           map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
         }
 
-        // Update marker
         if (d.currentLat && d.currentLng) {
           if (!deliveryMarkers[id]) {
             deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
@@ -325,17 +345,12 @@ function listenToDeliveries() {
             deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
           }
         }
-        // AUTO-RESUME GPS TRACKING AFTER PAGE REFRESH
-        if (
-          role === "delivery" &&
-          d.status === "en_route" &&
-          !isNavigating
-        ) {
+
+        if (role === "delivery" && d.status === "en_route" && !isNavigating) {
           startTracking(id, d.destLat, d.destLng);
         }
       }
 
-      // ── TABLE ROWS ──
       let actionButton = "";
       if (role === "delivery") {
         if (d.status === "pending")  actionButton = `<button class="start-btn"   onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
@@ -404,7 +419,6 @@ window.updateStatus = async function (id, status, destLat = null, destLng = null
   if (status === "delivered") {
     updateData.deliveredAt = serverTimestamp();
     stopTracking();
-    // Refresh the dropdown — the delivered batch stays hidden
     await loadBatches();
   }
 

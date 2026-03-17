@@ -14,7 +14,6 @@
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
-
 </head>
 <body>
     
@@ -31,7 +30,7 @@
             <li data-role="delivery"><a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
             <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html" class="active"><i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span></a></li>
-            <li data-role="superadmin admin manager inspector"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
+            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
@@ -150,6 +149,7 @@
 
 </main>
 
+<!-- ===================== MODAL: New Delivery ===================== -->
 <div class="qc-modal-overlay" id="modal-new-delivery">
     <div class="qc-modal wide">
         <div class="qc-modal-header teal">
@@ -158,12 +158,15 @@
         </div>
         <div class="qc-modal-body">
             <div class="ni-divider"><i class="fa-solid fa-circle-info"></i> Delivery Details</div>
-            
             <div class="ni-modal-grid">
+
+                <!-- Auto-generated delivery code shown as read-only -->
                 <div class="ni-form-group">
-                    <label>Delivery Code</label>
-                    <input type="text" id="deliveryCode" placeholder="e.g. D-010">
+                    <label>Delivery Code <span style="font-size:0.72rem;color:#94a3b8;font-weight:400;">(auto-generated)</span></label>
+                    <input type="text" id="deliveryCodeDisplay" readonly
+                        style="background:#f1f5f9;color:#0f172a;font-weight:700;cursor:not-allowed;">
                 </div>
+
                 <div class="ni-form-group">
                     <label>Select Batch</label>
                     <select id="batchSelect"></select>
@@ -172,7 +175,6 @@
                     <label>Assign Driver</label>
                     <select id="driverSelect"></select>
                 </div>
-                
                 <div class="ni-form-group">
                     <label>Select Truck</label>
                     <select id="truckSelect">
@@ -184,7 +186,7 @@
                 </div>
             </div>
 
-            <div class="ni-divider"><i class="fa-solid fa-map-location-dot"></i> Routing Info</div>
+            <div class="ni-divider" style="margin-top:20px;"><i class="fa-solid fa-map-location-dot"></i> Routing Info</div>
             <div class="ni-modal-grid">
                 <div class="ni-form-group position-relative">
                     <label>Origin</label>
@@ -209,6 +211,7 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: Pending ===================== -->
 <div class="qc-modal-overlay" id="modal-pending">
     <div class="qc-modal wide">
         <div class="qc-modal-header yellow">
@@ -224,6 +227,7 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: En Route ===================== -->
 <div class="qc-modal-overlay" id="modal-enroute">
     <div class="qc-modal wide">
         <div class="qc-modal-header blue">
@@ -239,6 +243,7 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: Delivered ===================== -->
 <div class="qc-modal-overlay" id="modal-delivered">
     <div class="qc-modal wide">
         <div class="qc-modal-header green">
@@ -254,6 +259,7 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: Delayed ===================== -->
 <div class="qc-modal-overlay" id="modal-delayed">
     <div class="qc-modal wide">
         <div class="qc-modal-header red">
@@ -287,20 +293,20 @@
             if (el) el.classList.remove('active');
             document.body.style.overflow = '';
         }
-        
-        // Triggers
-        document.getElementById('btn-new-delivery')?.addEventListener('click', () => openModal('modal-new-delivery'));
-        document.getElementById('btn-pending')?.addEventListener('click', () => openModal('modal-pending'));
-        document.getElementById('btn-enroute')?.addEventListener('click', () => openModal('modal-enroute'));
-        document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
-        document.getElementById('btn-delayed')?.addEventListener('click', () => openModal('modal-delayed'));
 
-        // Close functions
+        document.getElementById('btn-pending')?.addEventListener('click',   () => openModal('modal-pending'));
+        document.getElementById('btn-enroute')?.addEventListener('click',   () => openModal('modal-enroute'));
+        document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
+        document.getElementById('btn-delayed')?.addEventListener('click',   () => openModal('modal-delayed'));
+
+        // btn-new-delivery opens modal — code preview is handled in TransportDelivery.js
+        document.getElementById('btn-new-delivery')?.addEventListener('click', () => openModal('modal-new-delivery'));
+
         document.querySelectorAll('.qc-modal-close').forEach(btn => {
             btn.addEventListener('click', () => closeModal(btn.dataset.close));
         });
         document.querySelectorAll('.ni-btn-clear').forEach(btn => {
-            if(btn.dataset.close) btn.addEventListener('click', () => closeModal(btn.dataset.close));
+            if (btn.dataset.close) btn.addEventListener('click', () => closeModal(btn.dataset.close));
         });
         document.querySelectorAll('.qc-modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
