@@ -101,7 +101,10 @@ async function loadFreshnessData() {
       }
 
       const row = `
-        <tr>
+        <tr 
+          data-batch="${(d.batchCode ?? "").toLowerCase()}" 
+          data-status="${d.overallStatus}"
+        >
           <td><strong>${d.batchCode ?? "-"}</strong></td>
           <td>${d.location ?? "-"}</td>
           <td>${temp}</td>
@@ -157,6 +160,61 @@ async function loadFreshnessData() {
     }
 
   }
+
+}
+
+/* ================= SEARCH + FILTER ================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const filterBtn = document.getElementById("filterBtn");
+  const dropdown = document.getElementById("filterDropdown");
+  const searchInput = document.getElementById("searchBatch");
+
+  // Toggle dropdown
+  filterBtn?.addEventListener("click", () => {
+    dropdown.classList.toggle("active");
+  });
+
+  // SEARCH (LIVE 🔥)
+  searchInput?.addEventListener("input", applyFilters);
+
+  // APPLY FILTER BUTTON
+  document.getElementById("applyFilter")?.addEventListener("click", () => {
+    applyFilters();
+    dropdown.classList.remove("active");
+  });
+
+  // CLEAR FILTER
+  document.getElementById("clearFilter")?.addEventListener("click", () => {
+
+    document.getElementById("filterStatus").value = "";
+    searchInput.value = "";
+
+    applyFilters();
+  });
+
+});
+
+/* MAIN FILTER FUNCTION */
+function applyFilters() {
+
+  const search = document.getElementById("searchBatch").value.toLowerCase();
+  const status = document.getElementById("filterStatus").value;
+
+  const rows = document.querySelectorAll("#all-freshness-body tr");
+
+  rows.forEach(row => {
+
+    const rowBatch = row.dataset.batch || "";
+    const rowStatus = row.dataset.status || "";
+
+    const matchSearch = !search || rowBatch.includes(search);
+    const matchStatus = !status || rowStatus === status;
+
+    row.style.display = (matchSearch && matchStatus) ? "" : "none";
+
+  });
 
 }
 

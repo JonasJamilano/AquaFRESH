@@ -1,3 +1,5 @@
+
+
 /* =====================
    GLOBAL & TYPOGRAPHY
 ===================== */
@@ -256,3 +258,149 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 }
 .topbar.collapsed { margin-left: 80px; width: calc(100% - 80px); }
 .content.collapsed { margin-left: 80px; }
+
+/* =======================
+   FILTER UI
+======================= */
+
+/* HEADER ACTIONS */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* tighter spacing */
+}
+
+/* SEARCH BOX (MATCH USER MANAGEMENT) */
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 6px 10px;
+    height: 36px;
+    width: 240px;
+}
+
+.search-box i {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    margin-left: 8px;
+    width: 100%;
+}
+
+/* FILTER BUTTON ICON STYLE */
+.filter-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #4dd0c8;
+    border: none;
+    color: #003b3b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-btn:hover {
+    background: #2bb8ae;
+}
+
+/* DROPDOWN */
+.filter-dropdown {
+    position: absolute;
+    right: 32px;
+    margin-top: 10px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    width: 240px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: none;
+}
+
+.filter-dropdown.active {
+    display: block;
+}
+
+/* BUTTON ALIGNMENT 🔥 */
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+/* =========================
+   FILTER DROPDOWN DESIGN 
+========================= */
+
+/* SELECT (CLEAN LOOK) */
+.filter-dropdown select {
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 0 12px;
+    font-size: 14px;
+    background: #ffffff;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* LABEL */
+.filter-dropdown label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+/* BUTTON CONTAINER */
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+/* APPLY BUTTON */
+.btn.apply {
+    flex: 1;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #10b981;
+    color: #ffffff;
+    transition: 0.2s;
+}
+
+.btn.apply:hover {
+    background: #059669;
+}
+
+/* CLEAR BUTTON */
+.btn.clear {
+    flex: 1;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #f1f5f9;
+    color: #475569;
+    transition: 0.2s;
+}
+
+.btn.clear:hover {
+    background: #e2e8f0;
+}

@@ -73,7 +73,7 @@ async function loadUsers() {
     const toggleText = user.status === "active" ? "Deactivate" : "Activate";
 
     const row = `
-      <tr>
+      <tr data-role="${user.role}" data-status="${user.status}">
         <td>${user.customId || user.id}</td>
         <td>${user.fullName}</td>
         <td>${user.email}</td>
@@ -105,10 +105,11 @@ async function loadUsers() {
             : ""
         }
 
-        <button onclick="toggleStatus('${user.id}', '${user.status}')"
-          class="btn ${user.status === "active" ? "deactivate" : "activate"}">
-          ${toggleText}
-        </button>
+              <button onclick="toggleStatus('${user.id}', '${user.status}')"
+              class="btn icon-btn ${user.status === "active" ? "deactivate" : "activate"}"
+              title="${toggleText}">
+              <i class="fa-solid ${user.status === "active" ? "fa-ban" : "fa-check"}"></i>
+              </button>
         </td>
       </tr>
     `;
@@ -119,6 +120,80 @@ async function loadUsers() {
 
 window.loadUsers = loadUsers;
 loadUsers();
+
+/* =========================
+   SEARCH + FILTER
+========================= */
+
+const searchInput = document.getElementById("searchInput");
+const roleFilter = document.getElementById("roleFilter");
+const statusFilter = document.getElementById("statusFilter");
+
+function filterTable() {
+  const search = searchInput.value.toLowerCase();
+  const role = roleFilter.value;
+  const status = statusFilter.value;
+
+  const rows = document.querySelectorAll(".user-table tbody tr");
+
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const rowRole = row.dataset.role;
+    const rowStatus = row.dataset.status;
+
+    const matchSearch = text.includes(search);
+    const matchRole = !role || rowRole === role;
+    const matchStatus = !status || rowStatus === status;
+
+    row.style.display =
+      matchSearch && matchRole && matchStatus ? "" : "none";
+  });
+}
+
+/* =========================
+   NEW FILTER BUTTON SYSTEM
+========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const filterBtn = document.getElementById("filterBtn");
+  const dropdown = document.getElementById("filterDropdown");
+
+  const searchInput = document.getElementById("searchInput");
+  const roleFilter = document.getElementById("roleFilter");
+  const statusFilter = document.getElementById("statusFilter");
+
+  // ✅ TOGGLE DROPDOWN
+  filterBtn?.addEventListener("click", () => {
+    dropdown.classList.toggle("active");
+  });
+
+  // ✅ APPLY FILTER
+  document.getElementById("applyFilter")?.addEventListener("click", () => {
+    filterTable();
+    dropdown.classList.remove("active");
+  });
+
+  // ✅ CLEAR FILTER
+  document.getElementById("clearFilter")?.addEventListener("click", () => {
+    roleFilter.value = "";
+    statusFilter.value = "";
+    searchInput.value = "";
+
+    filterTable();
+  });
+
+  // ✅ SEARCH (LIVE)
+  searchInput?.addEventListener("input", filterTable);
+
+  // ✅ CLICK OUTSIDE TO CLOSE (🔥 NICE UX)
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && !filterBtn.contains(e.target)) {
+      dropdown.classList.remove("active");
+    }
+  });
+
+});
 
 /* =========================
    TOGGLE STATUS

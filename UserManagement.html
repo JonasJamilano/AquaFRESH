@@ -125,7 +125,58 @@
 
     <!-- USER TABLE -->
     <section class="panel">
-        <h3>System Users</h3>
+      <div class="panel-header-flex">
+
+    <h3>System Users</h3>
+
+    <div class="header-actions">
+
+                    <!-- SEARCH -->
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search users..." />
+                    </div>
+
+                     <div class="filter-wrapper"></div>
+
+                        <!-- FILTER BUTTON -->
+                        <button id="filterBtn" class="filter-btn">
+                            <i class="fa-solid fa-sliders"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- FILTER DROPDOWN -->
+                <div class="filter-dropdown" id="filterDropdown">
+
+                    <div class="filter-group">
+                        <label>Role</label>
+                        <select id="roleFilter">
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="manager">Manager</option>
+                            <option value="inspector">Inspector</option>
+                            <option value="delivery">Delivery</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="clearFilter" class="btn clear">Clear</button>
+                        <button id="applyFilter" class="btn apply">Apply</button>
+                    </div>
+
+                </div>
 
         <table class="user-table">
             <thead>

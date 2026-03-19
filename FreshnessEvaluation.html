@@ -102,10 +102,42 @@
         </div>
     </section>
 
-    <section class="panel">
-        <div class="panel-header-flex">
+            <section class="panel">
+                <div class="panel-header-flex">
             <h3>Batch Evaluation Data</h3>
-            <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Real-Time Sync</span>
+
+            <div class="header-actions">
+
+                <!-- SEARCH -->
+                <div class="search-box small">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchBatch" placeholder="Search Batch ID">
+                </div>
+
+                <!-- FILTER BUTTON -->
+                <button id="filterBtn" class="filter-btn">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+                 </div>
+            </div>
+
+             <div class="filter-dropdown" id="filterDropdown">
+
+            <div class="filter-group">
+                <label>Freshness Status</label>
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="Passed">Fresh</option>
+                    <option value="With Issues">With Issues</option>
+                    <option value="Spoiled">Spoiled</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button id="applyFilter" class="btn apply">Apply</button>
+                <button id="clearFilter" class="btn clear">Clear</button>
+            </div>
+
         </div>
 
         <table class="evaluation-table qc-table">
@@ -141,6 +173,7 @@
                         <th><i class="fa-solid fa-temperature-half"></i> Temp</th>
                         <th><i class="fa-solid fa-droplet"></i> pH Level</th>
                         <th><i class="fa-solid fa-wind"></i> Humidity</th>
+                        <th>Freshness Status</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>
@@ -165,6 +198,7 @@
                         <th><i class="fa-solid fa-temperature-half"></i> Temp</th>
                         <th><i class="fa-solid fa-droplet"></i> pH Level</th>
                         <th><i class="fa-solid fa-wind"></i> Humidity</th>
+                        <th>Freshness Status</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>
@@ -189,6 +223,7 @@
                         <th><i class="fa-solid fa-temperature-half"></i> Temp</th>
                         <th><i class="fa-solid fa-droplet"></i> pH Level</th>
                         <th><i class="fa-solid fa-wind"></i> Humidity</th>
+                        <th>Freshness Status</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>

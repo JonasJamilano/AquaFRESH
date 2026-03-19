@@ -172,6 +172,10 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
+.panel {
+    overflow-x: auto;
+}
+
 /* MODERN TABLE */
 .user-table {
     width: 100%;
@@ -209,6 +213,24 @@ body {
     background-color: #f8fafc;
 }
 
+/* Add clean spacing from table */
+.user-table {
+    margin-top: 10px;
+}
+
+/* Fix overflow buttons */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap; /* ✅ force single line */
+}
+
+/* Table scroll fix */
+.panel {
+    overflow-x: auto;
+}
+
 /* STATUS BADGES */
 .status {
     display: inline-flex;
@@ -235,6 +257,12 @@ body {
 .actions {
     display: flex;
     gap: 8px;
+}
+
+.actions .btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap; /* prevent text breaking */
 }
 
 /* Base Button */
@@ -716,4 +744,119 @@ transform:translateX(4px);
   justify-content: flex-end;
   gap: 12px;
   margin-top: 20px;
+}
+
+/* SEARCH BOX (UNIFIED STYLE) */
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 6px 10px;
+    height: 36px;
+    width: 240px;
+}
+
+.search-box i {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    margin-left: 8px;
+    width: 100%;
+}
+
+/* FILTER WRAPPER (ANCHOR FIX) */
+.filter-wrapper {
+    position: relative;
+}
+
+/* =======================
+   FILTER UI 
+======================= */
+
+/* HEADER ACTIONS */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* FILTER BUTTON */
+.filter-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #4dd0c8;
+    border: none;
+    color: #003b3b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-btn:hover {
+    background: #2bb8ae;
+}
+
+/* DROPDOWN */
+.filter-dropdown {
+    position: absolute;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    width: 260px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: none;
+    z-index: 10;
+}
+
+.filter-dropdown.active {
+    display: block;
+}
+
+/* FILTER GROUP */
+.filter-dropdown .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.filter-dropdown label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.filter-dropdown select {
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 0 10px;
+}
+
+/* BUTTON ALIGNMENT */
+.filter-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* BUTTONS */
+.btn.apply {
+    background: #10b981;
+    color: white;
+    padding: 6px 14px;
+}
+
+.btn.clear {
+    background: #e2e8f0;
+    padding: 6px 14px;
 }
