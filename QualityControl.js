@@ -245,11 +245,20 @@ async function openInspectionModal(category) {
 document.getElementById("choose-fish").addEventListener("click",  () => openInspectionModal("fish"));
 document.getElementById("choose-shrimp").addEventListener("click", () => openInspectionModal("shrimp"));
 
-// "Change Type" button inside inspection modal — goes back to chooser
-document.getElementById("ni-change-type-btn").addEventListener("click", () => {
-    document.getElementById("modal-new-inspection").classList.remove("active");
-    document.getElementById("modal-product-chooser").classList.add("active");
-    document.body.style.overflow = "hidden";
+// "Change Type" button — toggles directly between fish and shrimp
+document.getElementById("ni-change-type-btn").addEventListener("click", async () => {
+    const newCategory = currentProductCategory === "fish" ? "shrimp" : "fish";
+    currentProductCategory = newCategory;
+
+    updateProductBadge(newCategory);
+    renderProductOptions(newCategory);
+    renderCriteriaRows(newCategory);
+
+    // Reset location and regenerate batch ID
+    document.getElementById("inspection-location").value = "";
+    const batchInput = document.getElementById("batch-code");
+    batchInput.value = "Generating...";
+    batchInput.value = await generateBatchId();
 });
 
 
