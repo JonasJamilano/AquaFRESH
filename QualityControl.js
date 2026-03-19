@@ -18,6 +18,33 @@ const currentInspectorName = localStorage.getItem("userFullName") || "Unknown";
 // Tracks whether we're editing an existing record (stores doc ID) or creating new
 let editingRecordId = null;
 
+// Current product category: "fish" | "shrimp"
+let currentProductCategory = "fish";
+
+
+// ==========================
+// Criteria Config per type
+// ==========================
+const CRITERIA_CONFIG = {
+    fish: [
+        { name: "Eye Clarity",    weight: 0.30, label: "30%" },
+        { name: "Gill Color",     weight: 0.25, label: "25%" },
+        { name: "Odor",           weight: 0.25, label: "25%" },
+        { name: "Body Firmness",  weight: 0.20, label: "20%" },
+    ],
+    shrimp: [
+        { name: "Shell Condition", weight: 0.30, label: "30%" },
+        { name: "Odor",            weight: 0.30, label: "30%" },
+        { name: "Texture",         weight: 0.25, label: "25%" },
+        { name: "Tail Appearance", weight: 0.15, label: "15%" },
+    ]
+};
+
+const PRODUCT_OPTIONS = {
+    fish:   ["Bangus", "Tilapia"],
+    shrimp: ["Fresh Water Shrimp"]
+};
+
 
 // ==========================
 // Auto-Generate Batch ID
@@ -43,12 +70,71 @@ async function generateBatchId() {
 
 
 // ==========================
+// Render Criteria Rows
+// ==========================
+function renderCriteriaRows(category) {
+    const tbody = document.getElementById("new-inspection-tbody");
+    tbody.innerHTML = "";
+    CRITERIA_CONFIG[category].forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${c.name}</strong></td>
+            <td><span class="weight-badge">${c.label}</span></td>
+            <td>
+                <select class="criteria-select" data-criteria="${c.name}" data-weight="${c.weight}">
+                    <option value="Excellent">Excellent</option>
+                    <option value="Acceptable">Acceptable</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </td>
+            <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
+        `;
+        tbody.appendChild(tr);
+    });
+    calculateScore();
+}
+
+
+// ==========================
+// Render Product Type Options
+// ==========================
+function renderProductOptions(category) {
+    const select = document.getElementById("product-type");
+    select.innerHTML = '<option value="" disabled selected>Select Product</option>';
+    PRODUCT_OPTIONS[category].forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p;
+        opt.textContent = p;
+        select.appendChild(opt);
+    });
+}
+
+
+// ==========================
+// Update Product Badge in Inspection Modal
+// ==========================
+function updateProductBadge(category) {
+    const badge = document.getElementById("ni-product-badge");
+    const label = document.getElementById("ni-product-badge-label");
+    badge.className = "ni-product-badge " + category;
+    if (category === "fish") {
+        badge.querySelector("i").className = "fa-solid fa-fish";
+        label.textContent = "Fish Inspection";
+    } else {
+        badge.querySelector("i").className = "fa-solid fa-shrimp";
+        label.textContent = "Shrimp Inspection";
+    }
+}
+
+
+// ==========================
 // Helper: Collect Criteria Data
 // ==========================
 function getCriteriaData() {
     const rows = document.querySelectorAll("#new-inspection-tbody tr");
     return Array.from(rows).map(row => ({
         criteriaName: row.querySelector(".criteria-select").dataset.criteria,
+        weight:       parseFloat(row.querySelector(".criteria-select").dataset.weight),
         assessment:   row.querySelector(".criteria-select").value,
         remarks:      row.querySelector(".criteria-remarks").value.trim() || ""
     }));
@@ -57,36 +143,29 @@ function getCriteriaData() {
 
 // ==========================
 // Calculate Freshness Score
+// Fish:   Score = (Eye×0.3)+(Gill×0.25)+(Odor×0.25)+(Firmness×0.2) × 20  → 0-100
+// Shrimp: Score = (Shell×0.3)+(Odor×0.3)+(Texture×0.25)+(Tail×0.15) × 20 → 0-100
+// Thresholds: 80-100 = Passed, 60-79 = With Issues, <60 = Rejected
 // ==========================
 function calculateScore() {
-    const scoreMap = { "Excellent": 100, "Acceptable": 50, "Rejected": 0 };
+    const scoreMap = { "Excellent": 5, "Acceptable": 3, "Rejected": 1 };
 
-    let sensoryTotal = 0;
+    let weightedSum = 0;
     document.querySelectorAll(".criteria-select").forEach(sel => {
-        sensoryTotal += scoreMap[sel.value] ?? 0;
+        const rawScore = scoreMap[sel.value] ?? 1;
+        const weight   = parseFloat(sel.dataset.weight) || 0;
+        weightedSum += rawScore * weight;
     });
-    const sensoryAverage = sensoryTotal / 4;
 
-    const tempValue = parseFloat(document.getElementById("temperature").value) || 0;
-    const tempScore = tempValue <= 4.0 ? 100 : (tempValue <= 8.0 ? 50 : 0);
-
-    const phValue = parseFloat(document.getElementById("ph-level").value) || 0;
-    const phScore =
-        (phValue >= 6.5 && phValue <= 6.8) ? 100 :
-        ((phValue >= 6.0 && phValue < 6.5) || (phValue > 6.8 && phValue <= 7.2)) ? 50 : 0;
-
-    const finalScore = Math.round(
-        (sensoryAverage * 0.50) +
-        (tempScore      * 0.25) +
-        (phScore        * 0.25)
-    );
+    // Multiply by 20 to convert to 0–100 scale
+    const finalScore = Math.min(100, Math.round(weightedSum * 20));
 
     let classification, statusClass, iconHTML;
     if (finalScore >= 80) {
         classification = "Passed";
         statusClass    = "success";
         iconHTML       = '<i class="fa-solid fa-check"></i> ';
-    } else if (finalScore >= 50) {
+    } else if (finalScore >= 60) {
         classification = "With Issues";
         statusClass    = "warning";
         iconHTML       = '<i class="fa-solid fa-triangle-exclamation"></i> ';
@@ -109,40 +188,69 @@ function calculateScore() {
 // Bind Live Score Calculation
 // ==========================
 document.addEventListener("change", e => {
-    if (e.target.matches(".criteria-select") || e.target.matches("#temperature") || e.target.matches("#ph-level")) {
+    if (e.target.matches(".criteria-select")) {
         calculateScore();
     }
 });
-document.addEventListener("input", e => {
-    if (e.target.matches("#temperature") || e.target.matches("#ph-level")) {
-        calculateScore();
-    }
-});
+
 document.addEventListener("DOMContentLoaded", () => { calculateScore(); });
 
 
 // ==========================
-// Open modal in NEW mode
+// Product Chooser Modal Logic
 // ==========================
 document.getElementById("btn-new-inspection")
-    .addEventListener("click", async () => {
+    .addEventListener("click", () => {
         editingRecordId = null;
-
-        document.getElementById("modal-inspection-title").innerHTML =
-            '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
-        document.getElementById("save-inspection-btn").innerHTML =
-            '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
-
-        const batchInput    = document.getElementById("batch-code");
-        batchInput.value    = "Generating...";
-        batchInput.readOnly = true;
-        batchInput.style.color      = "#94a3b8";
-        batchInput.style.background = "#f1f5f9";
-        batchInput.value = await generateBatchId();
-
-        document.getElementById("modal-new-inspection").classList.add("active");
+        document.getElementById("modal-product-chooser").classList.add("active");
         document.body.style.overflow = "hidden";
     });
+
+async function openInspectionModal(category) {
+    currentProductCategory = category;
+
+    // Close chooser
+    document.getElementById("modal-product-chooser").classList.remove("active");
+
+    // Reset title & button
+    document.getElementById("modal-inspection-title").innerHTML =
+        '<i class="fa-solid fa-clipboard-list"></i> New Inspection Log';
+    document.getElementById("save-inspection-btn").innerHTML =
+        '<i class="fa-solid fa-floppy-disk"></i> Save Inspection Log';
+
+    // Product badge
+    updateProductBadge(category);
+
+    // Product dropdown options
+    renderProductOptions(category);
+
+    // Criteria rows
+    renderCriteriaRows(category);
+
+    // Batch ID
+    const batchInput    = document.getElementById("batch-code");
+    batchInput.value    = "Generating...";
+    batchInput.readOnly = true;
+    batchInput.style.color      = "#94a3b8";
+    batchInput.style.background = "#f1f5f9";
+    batchInput.value = await generateBatchId();
+
+    // Clear location
+    document.getElementById("inspection-location").value = "";
+
+    document.getElementById("modal-new-inspection").classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+document.getElementById("choose-fish").addEventListener("click",  () => openInspectionModal("fish"));
+document.getElementById("choose-shrimp").addEventListener("click", () => openInspectionModal("shrimp"));
+
+// "Change Type" button inside inspection modal — goes back to chooser
+document.getElementById("ni-change-type-btn").addEventListener("click", () => {
+    document.getElementById("modal-new-inspection").classList.remove("active");
+    document.getElementById("modal-product-chooser").classList.add("active");
+    document.body.style.overflow = "hidden";
+});
 
 
 // ==========================
@@ -151,28 +259,39 @@ document.getElementById("btn-new-inspection")
 async function openEditModal(id, data) {
     editingRecordId = id;
 
+    // Determine category from saved productType
+    const shrimpProducts = ["Fresh Water Shrimp"];
+    const category = shrimpProducts.includes(data.productType) ? "shrimp" : "fish";
+    currentProductCategory = category;
+
     document.getElementById("modal-inspection-title").innerHTML =
         '<i class="fa-solid fa-pen-to-square"></i> Edit Inspection Log';
     document.getElementById("save-inspection-btn").innerHTML =
         '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
 
+    // Product badge + options
+    updateProductBadge(category);
+    renderProductOptions(category);
+
+    // Batch ID
     const batchInput        = document.getElementById("batch-code");
     batchInput.value        = data.batchCode    || "";
     batchInput.readOnly     = true;
     batchInput.style.color  = "#94a3b8";
     batchInput.style.background = "#f1f5f9";
 
-    document.getElementById("inspection-location").value = data.location    || "";
-    document.getElementById("temperature").value         = data.temperature ?? "4.0";
-    document.getElementById("ph-level").value            = data.phLevel     ?? "6.5";
+    document.getElementById("inspection-location").value = data.location || "";
 
+    // Product select
     const productSelect = document.getElementById("product-type");
     productSelect.value = data.productType || "";
 
+    // Render criteria rows for this category, then fill saved values
+    renderCriteriaRows(category);
     const criteriaRows = document.querySelectorAll("#new-inspection-tbody tr");
     criteriaRows.forEach(row => {
-        const name   = row.querySelector(".criteria-select").dataset.criteria;
-        const match  = (data.criteria || []).find(c => c.criteriaName === name);
+        const name  = row.querySelector(".criteria-select").dataset.criteria;
+        const match = (data.criteria || []).find(c => c.criteriaName === name);
         if (match) {
             row.querySelector(".criteria-select").value  = match.assessment || "Excellent";
             row.querySelector(".criteria-remarks").value = match.remarks    || "";
@@ -203,18 +322,15 @@ document.getElementById("save-inspection-btn")
 
         const criteria                       = getCriteriaData();
         const { finalScore, classification } = calculateScore();
-        const temperature = parseFloat(document.getElementById("temperature").value);
-        const phLevel     = parseFloat(document.getElementById("ph-level").value);
 
         try {
             if (editingRecordId) {
                 await updateDoc(doc(db, "inspections", editingRecordId), {
                     batchCode,
                     productType,
+                    productCategory: currentProductCategory,
                     location,
                     criteria,
-                    temperature,
-                    phLevel,
                     score:         finalScore,
                     overallStatus: classification
                 });
@@ -223,14 +339,13 @@ document.getElementById("save-inspection-btn")
                 await addDoc(collection(db, "inspections"), {
                     batchCode,
                     productType,
+                    productCategory: currentProductCategory,
                     location,
-                    inspectorName: currentInspectorName,
+                    inspectorName:   currentInspectorName,
                     criteria,
-                    temperature,
-                    phLevel,
-                    score:         finalScore,
-                    overallStatus: classification,
-                    createdAt:     serverTimestamp()
+                    score:           finalScore,
+                    overallStatus:   classification,
+                    createdAt:       serverTimestamp()
                 });
                 alert("Inspection saved successfully!");
             }
@@ -263,12 +378,8 @@ async function resetInspectionForm() {
     editingRecordId = null;
 
     document.getElementById("inspection-location").value = "";
-    document.getElementById("product-type").value        = "";
-    document.getElementById("temperature").value         = "4.0";
-    document.getElementById("ph-level").value            = "6.5";
-
-    document.querySelectorAll(".criteria-select").forEach(sel => sel.value = "Excellent");
-    document.querySelectorAll(".criteria-remarks").forEach(inp => inp.value = "");
+    renderProductOptions(currentProductCategory);
+    renderCriteriaRows(currentProductCategory);
 
     calculateScore();
 
@@ -386,16 +497,14 @@ async function loadInspectionsByStatus() {
                 }
 
                 const safeData = encodeURIComponent(JSON.stringify({
-                    batchCode:     r.batchCode     ?? "",
-                    productType:   r.productType   ?? "",
-                    location:      r.location      ?? "",
-                    temperature:   r.temperature   ?? 4.0,
-                    phLevel:       r.phLevel        ?? 6.5,
-                    overallStatus: r.overallStatus ?? "",
-                    criteria:      r.criteria      ?? []
+                    batchCode:       r.batchCode       ?? "",
+                    productType:     r.productType     ?? "",
+                    productCategory: r.productCategory ?? "fish",
+                    location:        r.location        ?? "",
+                    overallStatus:   r.overallStatus   ?? "",
+                    criteria:        r.criteria        ?? []
                 }));
 
-                // Inspector name included in all three status modal tables
                 tr.innerHTML = `
                     <td><strong>${r.batchCode    ?? ""}</strong></td>
                     <td>${r.inspectorName        ?? "—"}</td>
@@ -461,16 +570,15 @@ document.getElementById("download-delivery-report-btn")
                     .join(" | ");
 
                 formattedData.push({
-                    "Batch ID":         r.batchCode     || "",
-                    "Inspector":        r.inspectorName || "",
-                    "Location":         r.location      || "",
-                    "Product Type":     r.productType   || "",
-                    "Temperature (°C)": r.temperature   || "",
-                    "pH Level":         r.phLevel       || "",
-                    "Criteria":         criteriaStr     || "",
-                    "Freshness Score":  r.score         ?? "",
-                    "Overall Status":   r.overallStatus || "",
-                    "Date":             r.createdAt?.toDate
+                    "Batch ID":        r.batchCode        || "",
+                    "Inspector":       r.inspectorName    || "",
+                    "Location":        r.location         || "",
+                    "Product Type":    r.productType      || "",
+                    "Product Category":r.productCategory  || "",
+                    "Criteria":        criteriaStr        || "",
+                    "Freshness Score": r.score            ?? "",
+                    "Overall Status":  r.overallStatus    || "",
+                    "Date":            r.createdAt?.toDate
                         ? r.createdAt.toDate().toLocaleString("en-PH", {
                             month: "short", day: "numeric", year: "numeric",
                             hour: "numeric", minute: "2-digit", hour12: true

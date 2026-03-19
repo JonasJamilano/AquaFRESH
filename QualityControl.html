@@ -63,7 +63,7 @@
             <div class="ni-trigger-icon"><i class="fa-solid fa-plus"></i></div>
             <div class="ni-trigger-text">
                 <h3>New Inspection Log</h3>
-                <p>Fill in batch details, sensor readings, and quality criteria</p>
+                <p>Fill in batch details and quality criteria for fish or shrimp</p>
             </div>
             <i class="fa-solid fa-arrow-right ni-trigger-arrow"></i>
         </button>
@@ -191,6 +191,48 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: Product Type Chooser ===================== -->
+<div class="qc-modal-overlay" id="modal-product-chooser">
+    <div class="qc-modal" style="max-width:520px;">
+        <div class="qc-modal-header teal">
+            <h3><i class="fa-solid fa-clipboard-list"></i> New Inspection Log</h3>
+            <button class="qc-modal-close" data-close="modal-product-chooser" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body" style="padding: 32px 28px;">
+            <p class="chooser-heading">What would you like to log today?</p>
+            <p class="chooser-sub">Select the product type to load the appropriate quality criteria.</p>
+
+            <div class="chooser-options">
+                <!-- Fish Card -->
+                <button class="chooser-card" id="choose-fish" data-type="fish">
+                    <div class="chooser-card-icon fish">
+                        <i class="fa-solid fa-fish"></i>
+                    </div>
+                    <div class="chooser-card-body">
+                        <div class="chooser-card-title">Fish</div>
+                        <div class="chooser-card-products">Bangus &nbsp;·&nbsp; Tilapia</div>
+                        <div class="chooser-card-criteria">Eye · Gill · Odor · Firmness</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right chooser-arrow"></i>
+                </button>
+
+                <!-- Shrimp Card -->
+                <button class="chooser-card" id="choose-shrimp" data-type="shrimp">
+                    <div class="chooser-card-icon shrimp">
+                        <i class="fa-solid fa-shrimp"></i>
+                    </div>
+                    <div class="chooser-card-body">
+                        <div class="chooser-card-title">Fresh Water Shrimp</div>
+                        <div class="chooser-card-products">Fresh Water Shrimp</div>
+                        <div class="chooser-card-criteria">Shell · Odor · Texture · Tail</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right chooser-arrow"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ===================== MODAL: New / Edit Inspection Log ===================== -->
 <div class="qc-modal-overlay" id="modal-new-inspection">
     <div class="qc-modal wide">
@@ -200,6 +242,17 @@
         </div>
 
         <div class="qc-modal-body">
+
+            <!-- Product Type Badge -->
+            <div class="ni-product-badge-row">
+                <div id="ni-product-badge" class="ni-product-badge fish">
+                    <i class="fa-solid fa-fish"></i>
+                    <span id="ni-product-badge-label">Fish Inspection</span>
+                </div>
+                <button class="ni-change-type-btn" id="ni-change-type-btn">
+                    <i class="fa-solid fa-arrows-rotate"></i> Change Type
+                </button>
+            </div>
 
             <div class="ni-divider"><i class="fa-solid fa-tag"></i> Batch Details</div>
             <div class="ni-modal-grid">
@@ -216,28 +269,9 @@
                     <label>Product Type</label>
                     <select id="product-type">
                         <option value="" disabled selected>Select Product</option>
-                        <option value="Fresh Water Shrimp">Fresh Water Shrimp</option>
                         <option value="Bangus">Bangus</option>
                         <option value="Tilapia">Tilapia</option>
                     </select>
-                </div>
-            </div>
-
-            <div class="ni-divider"><i class="fa-solid fa-microchip"></i> Sensor Readings</div>
-            <div class="ni-sensor-row">
-                <div class="ni-sensor-card">
-                    <div class="ni-sensor-icon"><i class="fa-solid fa-temperature-half"></i></div>
-                    <div>
-                        <label for="temperature">Temperature (°C)</label>
-                        <input type="number" id="temperature" step="0.1" value="4.0" required>
-                    </div>
-                </div>
-                <div class="ni-sensor-card">
-                    <div class="ni-sensor-icon"><i class="fa-solid fa-droplet"></i></div>
-                    <div>
-                        <label for="ph-level">pH Level</label>
-                        <input type="number" id="ph-level" step="0.1" value="6.5" required>
-                    </div>
                 </div>
             </div>
 
@@ -246,31 +280,13 @@
                 <thead>
                     <tr>
                         <th>Criteria</th>
+                        <th>Weight</th>
                         <th>Assessment</th>
                         <th>Remarks</th>
                     </tr>
                 </thead>
                 <tbody id="new-inspection-tbody">
-                    <tr>
-                        <td><strong>Eye Clarity</strong></td>
-                        <td><select class="criteria-select" data-criteria="Eye Clarity"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
-                        <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Gill Color</strong></td>
-                        <td><select class="criteria-select" data-criteria="Gill Color"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
-                        <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Body Firmness</strong></td>
-                        <td><select class="criteria-select" data-criteria="Body Firmness"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
-                        <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Odor</strong></td>
-                        <td><select class="criteria-select" data-criteria="Odor"><option>Excellent</option><option>Acceptable</option><option>Rejected</option></select></td>
-                        <td><input class="criteria-remarks" type="text" placeholder="Optional notes..."></td>
-                    </tr>
+                    <!-- Rows injected by JS based on product type -->
                 </tbody>
             </table>
 
