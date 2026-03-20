@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "aquafresh-d1018"
-  }
+    "default": "aquafresh-capstone"
+  },
+  "targets": {},
+  "etags": {}
 }
