@@ -1183,13 +1183,6 @@ display:block;
         align-items: flex-start;
     }
 }
-
-/* =========================================
-   PASTE THESE ADDITIONS INTO
-   AnalyticsReporting.css
-   (recommended: just before the final
-    @media responsive block)
-========================================= */
  
 /* ── Metric card states: OPTIMAL (green) & ALARM (red) ── */
  
@@ -1263,11 +1256,6 @@ display:block;
     color: #991b1b;
     border: 1px solid #fca5a5;
 }
-
-/* =========================================
-   PASTE INTO AnalyticsReporting.css
-   (before the final @media block)
-========================================= */
  
 /* ── Connection badge inside the tank table ── */
 .connection-badge {
@@ -1309,14 +1297,6 @@ display:block;
 .status-table td:last-child {
     white-space: nowrap;
 }
-
-/* =========================================
-   PASTE INTO AnalyticsReporting.css
-   (before the final @media block)
- 
-   Replaces the old two-card grid for
-   Tank Monitoring — single View Tanks card
-========================================= */
  
 /* ── Single full-width View Tanks card ── */
 .view-tanks-card {
