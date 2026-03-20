@@ -365,3 +365,112 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     border-color: #94a3b8;
     color: #1e293b;
 }
+
+/* =====================
+   INSPECTIONS TODAY — CARD LIST
+===================== */
+.insp-card-list { display: flex; flex-direction: column; gap: 8px; }
+
+.insp-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left-width: 4px;
+    border-left-style: solid;
+    border-radius: 10px;
+    padding: 14px 18px;
+    transition: box-shadow 0.15s, transform 0.12s;
+}
+.insp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); transform: translateY(-1px); }
+.insp-card.passed   { border-left-color: #1D9E75; }
+.insp-card.issues   { border-left-color: #BA7517; }
+.insp-card.rejected { border-left-color: #A32D2D; }
+
+.insp-batch-col { min-width: 110px; flex-shrink: 0; }
+.insp-batch-id {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+.insp-product-pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+.insp-product-pill.fish   { background: #dbeafe; color: #1e40af; }
+.insp-product-pill.shrimp { background: #fef3c7; color: #92400e; }
+
+.insp-meta-col {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.insp-meta-item { display: flex; flex-direction: column; gap: 1px; }
+.insp-meta-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.insp-meta-val {
+    font-size: 0.84rem;
+    color: #334155;
+    font-weight: 500;
+}
+.insp-meta-val.score-val { color: #0f172a; font-weight: 700; }
+
+.insp-date-col {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.insp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.insp-badge.passed   { background: #dcfce7; color: #166534; }
+.insp-badge.issues   { background: #fef9c3; color: #854d0e; }
+.insp-badge.rejected { background: #fee2e2; color: #991b1b; }
+
+.insp-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.insp-badge-dot.passed   { background: #16a34a; }
+.insp-badge-dot.issues   { background: #ca8a04; }
+.insp-badge-dot.rejected { background: #dc2626; }
+
+.insp-card-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.88rem;
+    padding: 32px 0;
+    border: 1.5px dashed #e2e8f0;
+    border-radius: 10px;
+}
+.insp-card-empty i { font-size: 1.5rem; display: block; margin-bottom: 8px; color: #cbd5e1; }
+
+@media (max-width: 640px) {
+    .insp-card { flex-wrap: wrap; }
+    .insp-meta-col { gap: 12px; }
+}

@@ -236,7 +236,7 @@ async function openInspectionModal(category) {
     batchInput.value = await generateBatchId();
 
     // Clear location
-    document.getElementById("inspection-location").value = "";
+    document.getElementById("inspection-location").selectedIndex = 0;
 
     document.getElementById("modal-new-inspection").classList.add("active");
     document.body.style.overflow = "hidden";
@@ -255,7 +255,7 @@ document.getElementById("ni-change-type-btn").addEventListener("click", async ()
     renderCriteriaRows(newCategory);
 
     // Reset location and regenerate batch ID
-    document.getElementById("inspection-location").value = "";
+    document.getElementById("inspection-location").selectedIndex = 0;
     const batchInput = document.getElementById("batch-code");
     batchInput.value = "Generating...";
     batchInput.value = await generateBatchId();
@@ -386,7 +386,7 @@ document.getElementById("add-inspection-btn")
 async function resetInspectionForm() {
     editingRecordId = null;
 
-    document.getElementById("inspection-location").value = "";
+    document.getElementById("inspection-location").selectedIndex = 0;
     renderProductOptions(currentProductCategory);
     renderCriteriaRows(currentProductCategory);
 
