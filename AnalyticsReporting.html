@@ -72,7 +72,7 @@
                 </a>
             </li>
 
-            <li data-role="superadmin admin manager inspector">
+            <li data-role="superadmin admin manager delivery">
                 <a href="AnalyticsReporting.html" class="active">
                     <i class="fa-solid fa-chart-line"></i>
                     <span class="label">Analytics & Reporting</span>
@@ -167,43 +167,20 @@
             Overview of tank status and sensor conditions across monitored tanks per truck
         </p>
 
-        <div class="qc-status-cards">
+        <!-- SINGLE VIEW TANKS CARD — JS switches between green/red -->
+        <div class="view-tanks-card green" id="viewTanksCard" onclick="openSensorModal()">
 
-            <!-- NORMAL -->
-            <div class="qc-status-card green"
-                onclick="openSensorModal('normal')">
-
-                <div class="card-icon">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-
-                <div class="card-info">
-                    <div class="card-title">Normal</div>
-                    <div class="card-count" id="normalCount">0</div>
-                    <div class="card-cta">View tanks</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-
+            <div class="card-icon" id="viewTanksIcon">
+                <i class="fa-solid fa-check" id="viewTanksIconGlyph"></i>
             </div>
 
-            <!-- ALERT -->
-            <div class="qc-status-card red"
-                onclick="openSensorModal('alert')">
-
-                <div class="card-icon">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                </div>
-
-                <div class="card-info">
-                    <div class="card-title">Alert</div>
-                    <div class="card-count" id="alertCount">0</div>
-                    <div class="card-cta">View tanks</div>
-                </div>
-
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-
+            <div class="card-info">
+                <div class="card-title" id="viewTanksTitle">All Tanks Normal</div>
+                <div class="card-subtitle" id="viewTanksSubtitle">All sensors within safe thresholds</div>
+                <div class="card-cta">View tanks</div>
             </div>
+
+            <i class="fa-solid fa-chevron-right card-arrow"></i>
 
         </div>
 
@@ -214,7 +191,7 @@
 <!-- ANALYTICS TRENDS -->
 <!-- ============================= -->
 
-<section class="panel">
+<section class="panel" id="trendsPanelSection">
 
 <div class="panel-header-flex">
 <h3>Trends</h3>
@@ -224,25 +201,11 @@
 Analytics insights across sensors, freshness evaluation, and delivery performance
 </p>
 
-
-<!-- MAIN TREND TABS -->
-
 <div class="trends-tabs">
-
-    <div class="trends-tab active" data-trendtab="sensor">
-    Sensor Trends
-    </div>
-
-    <div class="trends-tab" data-trendtab="freshness">
-    Freshness Trends
-    </div>
-
-    <div class="trends-tab" data-trendtab="delivery">
-    Delivery Performance
-    </div>
-
+    <div class="trends-tab active" data-trendtab="sensor">Sensor Trends</div>
+    <div class="trends-tab" data-trendtab="freshness">Freshness Trends</div>
+    <div class="trends-tab" data-trendtab="delivery">Delivery Performance</div>
 </div>
-
 
 <!-- ================= SENSOR TRENDS ================= -->
 
@@ -251,48 +214,33 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
     <div class="trend-tabs">
 
         <div class="trend-card active" data-trend="temp">
-            <div class="trend-icon">
-                <i class="fa-solid fa-temperature-half"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-temperature-half"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Temperature</div>
                 <div class="trend-value">Trend</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
-
         <div class="trend-card" data-trend="ph">
-            <div class="trend-icon">
-                <i class="fa-solid fa-droplet"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-droplet"></i></div>
             <div class="trend-info">
                 <div class="trend-title">pH Level</div>
                 <div class="trend-value">Trend</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
-
         <div class="trend-card" data-trend="humidity">
-            <div class="trend-icon">
-                <i class="fa-solid fa-cloud"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-cloud"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Humidity</div>
                 <div class="trend-value">Trend</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
     </div>
-
 
     <div class="trend-content active" id="temp">
         <div class="metric-panel">
@@ -336,7 +284,6 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 </div>
 
 
-
 <!-- ================= FRESHNESS TRENDS ================= -->
 
 <div class="trends-panel" id="freshness">
@@ -344,69 +291,45 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
     <div class="trend-tabs">
 
         <div class="trend-card active" data-trend="fresh">
-            <div class="trend-icon">
-                <i class="fa-solid fa-fish"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-fish"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Fresh</div>
                 <div class="trend-value">76%</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
-
         <div class="trend-card" data-trend="moderate">
-            <div class="trend-icon">
-                <i class="fa-solid fa-water"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-water"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Moderate</div>
                 <div class="trend-value">18%</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
-
         <div class="trend-card" data-trend="spoiled">
-            <div class="trend-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Spoiled</div>
                 <div class="trend-value">6%</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
     </div>
 
-
     <div class="trend-content active" id="fresh">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart</div>
     </div>
-
     <div class="trend-content" id="moderate">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Moderate Freshness Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-column"></i> Moderate Freshness Chart</div>
     </div>
-
     <div class="trend-content" id="spoiled">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-column"></i> Spoiled Fish Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-column"></i> Spoiled Fish Chart</div>
     </div>
 
 </div>
-
 
 
 <!-- ================= DELIVERY PERFORMANCE ================= -->
@@ -416,64 +339,42 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
     <div class="trend-tabs">
 
         <div class="trend-card active" data-trend="ontime">
-            <div class="trend-icon">
-                <i class="fa-solid fa-truck-fast"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-truck-fast"></i></div>
             <div class="trend-info">
                 <div class="trend-title">On-Time Rate</div>
                 <div class="trend-value">82%</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
-
         <div class="trend-card" data-trend="delay">
-            <div class="trend-icon">
-                <i class="fa-solid fa-clock"></i>
-            </div>
-
+            <div class="trend-icon"><i class="fa-solid fa-clock"></i></div>
             <div class="trend-info">
                 <div class="trend-title">Average Delay</div>
                 <div class="trend-value">18m</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
-
 
         <div class="trend-card" data-trend="late">
-            <div class="trend-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-
-            <div class="trend-title">Late Deliveries</div>
+            <div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="trend-info">
+                <div class="trend-title">Late Deliveries</div>
                 <div class="trend-value">3</div>
             </div>
-
             <i class="fa-solid fa-chevron-right trend-arrow"></i>
         </div>
 
     </div>
 
-
     <div class="trend-content active" id="ontime">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart</div>
     </div>
-
     <div class="trend-content" id="delay">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Average Delay Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-line"></i> Average Delay Chart</div>
     </div>
-
     <div class="trend-content" id="late">
-        <div class="chart-box">
-            <i class="fa-solid fa-chart-line"></i> Late Deliveries Chart
-        </div>
+        <div class="chart-box"><i class="fa-solid fa-chart-line"></i> Late Deliveries Chart</div>
     </div>
 
 </div>
@@ -491,55 +392,39 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
     <div class="qc-modal">
 
-        <!-- MODAL HEADER -->
-
         <div class="qc-modal-header teal">
-
             <h3>
                 <i class="fa-solid fa-microchip"></i>
-                Sensor List
-                <span class="modal-count-badge" id="sensorCount">3</span>
+                Tank Monitoring
             </h3>
-
             <button class="qc-modal-close" onclick="closeSensorModal()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
         </div>
-
-
-        <!-- MODAL BODY -->
 
         <div class="qc-modal-body">
 
-
             <!-- SENSOR TYPES -->
-
             <div class="sensor-type-grid">
 
                 <div class="sensor-type-card">
                     <i class="fa-solid fa-temperature-half"></i>
-
                     <div>
                         <div class="sensor-type-title">Temperature Sensor</div>
                         <div class="sensor-type-sub">Water Temperature Monitoring</div>
                     </div>
                 </div>
 
-
                 <div class="sensor-type-card">
                     <i class="fa-solid fa-droplet"></i>
-
                     <div>
                         <div class="sensor-type-title">pH Sensor</div>
                         <div class="sensor-type-sub">Water Acidity Monitoring</div>
                     </div>
                 </div>
 
-
                 <div class="sensor-type-card">
                     <i class="fa-solid fa-cloud"></i>
-
                     <div>
                         <div class="sensor-type-title">Humidity Sensor</div>
                         <div class="sensor-type-sub">Environmental Humidity</div>
@@ -548,33 +433,21 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 
             </div>
 
-
-            <!-- ============================= -->
             <!-- SENSOR STATUS OVERVIEW -->
-            <!-- ============================= -->
-
             <div class="panel-header-flex" style="margin-top:24px;">
-
                 <h3>Tank Status Overview</h3>
-
                 <span class="live-indicator">
                     <i class="fa-solid fa-circle-dot"></i>
                     Live Data Feed
                 </span>
-
             </div>
 
-
-            <!-- ============================= -->
             <!-- TRUCK A -->
-            <!-- ============================= -->
-
             <h4 class="truck-group-title">
                 <i class="fa-solid fa-truck"></i> Truck A
             </h4>
 
             <table class="status-table">
-
                 <thead>
                     <tr>
                         <th>Tank</th>
@@ -582,56 +455,37 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
                         <th>pH</th>
                         <th>Humidity</th>
                         <th>Status</th>
+                        <th>Connection</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
-                <tr>
-
-                    <td><strong>Tank 1</strong></td>
-
-                    <td id="tank1-temp">
-                        <i class="fa-solid fa-temperature-half"></i>
-                        --
-                    </td>
-
-                    <td id="tank1-ph">
-                        <i class="fa-solid fa-droplet"></i>
-                        --
-                    </td>
-
-                    <td id="tank1-humidity">
-                        <i class="fa-solid fa-cloud"></i>
-                        --
-                    </td>
-
-                    <td id="tank1-status">
-                        <span class="status good">
-                            <i class="fa-solid fa-check"></i>
-                            Threshold Normal
-                        </span>
-                    </td>
-
-                    <td id="tank1-time">--</td>
-
-                </tr>
+                    <tr>
+                        <td><strong>Tank 1</strong></td>
+                        <td id="tank1-temp"><i class="fa-solid fa-temperature-half"></i> --</td>
+                        <td id="tank1-ph"><i class="fa-solid fa-droplet"></i> --</td>
+                        <td id="tank1-humidity"><i class="fa-solid fa-cloud"></i> --</td>
+                        <td id="tank1-status">
+                            <span class="status good">
+                                <i class="fa-solid fa-check"></i> Threshold Normal
+                            </span>
+                        </td>
+                        <td id="tank1-connection">
+                            <span class="connection-badge offline">
+                                <i class="fa-solid fa-circle-xmark"></i> Checking…
+                            </span>
+                        </td>
+                        <td id="tank1-time">--</td>
+                    </tr>
                 </tbody>
-
             </table>
 
-
-            <!-- ============================= -->
             <!-- TRUCK B -->
-            <!-- ============================= -->
-
             <h4 class="truck-group-title">
                 <i class="fa-solid fa-truck"></i> Truck B
             </h4>
 
             <table class="status-table">
-
                 <thead>
                     <tr>
                         <th>Tank</th>
@@ -639,51 +493,29 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
                         <th>pH</th>
                         <th>Humidity</th>
                         <th>Status</th>
+                        <th>Connection</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
-                <tr class="inactive-tank">
-
-                    <td><strong>Tank 2</strong></td>
-
-                    <td id="tank2-temp">
-                        <i class="fa-solid fa-temperature-half"></i>
-                        --
-                    </td>
-
-                    <td id="tank2-ph">
-                        <i class="fa-solid fa-droplet"></i>
-                        --
-                    </td>
-
-                    <td id="tank2-humidity">
-                        <i class="fa-solid fa-cloud"></i>
-                        --
-                    </td>
-
-                    <td id="tank2-status">--</td>
-                    <td id="tank2-time">--</td>
-
-                </tr>
-
+                    <tr class="inactive-tank">
+                        <td><strong>Tank 2</strong></td>
+                        <td id="tank2-temp"><i class="fa-solid fa-temperature-half"></i> --</td>
+                        <td id="tank2-ph"><i class="fa-solid fa-droplet"></i> --</td>
+                        <td id="tank2-humidity"><i class="fa-solid fa-cloud"></i> --</td>
+                        <td id="tank2-status">--</td>
+                        <td id="tank2-connection">--</td>
+                        <td id="tank2-time">--</td>
+                    </tr>
                 </tbody>
-
             </table>
 
-
-            <!-- ============================= -->
             <!-- TRUCK C -->
-            <!-- ============================= -->
-
             <h4 class="truck-group-title">
                 <i class="fa-solid fa-truck"></i> Truck C
             </h4>
 
             <table class="status-table">
-
                 <thead>
                     <tr>
                         <th>Tank</th>
@@ -691,38 +523,21 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
                         <th>pH</th>
                         <th>Humidity</th>
                         <th>Status</th>
+                        <th>Connection</th>
                         <th>Last Updated</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
-                <tr class="inactive-tank">
-
-                    <td><strong>Tank 3</strong></td>
-
-                    <td id="tank3-temp">
-                        <i class="fa-solid fa-temperature-half"></i>
-                        --
-                    </td>
-
-                    <td id="tank3-ph">
-                        <i class="fa-solid fa-droplet"></i>
-                        --
-                    </td>
-
-                    <td id="tank3-humidity">
-                        <i class="fa-solid fa-cloud"></i>
-                        --
-                    </td>
-
-                    <td id="tank3-status">--</td>
-                    <td id="tank3-time">--</td>
-
-                </tr>
-
+                    <tr class="inactive-tank">
+                        <td><strong>Tank 3</strong></td>
+                        <td id="tank3-temp"><i class="fa-solid fa-temperature-half"></i> --</td>
+                        <td id="tank3-ph"><i class="fa-solid fa-droplet"></i> --</td>
+                        <td id="tank3-humidity"><i class="fa-solid fa-cloud"></i> --</td>
+                        <td id="tank3-status">--</td>
+                        <td id="tank3-connection">--</td>
+                        <td id="tank3-time">--</td>
+                    </tr>
                 </tbody>
-
             </table>
 
         </div>
@@ -745,83 +560,36 @@ Analytics insights across sensors, freshness evaluation, and delivery performanc
 <script>
 
 document.querySelectorAll(".trend-card").forEach(card => {
-
     card.addEventListener("click", () => {
-
         const container = card.closest(".panel")
-
-        const cards = container.querySelectorAll(".trend-card")
-        const contents = container.querySelectorAll(".trend-content")
-
+        const cards     = container.querySelectorAll(".trend-card")
+        const contents  = container.querySelectorAll(".trend-content")
         cards.forEach(c => c.classList.remove("active"))
         contents.forEach(c => c.classList.remove("active"))
-
         card.classList.add("active")
-
-        const id = card.dataset.trend
-        container.querySelector("#" + id).classList.add("active")
-
+        container.querySelector("#" + card.dataset.trend).classList.add("active")
     })
-
 })
 
-/* =========================================
-MAIN TRENDS TAB SWITCH
-========================================= */
-
 document.querySelectorAll(".trends-tab").forEach(tab => {
-
     tab.addEventListener("click", () => {
-
-        /* remove active state */
-
-        document.querySelectorAll(".trends-tab")
-        .forEach(t => t.classList.remove("active"))
-
-        document.querySelectorAll(".trends-panel")
-        .forEach(p => p.classList.remove("active"))
-
-        /* activate selected tab */
-
+        document.querySelectorAll(".trends-tab").forEach(t => t.classList.remove("active"))
+        document.querySelectorAll(".trends-panel").forEach(p => p.classList.remove("active"))
         tab.classList.add("active")
-
-        const panel = tab.dataset.trendtab
-
-        document
-        .getElementById(panel)
-        .classList.add("active")
-
+        document.getElementById(tab.dataset.trendtab).classList.add("active")
     })
-
 })
 
 </script>
 
 <script>
 
-function openSensorModal(type) {
-
-    const modal = document.getElementById("sensorModal")
-
-    const title = {
-        normal: "Normal",
-        warning: "Warning",
-        alert: "Alert"
-    }
-
-    document.querySelector(".qc-modal-header h3").innerHTML =
-`<i class="fa-solid fa-microchip"></i> ${title[type]}`
-
-    modal.classList.add("active")
-
+function openSensorModal() {
+    document.getElementById("sensorModal").classList.add("active")
 }
 
 function closeSensorModal() {
-
-    document
-        .getElementById("sensorModal")
-        .classList.remove("active")
-
+    document.getElementById("sensorModal").classList.remove("active")
 }
 
 </script>
