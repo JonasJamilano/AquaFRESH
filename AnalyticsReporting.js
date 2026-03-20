@@ -122,9 +122,10 @@ const metricThresholdChecks = {
     },
     ph(value, config) {
         if (Number.isNaN(value)) return null;
-        if (value >= 7.7) return { metric: "ph", message: `pH level exceeded 7.7 (current: ${formatValueForAlert(value, config)})` };
+        if (value < 6.5) return { metric: "ph", message: `pH level dropped below 6.5 (current: ${formatValueForAlert(value, config)})` };
+        if (value > 7.5) return { metric: "ph", message: `pH level exceeded 7.5 (current: ${formatValueForAlert(value, config)})` };
         return null;
-    }
+    },
 };
 
 /* =========================================

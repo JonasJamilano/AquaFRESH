@@ -74,6 +74,7 @@
         <p class="subtitle">View your assigned deliveries and start your routes.</p>
     </section>
 
+    <!-- MY ASSIGNMENTS -->
     <section class="panel">
         <div class="panel-header-flex">
             <h3>My Assignments</h3>
@@ -122,6 +123,44 @@
         </div>
     </section>
 
+    <!-- ============================= -->
+    <!-- THRESHOLD ALERT BANNER        -->
+    <!-- Hidden by default, shown by   -->
+    <!-- DeliveryDashboard.js when any -->
+    <!-- sensor exceeds threshold.     -->
+    <!-- Clicking navigates to         -->
+    <!-- AnalyticsReporting.html       -->
+    <!-- ============================= -->
+    <section
+        id="deliveryAlarmBanner"
+        class="delivery-alarm-banner"
+        role="alert"
+        aria-live="polite"
+        hidden
+        onclick="window.location.href='AnalyticsReporting.html'"
+        style="cursor:pointer;">
+
+        <div class="alarm-icon-wrap">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+
+        <div class="alarm-body">
+            <p class="alarm-title">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Threshold Alert
+            </p>
+            <ul class="alarm-list" id="deliveryAlarmMessages"></ul>
+            <p class="alarm-footer" id="deliveryAlarmTimestamp"></p>
+        </div>
+
+        <div class="alarm-cta">
+            <span>View Analytics</span>
+            <i class="fa-solid fa-chevron-right"></i>
+        </div>
+
+    </section>
+
+    <!-- ALL MY DELIVERIES -->
     <section class="panel">
         <div class="panel-header-flex">
             <h3>All My Deliveries</h3>
@@ -141,6 +180,8 @@
     </section>
 
 </main>
+
+<!-- MODALS (unchanged) -->
 
 <div class="qc-modal-overlay" id="modal-pending">
     <div class="qc-modal wide">
@@ -218,7 +259,7 @@
             if (el) el.classList.remove('active');
             document.body.style.overflow = '';
         }
-        
+
         document.getElementById('btn-pending')?.addEventListener('click', () => openModal('modal-pending'));
         document.getElementById('btn-enroute')?.addEventListener('click', () => openModal('modal-enroute'));
         document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
