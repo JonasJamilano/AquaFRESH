@@ -12,6 +12,9 @@
 </head>
 <body>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- ===================== SIDEBAR ===================== -->
 <aside class="sidebar">
     <div class="brand">
@@ -74,19 +77,10 @@
         <div class="panel-header-flex">
             <h3>Inspections Today (<span id="inspections-today-count">0</span>)</h3>
         </div>
-        <table class="qc-table">
-            <thead>
-                <tr>
-                    <th>Batch ID</th>
-                    <th>Inspector</th>
-                    <th>Location</th>
-                    <th>Product</th>
-                    <th>Date</th>
-                    <th class="text-right">Status</th>
-                </tr>
-            </thead>
-            <tbody id="inspections-today-body"></tbody>
-        </table>
+        <div class="insp-card-list" id="inspections-today-body"></div>
+        <div class="insp-card-empty" id="inspections-today-empty" style="display:none;">
+            <i class="fa-solid fa-clipboard"></i> No inspections logged today yet.
+        </div>
     </section>
 
     <!-- Inspection Status Summary Cards -->
@@ -280,6 +274,7 @@
             </div>
 
             <div class="ni-divider"><i class="fa-solid fa-list-check"></i> Quality Criteria</div>
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
             <table class="ni-criteria-table">
                 <thead>
                     <tr>
@@ -293,6 +288,7 @@
                     <!-- Rows injected by JS based on product type -->
                 </tbody>
             </table>
+            </div>
 
             <div id="score-container" class="ni-score-widget">
                 <div>
@@ -468,5 +464,35 @@
     })();
 </script>
 
+<script>
+    (function() {
+        const menuBtn   = document.querySelector('.menu-btn');
+        const sidebar   = document.querySelector('.sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+
+        function openSidebar() {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (menuBtn) menuBtn.addEventListener('click', () => {
+            sidebar.classList.contains('mobile-open') ? closeSidebar() : openSidebar();
+        });
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar on nav link click (mobile)
+        document.querySelectorAll('.menu li a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) closeSidebar();
+            });
+        });
+    })();
+</script>
 </body>
 </html>
