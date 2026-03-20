@@ -170,13 +170,13 @@ function updateViewTanksCard(isAlert, alertCount) {
         title.textContent = alertCount > 1
             ? `${alertCount} Tanks in Alert`
             : "Attention Required";
-        subtitle.textContent = "One or more sensors exceeded safe thresholds";
+        subtitle.textContent = "One or more tanks exceeded safe thresholds";
     } else {
         card.className    = "view-tanks-card green";
         icon.className    = "card-icon";
         glyph.className   = "fa-solid fa-check";
         title.textContent = "All Tanks Normal";
-        subtitle.textContent = "All sensors within safe thresholds";
+        subtitle.textContent = "All tanks within safe thresholds";
     }
 }
 
