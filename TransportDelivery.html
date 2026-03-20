@@ -11,12 +11,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="TransportDelivery.css">
-    
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
 </head>
 <body>
-    
+
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -117,13 +117,88 @@
         </div>
     </section>
 
+    <!-- ============================= -->
+    <!-- LIVE GPS TRACKING PANEL       -->
+    <!-- Contains: alarm banner,       -->
+    <!-- map, store search status,     -->
+    <!-- and nearby stores list        -->
+    <!-- ============================= -->
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Live GPS Tracking</h3>
             <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Real-Time</span>
         </div>
-        <p id="map-status" style="font-size: 13px; margin-bottom: 16px; color: #64748b;">Initializing map...</p>
+
+        <p id="map-status" style="font-size:13px;margin-bottom:16px;color:#64748b;">
+            Initializing map...
+        </p>
+
+        <!-- ============================= -->
+        <!-- THRESHOLD ALERT BANNER        -->
+        <!-- Floats above the map.         -->
+        <!-- Hidden until alarm triggers.  -->
+        <!-- Click → AnalyticsReporting    -->
+        <!-- ============================= -->
+        <div
+            id="mapAlarmBanner"
+            class="map-alarm-banner"
+            hidden>
+
+            <div class="map-alarm-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+
+            <div class="map-alarm-body">
+                <p class="map-alarm-title">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Threshold Alert
+                </p>
+                <ul class="map-alarm-list" id="mapAlarmMessages"></ul>
+                <p class="map-alarm-footer" id="mapAlarmTimestamp"></p>
+            </div>
+
+            <div class="map-alarm-actions">
+
+                <a href="AnalyticsReporting.html" class="map-alarm-btn analytics-btn">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>View Analytics</span>
+                </a>
+
+                <button class="map-alarm-btn stores-btn" onclick="onFindStoresClicked()">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Find Nearby Stores</span>
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- THE MAP -->
         <div id="delivery-map"></div>
+
+        <!-- Store search status line (below map) -->
+        <div id="storeSearchStatus" class="store-search-status" style="display:none;"></div>
+
+        <!-- ============================= -->
+        <!-- NEARBY STORES PANEL           -->
+        <!-- Appears below map on alert.   -->
+        <!-- Hidden until stores found.    -->
+        <!-- ============================= -->
+        <div id="nearbyStoresPanel" class="nearby-stores-panel" hidden>
+
+            <div class="nearby-stores-header">
+                <div class="nearby-stores-title">
+                    <i class="fa-solid fa-store"></i>
+                    Nearby Ice &amp; Convenience Stores
+                </div>
+                <span class="nearby-stores-hint">Tap a store to locate it on the map</span>
+            </div>
+
+            <div id="nearbyStoresList" class="nearby-stores-list"></div>
+
+        </div>
+
     </section>
 
     <section class="panel">
@@ -159,14 +234,11 @@
         <div class="qc-modal-body">
             <div class="ni-divider"><i class="fa-solid fa-circle-info"></i> Delivery Details</div>
             <div class="ni-modal-grid">
-
-                <!-- Auto-generated delivery code shown as read-only -->
                 <div class="ni-form-group">
                     <label>Delivery Code <span style="font-size:0.72rem;color:#94a3b8;font-weight:400;">(auto-generated)</span></label>
                     <input type="text" id="deliveryCodeDisplay" readonly
                         style="background:#f1f5f9;color:#0f172a;font-weight:700;cursor:not-allowed;">
                 </div>
-
                 <div class="ni-form-group">
                     <label>Select Batch</label>
                     <select id="batchSelect"></select>
@@ -185,7 +257,6 @@
                     </select>
                 </div>
             </div>
-
             <div class="ni-divider" style="margin-top:20px;"><i class="fa-solid fa-map-location-dot"></i> Routing Info</div>
             <div class="ni-modal-grid">
                 <div class="ni-form-group position-relative">
@@ -299,7 +370,6 @@
         document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
         document.getElementById('btn-delayed')?.addEventListener('click',   () => openModal('modal-delayed'));
 
-        // btn-new-delivery opens modal — code preview is handled in TransportDelivery.js
         document.getElementById('btn-new-delivery')?.addEventListener('click', () => openModal('modal-new-delivery'));
 
         document.querySelectorAll('.qc-modal-close').forEach(btn => {

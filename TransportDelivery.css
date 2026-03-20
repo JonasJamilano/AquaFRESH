@@ -17,19 +17,16 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     padding: 24px;
 }
 
-/* full logo */
 .logo-full {
     width: 150px;
     transition: 0.3s;
 }
 
-/* icon logo (hidden by default) */
 .logo-icon {
     width: 40px;
     display: none;
 }
 
-/* hide text when collapsed */
 .brand-text {
     font-size: 12px;
     color: #94a3b8;
@@ -45,6 +42,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .menu li.active a, .menu li a.active { background: linear-gradient(90deg, rgba(77,208,200,0.12) 0%, rgba(77,208,200,0.02) 100%); color: #ffffff; border-left: 3px solid #4dd0c8; border-radius: 4px 8px 8px 4px; }
 .menu li.active a i, .menu li a.active i { color: #4dd0c8; }
 .menu li[data-role] { display: none; }
+
 .topbar { height: 64px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; margin-left: 260px; position: fixed; width: calc(100% - 260px); z-index: 90; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); }
 .menu-btn { font-size: 20px; cursor: pointer; color: #64748b; }
 .profile-dropdown { position: relative; }
@@ -61,9 +59,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
    MAIN CONTENT
 ===================== */
 .content { margin-left: 260px; padding: 100px 32px 40px 32px; }
-
-/* Fixed the spacing so it's not too close to the schedule button */
-.page-header { margin-bottom: 32px; } 
+.page-header { margin-bottom: 32px; }
 .page-header h2 { color: #0f172a; font-size: 24px; }
 .subtitle { font-size: 14px; color: #64748b; margin-top: 8px; }
 
@@ -81,9 +77,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .live-indicator i { font-size: 8px; animation: blink 1.5s infinite; }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-/* ============================================
+/* =====================
    NEW DELIVERY — TRIGGER BUTTON
-============================================== */
+===================== */
 .new-inspection-trigger { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); border-radius: 14px; padding: 24px 28px; cursor: pointer; border: none; width: 100%; text-align: left; color: #fff; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 20px rgba(13, 148, 136, 0.35); margin-bottom: 32px; }
 .new-inspection-trigger:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(13, 148, 136, 0.45); }
 .new-inspection-trigger:active { transform: translateY(0); }
@@ -94,9 +90,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .ni-trigger-arrow { font-size: 1.3rem; opacity: 0.6; transition: opacity 0.15s, transform 0.15s; }
 .new-inspection-trigger:hover .ni-trigger-arrow { opacity: 1; transform: translateX(4px); }
 
-/* ===========================================
+/* =====================
    STATUS SUMMARY CARDS
-============================================== */
+===================== */
 .qc-status-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .qc-status-card { border-radius: 12px; padding: 20px 22px; cursor: pointer; border: 2px solid transparent; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 16px; user-select: none; }
 .qc-status-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
@@ -109,19 +105,15 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .qc-status-card .card-arrow { font-size: 1.1rem; color: #cbd5e1; transition: color 0.15s, transform 0.15s; }
 .qc-status-card:hover .card-arrow { color: #64748b; transform: translateX(4px); }
 
-/* Card Colors */
 .qc-status-card.green  { background: #f0fdf4; border-color: #86efac; }
 .qc-status-card.green  .card-icon { background: #dcfce7; color: #16a34a; }
 .qc-status-card.green  .card-count { color: #16a34a; }
-
 .qc-status-card.yellow { background: #fefce8; border-color: #fde047; }
 .qc-status-card.yellow .card-icon { background: #fef9c3; color: #ca8a04; }
 .qc-status-card.yellow .card-count { color: #ca8a04; }
-
 .qc-status-card.red    { background: #fef2f2; border-color: #fca5a5; }
 .qc-status-card.red    .card-icon { background: #fee2e2; color: #dc2626; }
 .qc-status-card.red    .card-count { color: #dc2626; }
-
 .qc-status-card.blue   { background: #eff6ff; border-color: #93c5fd; }
 .qc-status-card.blue   .card-icon { background: #dbeafe; color: #3b82f6; }
 .qc-status-card.blue   .card-count { color: #3b82f6; }
@@ -129,9 +121,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 @media (max-width: 800px) { .qc-status-cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .qc-status-cards { grid-template-columns: 1fr; } }
 
-/* ==============================================
+/* =====================
    MODALS
-============================================== */
+===================== */
 .qc-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; }
 .qc-modal-overlay.active { display: flex; }
 .qc-modal { background: #fff; border-radius: 14px; width: 90%; max-width: 820px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); overflow: hidden; animation: modalIn 0.22s ease; }
@@ -152,12 +144,10 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .ni-divider { font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin: 4px 0 12px; padding-bottom: 8px; border-bottom: 1.5px solid #e2e8f0; display: flex; align-items: center; gap: 6px; }
 .ni-modal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
 @media (max-width: 640px) { .ni-modal-grid { grid-template-columns: 1fr; } }
-
 .ni-form-group { display: flex; flex-direction: column; gap: 5px; }
 .ni-form-group label { font-size: 0.78rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; }
 .ni-form-group input, .ni-form-group select { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 9px 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; transition: border-color 0.15s, background 0.15s; outline: none; width: 100%; }
 .ni-form-group input:focus, .ni-form-group select:focus { border-color: #0d9488; background: #fff; }
-
 .ni-modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
 .ni-btn-clear { padding: 9px 20px; border: 1.5px solid #cbd5e1; background: #fff; border-radius: 8px; font-size: 0.88rem; font-weight: 600; color: #475569; cursor: pointer; transition: background 0.15s; }
 .ni-btn-clear:hover { background: #f1f5f9; }
@@ -180,77 +170,43 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .truck-marker { background: #3b82f6; color: white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); font-size: 16px; border: 2px solid #ffffff; }
 .leaflet-routing-container { display: none !important; }
 
-/* ==============================================
-   EQUAL GRID TABLES WITH BORDERS
-============================================== */
-.qc-table, .delivery-table {
-    width: 100%;
-    border-collapse: collapse; /* Merges borders cleanly */
-    table-layout: fixed; /* Forces exactly equal column widths */
-    margin-top: 8px;
-    border: 1px solid #e2e8f0; /* Outer border */
-    background: #ffffff;
-}
-
-.qc-table th, .delivery-table th {
-    background: #f1f5f9;
-    color: #475569;
-    padding: 14px 12px;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    text-align: center; /* Centers the header */
-    border: 1px solid #e2e8f0; /* Vertical and horizontal lines */
-}
-
-.qc-table td, .delivery-table td {
-    padding: 14px 12px;
-    border: 1px solid #e2e8f0; /* Vertical and horizontal lines */
-    font-size: 14px;
-    vertical-align: middle;
-    text-align: center; /* Centers the row data */
-    word-wrap: break-word; /* Prevents long text from breaking the equal grid */
-    color: #334155;
-    transition: background-color 0.2s ease;
-}
-
-.qc-table tbody tr:hover td, .delivery-table tbody tr:hover td {
-    background-color: #f8fafc;
-}
+/* =====================
+   TABLES
+===================== */
+.qc-table, .delivery-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 8px; border: 1px solid #e2e8f0; background: #ffffff; }
+.qc-table th, .delivery-table th { background: #f1f5f9; color: #475569; padding: 14px 12px; font-weight: 600; font-size: 12px; text-transform: uppercase; text-align: center; border: 1px solid #e2e8f0; }
+.qc-table td, .delivery-table td { padding: 14px 12px; border: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; text-align: center; word-wrap: break-word; color: #334155; transition: background-color 0.2s ease; }
+.qc-table tbody tr:hover td, .delivery-table tbody tr:hover td { background-color: #f8fafc; }
 
 /* =====================
    STATUS BADGES & BUTTONS
 ===================== */
 [class^="status-"] { display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 600; text-align: center; white-space: nowrap; text-transform: capitalize; }
-.status-pending { background-color: #fef08a; color: #ca8a04; }
-.status-en_route { background-color: #dbeafe; color: #1e40af; }
+.status-pending   { background-color: #fef08a; color: #ca8a04; }
+.status-en_route  { background-color: #dbeafe; color: #1e40af; }
 .status-delivered { background-color: #dcfce7; color: #166534; }
-.status-delayed { background-color: #fee2e2; color: #991b1b; }
+.status-delayed   { background-color: #fee2e2; color: #991b1b; }
 
-.start-btn, .deliver-btn { color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif; font-size: 13px;}
-.start-btn { background: #3b82f6; } .start-btn:hover { background: #2563eb; }
+.start-btn, .deliver-btn { color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif; font-size: 13px; }
+.start-btn   { background: #3b82f6; } .start-btn:hover   { background: #2563eb; }
 .deliver-btn { background: #10b981; } .deliver-btn:hover { background: #059669; }
 
-/* SIDEBAR COLLAPSE LOGIC */
+/* =====================
+   SIDEBAR COLLAPSE
+===================== */
 .sidebar.collapsed { width: 80px; }
-.sidebar.collapsed .brand h1, .sidebar.collapsed .brand p, .sidebar.collapsed .menu li a span:not(.icon) { display: none; }
-
-.sidebar.collapsed .logo-full {
-    display: none;
-}
-
-.sidebar.collapsed .logo-icon {
-    display: block;
-    margin: auto;
-}
-
-.sidebar.collapsed .brand-text {
-    display: none;
-}
-
-.topbar.collapsed { margin-left: 80px; width: calc(100% - 80px); }
+.sidebar.collapsed .brand h1,
+.sidebar.collapsed .brand p,
+.sidebar.collapsed .menu li a span:not(.icon) { display: none; }
+.sidebar.collapsed .logo-full  { display: none; }
+.sidebar.collapsed .logo-icon  { display: block; margin: auto; }
+.sidebar.collapsed .brand-text { display: none; }
+.topbar.collapsed  { margin-left: 80px; width: calc(100% - 80px); }
 .content.collapsed { margin-left: 80px; }
 
+/* =====================
+   LEAFLET ROUTING
+===================== */
 .leaflet-routing-container {
     background: #ffffff !important;
     border-radius: 12px !important;
@@ -260,61 +216,190 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     width: 250px;
     max-height: 300px;
     overflow-y: auto;
-    
-    /* Forces it to hover nicely in the top right */
     position: absolute !important;
     top: 15px !important;
     right: 15px !important;
     z-index: 1000 !important;
 }
+.leaflet-routing-geocoders { display: none !important; }
+.leaflet-routing-alt { border: 2px solid #e2e8f0; padding: 14px; border-radius: 10px; transition: all 0.2s ease; cursor: pointer; margin-bottom: 10px; background: #f8fafc; }
+.leaflet-routing-alt:hover { border-color: #94a3b8; background: #ffffff; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.leaflet-routing-alt-selected { background: #f0fdfa !important; border: 2px solid #0d9488 !important; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15); }
+.leaflet-routing-alt table { display: none !important; }
+.leaflet-routing-alt h2 { font-size: 15px !important; color: #0f172a !important; margin: 0 0 6px 0 !important; font-weight: 700; }
+.leaflet-routing-alt h3 { font-size: 13px !important; color: #0f766e !important; margin: 0 !important; font-weight: 600; }
 
-/* Hide the Leaflet routing default geocoders (input boxes) if they appear */
-.leaflet-routing-geocoders {
-    display: none !important;
+/* =====================
+   MAP ALARM BANNER
+===================== */
+.map-alarm-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    border: 1px solid #f87171;
+    background: linear-gradient(135deg, #fee2e2, #fff5f5);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+    color: #7f1d1d;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.map-alarm-banner:hover { box-shadow: 0 10px 28px rgba(220, 38, 38, 0.25); transform: translateY(-2px); }
+.map-alarm-banner[hidden] { display: none; }
+
+.map-alarm-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fee2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc2626;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    animation: alarmPulse 1.5s infinite;
+}
+@keyframes alarmPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+    50%       { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
 }
 
-/* Make each route look like a clickable button/card */
-.leaflet-routing-alt {
-    border: 2px solid #e2e8f0;
-    padding: 14px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    margin-bottom: 10px;
-    background: #f8fafc;
-}
+.map-alarm-body   { flex: 1; }
+.map-alarm-title  { font-size: 0.95rem; font-weight: 700; color: #b91c1c; margin: 0 0 3px 0; display: flex; align-items: center; gap: 6px; }
+.map-alarm-list   { margin: 0 0 3px 0; padding-left: 18px; color: #7f1d1d; font-size: 13px; }
+.map-alarm-list li { margin-bottom: 2px; }
+.map-alarm-footer { font-size: 11px; color: #991b1b; margin: 0; }
 
-.leaflet-routing-alt:hover {
-    border-color: #94a3b8;
-    background: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-/* Highlight the currently active route card */
-.leaflet-routing-alt-selected {
-    background: #f0fdfa !important;
-    border: 2px solid #0d9488 !important;
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
-}
-
-/* Hide the ugly list of turn-by-turn text */
-.leaflet-routing-alt table {
-    display: none !important;
-}
-
-/* Style the Route Title (e.g., "Route 1") */
-.leaflet-routing-alt h2 {
-    font-size: 15px !important;
-    color: #0f172a !important;
-    margin: 0 0 6px 0 !important;
-    font-weight: 700;
-}
-
-/* Style the Distance & ETA text */
-.leaflet-routing-alt h3 {
-    font-size: 13px !important;
-    color: #0f766e !important;
-    margin: 0 !important;
+.map-alarm-actions { display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
+.map-alarm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 8px;
+    font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
 }
+.map-alarm-btn:hover   { transform: translateY(-1px); }
+.analytics-btn         { background: #dc2626; color: #fff; }
+.analytics-btn:hover   { background: #b91c1c; }
+.stores-btn            { background: #fff; color: #dc2626; border: 1.5px solid #fca5a5; }
+.stores-btn:hover      { background: #fee2e2; }
+
+/* =====================
+   STORE SEARCH STATUS
+===================== */
+.store-search-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    min-height: 20px;
+}
+
+/* =====================
+   NEARBY STORES PANEL
+===================== */
+.nearby-stores-panel { margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05); }
+.nearby-stores-panel[hidden] { display: none; }
+.nearby-stores-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 6px; }
+.nearby-stores-title  { font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.nearby-stores-title i { color: #0f766e; }
+.nearby-stores-hint   { font-size: 12px; color: #94a3b8; }
+.nearby-stores-list   { max-height: 320px; overflow-y: auto; }
+
+.store-list-item { display: flex; align-items: center; gap: 14px; padding: 13px 18px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s; }
+.store-list-item:last-child { border-bottom: none; }
+.store-list-item:hover { background: #f0fdfa; }
+.store-list-num   { width: 28px; height: 28px; border-radius: 50%; background: #0f766e; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.store-list-info  { flex: 1; }
+.store-list-name  { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+.store-list-meta  { font-size: 12px; color: #64748b; }
+.store-list-arrow { color: #cbd5e1; font-size: 0.9rem; transition: color 0.15s, transform 0.15s; }
+.store-list-item:hover .store-list-arrow { color: #0f766e; transform: translateX(3px); }
+
+/* =====================
+   STORE MAP MARKERS
+===================== */
+.store-marker-icon { background: transparent; border: none; }
+.store-marker {
+    background: #0ea5e9;
+    color: #fff;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid #fff;
+    box-shadow: 0 3px 8px rgba(14, 165, 233, 0.45);
+}
+
+/* =====================
+   STORE POPUP
+===================== */
+.store-popup      { font-family: 'Inter', sans-serif; font-size: 13px; min-width: 160px; }
+.store-popup-name { font-weight: 700; color: #0f172a; margin-bottom: 3px; font-size: 13px; line-height: 1.3; }
+.store-popup-type { font-size: 11px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.store-popup-dist {
+    font-size: 12px;
+    color: #0f766e;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.store-popup-directions {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #0f766e;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+    width: 100%;
+    justify-content: center;
+}
+.store-popup-directions:hover { background: #0d9488; }
+
+/* =====================
+   BACK TO DELIVERY BTN
+===================== */
+.back-to-delivery-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #0f766e;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+.back-to-delivery-btn:hover { background: #0d9488; }
