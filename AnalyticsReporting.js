@@ -526,7 +526,7 @@ async function loadAllHistory() {
 
         renderHistoryChart(m, rows);
         renderHistoryTable(m, rows);
-        setBadge(m.badgeId, rows.length ? "ok" : "empty", rows.length ? `${rows.length} records` : "No data");
+        setBadge(m.badgeId, rows.length ? "ok" : "empty", rows.length ? `${rows.length} latest records` : "No data");
     });
 }
 
