@@ -446,22 +446,58 @@ async function loadInspectionsToday() {
             where("createdAt", ">=", today),
             orderBy("createdAt", "desc")
         );
-        const snapshot = await getDocs(q);
-        const tbody    = document.getElementById("inspections-today-body");
-        tbody.innerHTML = "";
+        const snapshot  = await getDocs(q);
+        const container = document.getElementById("inspections-today-body");
+        const emptyEl   = document.getElementById("inspections-today-empty");
+        container.innerHTML = "";
+
+        if (snapshot.empty) {
+            if (emptyEl) emptyEl.style.display = "block";
+            document.getElementById("inspections-today-count").textContent = 0;
+            return;
+        }
+        if (emptyEl) emptyEl.style.display = "none";
 
         snapshot.forEach(d => {
-            const r  = d.data();
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong>${r.batchCode   ?? ""}</strong></td>
-                <td>${r.inspectorName       ?? "—"}</td>
-                <td>${r.location            ?? ""}</td>
-                <td>${r.productType         ?? ""}</td>
-                <td>${formatDate(r.createdAt)}</td>
-                <td class="text-right">${getStatusBadgeHTML(r.overallStatus)}</td>
+            const r = d.data();
+
+            const statusKey = r.overallStatus === "Passed"      ? "passed"
+                            : r.overallStatus === "With Issues" ? "issues"
+                            : "rejected";
+
+            const shrimpProducts = ["Fresh Water Shrimp"];
+            const pillClass = shrimpProducts.includes(r.productType) ? "shrimp" : "fish";
+
+            const badgeLabel = r.overallStatus === "With Issues" ? "With Issues" : r.overallStatus;
+
+            const card = document.createElement("div");
+            card.className = `insp-card ${statusKey}`;
+            card.innerHTML = `
+                <div class="insp-batch-col">
+                    <div class="insp-batch-id">${r.batchCode ?? ""}</div>
+                    <span class="insp-product-pill ${pillClass}">${r.productType ?? ""}</span>
+                </div>
+                <div class="insp-meta-col">
+                    <div class="insp-meta-item">
+                        <span class="insp-meta-label">Inspector</span>
+                        <span class="insp-meta-val">${r.inspectorName ?? "—"}</span>
+                    </div>
+                    <div class="insp-meta-item">
+                        <span class="insp-meta-label">Location</span>
+                        <span class="insp-meta-val">${r.location ?? "—"}</span>
+                    </div>
+                    <div class="insp-meta-item">
+                        <span class="insp-meta-label">Score</span>
+                        <span class="insp-meta-val score-val">${r.score ?? "—"} <span style="font-weight:400;color:#94a3b8;font-size:0.78rem;">/ 100</span></span>
+                    </div>
+                </div>
+                <div class="insp-date-col">${formatDate(r.createdAt)}</div>
+                <span class="insp-badge ${statusKey}">
+                    <span class="insp-badge-dot ${statusKey}"></span>
+                    ${badgeLabel}
+                </span>
             `;
-            tbody.appendChild(tr);
+            container.appendChild(card);
         });
 
         document.getElementById("inspections-today-count").textContent = snapshot.size;
