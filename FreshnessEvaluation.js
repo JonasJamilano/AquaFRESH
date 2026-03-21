@@ -19,146 +19,84 @@ async function loadFreshnessData() {
 
     const snapshot = await getDocs(q);
 
-    const tbody = document.getElementById("all-freshness-body");
-    const freshBody = document.getElementById("fresh-body");
+    const tbody      = document.getElementById("all-freshness-body");
+    const freshBody  = document.getElementById("fresh-body");
     const issuesBody = document.getElementById("issues-body");
     const spoiledBody = document.getElementById("spoiled-body");
 
-    // SAFE RESET
-    if (tbody) tbody.innerHTML = "";
-    if (freshBody) freshBody.innerHTML = "";
+    if (tbody)      tbody.innerHTML      = "";
+    if (freshBody)  freshBody.innerHTML  = "";
     if (issuesBody) issuesBody.innerHTML = "";
     if (spoiledBody) spoiledBody.innerHTML = "";
 
-    let freshCount = 0;
-    let issuesCount = 0;
+    let freshCount   = 0;
+    let issuesCount  = 0;
     let spoiledCount = 0;
 
     if (snapshot.empty) {
-
       if (tbody) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7">No inspection data available</td>
-          </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="4">No inspection data available</td></tr>`;
       }
-
       return;
     }
 
     snapshot.forEach(docSnap => {
 
-      const d = docSnap.data();
-
-      const temp = d.temperature ?? "-";
-      const ph = d.phLevel ?? "-";
-      const humidity = d.humidity ?? "--";
-
+      const d    = docSnap.data();
       const time = formatDate(d.createdAt);
 
       let statusHTML = "";
-      let category = "";
+      let category   = "";
 
-      // STATUS LOGIC
       if (d.overallStatus === "Passed") {
-
-        statusHTML = `
-          <span class="status fresh">
-            <i class="fa-solid fa-check"></i> Fresh
-          </span>
-        `;
-
-        category = "fresh";
+        statusHTML = `<span class="status fresh"><i class="fa-solid fa-check"></i> Fresh</span>`;
+        category   = "fresh";
         freshCount++;
-
       }
-
       else if (d.overallStatus === "With Issues") {
-
-        statusHTML = `
-          <span class="status moderate">
-            <i class="fa-solid fa-triangle-exclamation"></i> With Issues
-          </span>
-        `;
-
-        category = "issues";
+        statusHTML = `<span class="status moderate"><i class="fa-solid fa-triangle-exclamation"></i> With Issues</span>`;
+        category   = "issues";
         issuesCount++;
-
       }
-
       else {
-
-        statusHTML = `
-          <span class="status spoiled">
-            <i class="fa-solid fa-circle-exclamation"></i> Spoiled
-          </span>
-        `;
-
-        category = "spoiled";
+        statusHTML = `<span class="status spoiled"><i class="fa-solid fa-circle-exclamation"></i> Spoiled</span>`;
+        category   = "spoiled";
         spoiledCount++;
-
       }
 
+      /* ── 4-column row — Batch ID, Location, Status, Last Updated ── */
       const row = `
-        <tr 
-          data-batch="${(d.batchCode ?? "").toLowerCase()}" 
+        <tr
+          data-batch="${(d.batchCode ?? "").toLowerCase()}"
           data-status="${d.overallStatus}"
         >
           <td><strong>${d.batchCode ?? "-"}</strong></td>
           <td>${d.location ?? "-"}</td>
-          <td>${temp}</td>
-          <td>${ph}</td>
-          <td>${humidity}</td>
           <td>${statusHTML}</td>
           <td>${time}</td>
         </tr>
       `;
 
-      // MAIN TABLE
-      if (tbody) tbody.innerHTML += row;
-
-      // MODALS
-      if (category === "fresh" && freshBody) freshBody.innerHTML += row;
-      if (category === "issues" && issuesBody) issuesBody.innerHTML += row;
+      if (tbody)      tbody.innerHTML      += row;
+      if (category === "fresh"   && freshBody)   freshBody.innerHTML   += row;
+      if (category === "issues"  && issuesBody)  issuesBody.innerHTML  += row;
       if (category === "spoiled" && spoiledBody) spoiledBody.innerHTML += row;
 
     });
 
-    // UPDATE COUNTS
-    document.getElementById("fresh-count").textContent = freshCount;
-    document.getElementById("issues-count").textContent = issuesCount;
+    document.getElementById("fresh-count").textContent   = freshCount;
+    document.getElementById("issues-count").textContent  = issuesCount;
     document.getElementById("spoiled-count").textContent = spoiledCount;
 
-    // EMPTY STATE FOR MODALS
-    if (freshBody && !freshBody.innerHTML) {
-      freshBody.innerHTML = `<tr><td colspan="6">No fresh records</td></tr>`;
-    }
-
-    if (issuesBody && !issuesBody.innerHTML) {
-      issuesBody.innerHTML = `<tr><td colspan="6">No issues records</td></tr>`;
-    }
-
-    if (spoiledBody && !spoiledBody.innerHTML) {
-      spoiledBody.innerHTML = `<tr><td colspan="6">No spoiled records</td></tr>`;
-    }
+    if (freshBody   && !freshBody.innerHTML)   freshBody.innerHTML   = `<tr><td colspan="4">No fresh records</td></tr>`;
+    if (issuesBody  && !issuesBody.innerHTML)  issuesBody.innerHTML  = `<tr><td colspan="4">No issues records</td></tr>`;
+    if (spoiledBody && !spoiledBody.innerHTML) spoiledBody.innerHTML = `<tr><td colspan="4">No spoiled records</td></tr>`;
 
   }
-
   catch (error) {
-
-    console.error("🔥 Error loading freshness data:", error);
-
+    console.error("Error loading freshness data:", error);
     const tbody = document.getElementById("all-freshness-body");
-
-    if (tbody) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7">Error loading data</td>
-        </tr>
-      `;
-    }
-
+    if (tbody) tbody.innerHTML = `<tr><td colspan="4">Error loading data</td></tr>`;
   }
 
 }
@@ -167,53 +105,40 @@ async function loadFreshnessData() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const filterBtn = document.getElementById("filterBtn");
-  const dropdown = document.getElementById("filterDropdown");
+  const filterBtn   = document.getElementById("filterBtn");
+  const dropdown    = document.getElementById("filterDropdown");
   const searchInput = document.getElementById("searchBatch");
 
-  // Toggle dropdown
   filterBtn?.addEventListener("click", () => {
     dropdown.classList.toggle("active");
   });
 
-  // SEARCH (LIVE 🔥)
   searchInput?.addEventListener("input", applyFilters);
 
-  // APPLY FILTER BUTTON
   document.getElementById("applyFilter")?.addEventListener("click", () => {
     applyFilters();
     dropdown.classList.remove("active");
   });
 
-  // CLEAR FILTER
   document.getElementById("clearFilter")?.addEventListener("click", () => {
-
     document.getElementById("filterStatus").value = "";
     searchInput.value = "";
-
     applyFilters();
   });
 
 });
 
-/* MAIN FILTER FUNCTION */
 function applyFilters() {
 
   const search = document.getElementById("searchBatch").value.toLowerCase();
   const status = document.getElementById("filterStatus").value;
 
-  const rows = document.querySelectorAll("#all-freshness-body tr");
-
-  rows.forEach(row => {
-
-    const rowBatch = row.dataset.batch || "";
+  document.querySelectorAll("#all-freshness-body tr").forEach(row => {
+    const rowBatch  = row.dataset.batch  || "";
     const rowStatus = row.dataset.status || "";
-
     const matchSearch = !search || rowBatch.includes(search);
     const matchStatus = !status || rowStatus === status;
-
     row.style.display = (matchSearch && matchStatus) ? "" : "none";
-
   });
 
 }
@@ -221,18 +146,13 @@ function applyFilters() {
 /* ================= DATE FORMAT ================= */
 
 function formatDate(timestamp) {
-
   if (!timestamp || !timestamp.toDate) return "--";
-
-  const date = timestamp.toDate();
-
-  return date.toLocaleString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true
+  return timestamp.toDate().toLocaleString("en-PH", {
+    month  : "short",
+    day    : "numeric",
+    year   : "numeric",
+    hour   : "numeric",
+    minute : "2-digit",
+    hour12 : true
   });
-
 }

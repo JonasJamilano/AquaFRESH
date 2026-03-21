@@ -115,9 +115,6 @@
                 <tr>
                     <th>Batch ID</th>
                     <th>Location</th>
-                    <th><i class="fa-solid fa-temperature-half"></i> Temp (°C)</th>
-                    <th><i class="fa-solid fa-droplet"></i> pH Level</th>
-                    <th><i class="fa-solid fa-wind"></i> Humidity (%)</th>
                     <th>Freshness Status</th>
                     <th>Last Updated</th>
                 </tr>
@@ -126,6 +123,7 @@
         </table>
     </section>
 </main>
+
 <!-- MODAL: Fresh -->
 <div class="qc-modal-overlay" id="modal-fresh">
     <div class="qc-modal wide">
@@ -135,12 +133,20 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead><tr><th>Batch ID</th><th>Location</th><th>Temp</th><th>pH Level</th><th>Humidity</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Location</th>
+                        <th>Freshness Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
                 <tbody id="fresh-body"></tbody>
             </table>
         </div>
     </div>
 </div>
+
 <!-- MODAL: Issues -->
 <div class="qc-modal-overlay" id="modal-issues">
     <div class="qc-modal wide">
@@ -150,12 +156,20 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead><tr><th>Batch ID</th><th>Location</th><th>Temp</th><th>pH Level</th><th>Humidity</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Location</th>
+                        <th>Freshness Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
                 <tbody id="issues-body"></tbody>
             </table>
         </div>
     </div>
 </div>
+
 <!-- MODAL: Spoiled -->
 <div class="qc-modal-overlay" id="modal-spoiled">
     <div class="qc-modal wide">
@@ -165,12 +179,20 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead><tr><th>Batch ID</th><th>Location</th><th>Temp</th><th>pH Level</th><th>Humidity</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Location</th>
+                        <th>Freshness Status</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
                 <tbody id="spoiled-body"></tbody>
             </table>
         </div>
     </div>
 </div>
+
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="FreshnessEvaluation.js"></script>
