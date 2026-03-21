@@ -32,23 +32,31 @@ function getAudioContext() {
     return audioCtx;
 }
 
+function doBeep(ctx) {
+    const now = ctx.currentTime;
+    [0, 0.2].forEach((offset) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now + offset);
+        gain.gain.setValueAtTime(0,    now + offset);
+        gain.gain.linearRampToValueAtTime(0.6, now + offset + 0.01);
+        gain.gain.linearRampToValueAtTime(0,   now + offset + 0.08);
+        osc.start(now + offset);
+        osc.stop(now  + offset + 0.1);
+    });
+}
+
 function playAlertSound() {
     try {
         const ctx = getAudioContext();
-        const now = ctx.currentTime;
-        [0, 0.2].forEach((offset) => {
-            const osc  = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(880, now + offset);
-            gain.gain.setValueAtTime(0,    now + offset);
-            gain.gain.linearRampToValueAtTime(0.6, now + offset + 0.01);
-            gain.gain.linearRampToValueAtTime(0,   now + offset + 0.08);
-            osc.start(now + offset);
-            osc.stop(now  + offset + 0.1);
-        });
+        if (ctx.state === "suspended") {
+            ctx.resume().then(() => doBeep(ctx)).catch(e => console.warn("Audio resume failed:", e));
+        } else {
+            doBeep(ctx);
+        }
     } catch (err) { console.warn("Alert sound failed:", err); }
 }
 
