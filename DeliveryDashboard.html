@@ -10,10 +10,10 @@
     <link rel="stylesheet" href="DeliveryDashboard.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
-
 </head>
 <body>
 
+<!-- nav-toggle MUST come before sidebar and overlay as siblings -->
 <input type="checkbox" id="nav-toggle">
 
 <aside class="sidebar">
@@ -35,6 +35,9 @@
         </ul>
     </nav>
 </aside>
+
+<!-- Dark overlay — tapping it closes the sidebar on mobile -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
 
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
@@ -123,14 +126,7 @@
         </div>
     </section>
 
-    <!-- ============================= -->
-    <!-- THRESHOLD ALERT BANNER        -->
-    <!-- Hidden by default, shown by   -->
-    <!-- DeliveryDashboard.js when any -->
-    <!-- sensor exceeds threshold.     -->
-    <!-- Clicking navigates to         -->
-    <!-- AnalyticsReporting.html       -->
-    <!-- ============================= -->
+    <!-- THRESHOLD ALERT BANNER -->
     <section
         id="deliveryAlarmBanner"
         class="delivery-alarm-banner"
@@ -139,11 +135,9 @@
         hidden
         onclick="window.location.href='AnalyticsReporting.html'"
         style="cursor:pointer;">
-
         <div class="alarm-icon-wrap">
             <i class="fa-solid fa-bell"></i>
         </div>
-
         <div class="alarm-body">
             <p class="alarm-title">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -152,12 +146,10 @@
             <ul class="alarm-list" id="deliveryAlarmMessages"></ul>
             <p class="alarm-footer" id="deliveryAlarmTimestamp"></p>
         </div>
-
         <div class="alarm-cta">
             <span>View Analytics</span>
             <i class="fa-solid fa-chevron-right"></i>
         </div>
-
     </section>
 
     <!-- ALL MY DELIVERIES -->
@@ -181,7 +173,7 @@
 
 </main>
 
-<!-- MODALS (unchanged) -->
+<!-- MODALS -->
 
 <div class="qc-modal-overlay" id="modal-pending">
     <div class="qc-modal wide">

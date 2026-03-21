@@ -11,7 +11,9 @@
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
 </head>
 <body>
+
 <input type="checkbox" id="nav-toggle">
+
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -26,11 +28,15 @@
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html" class="active"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
             <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a></li>
-            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
+            <li data-role="superadmin admin manager delivery"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
 </aside>
+
+<!-- Dark overlay — tapping closes sidebar on mobile -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
@@ -44,11 +50,13 @@
         </div>
     </div>
 </header>
+
 <main class="content">
     <section class="page-header">
         <h2>Freshness Evaluation</h2>
         <p class="subtitle">Real-time assessment of fish freshness based on sensor data</p>
     </section>
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Current Batch Overview</h3>
@@ -84,6 +92,7 @@
             </div>
         </div>
     </section>
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Batch Evaluation Data</h3>
@@ -133,14 +142,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead>
-                    <tr>
-                        <th>Batch ID</th>
-                        <th>Location</th>
-                        <th>Freshness Status</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Batch ID</th><th>Location</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
                 <tbody id="fresh-body"></tbody>
             </table>
         </div>
@@ -156,14 +158,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead>
-                    <tr>
-                        <th>Batch ID</th>
-                        <th>Location</th>
-                        <th>Freshness Status</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Batch ID</th><th>Location</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
                 <tbody id="issues-body"></tbody>
             </table>
         </div>
@@ -179,14 +174,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="evaluation-table qc-table">
-                <thead>
-                    <tr>
-                        <th>Batch ID</th>
-                        <th>Location</th>
-                        <th>Freshness Status</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Batch ID</th><th>Location</th><th>Freshness Status</th><th>Last Updated</th></tr></thead>
                 <tbody id="spoiled-body"></tbody>
             </table>
         </div>
