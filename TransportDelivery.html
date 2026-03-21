@@ -13,6 +13,11 @@
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
 </head>
 <body>
+
+<!-- ① checkbox must be the VERY FIRST element in body, before sidebar -->
+<input type="checkbox" id="nav-toggle">
+
+<!-- ② sidebar -->
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -32,8 +37,13 @@
         </ul>
     </nav>
 </aside>
+
+<!-- ③ overlay — must be AFTER aside, before header -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
+<!-- ④ topbar — menu-btn is a <label> not <span> -->
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -45,11 +55,13 @@
         </div>
     </div>
 </header>
+
 <main class="content">
     <section class="page-header">
         <h2>Transport & Delivery</h2>
         <p class="subtitle">Monitoring delivery progress, environmental conditions, and routes</p>
     </section>
+
     <section class="panel panel-trigger" id="createDeliveryWrapper" style="display:none;">
         <button class="new-inspection-trigger" id="btn-new-delivery" aria-label="Open New Delivery Log">
             <div class="ni-trigger-icon"><i class="fa-solid fa-truck-fast"></i></div>
@@ -60,6 +72,7 @@
             <i class="fa-solid fa-arrow-right ni-trigger-arrow"></i>
         </button>
     </section>
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Delivery Status Summary</h3>
@@ -104,12 +117,14 @@
             </div>
         </div>
     </section>
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Live GPS Tracking</h3>
             <span class="live-indicator"><i class="fa-solid fa-circle-dot"></i> Real-Time</span>
         </div>
         <p id="map-status" style="font-size:13px;margin-bottom:16px;color:#64748b;">Initializing map...</p>
+
         <div id="mapAlarmBanner" class="map-alarm-banner" hidden>
             <div class="map-alarm-icon"><i class="fa-solid fa-bell"></i></div>
             <div class="map-alarm-body">
@@ -122,8 +137,10 @@
                 <button class="map-alarm-btn stores-btn" onclick="onFindStoresClicked()"><i class="fa-solid fa-store"></i><span>Find Nearby Stores</span></button>
             </div>
         </div>
+
         <div id="delivery-map"></div>
         <div id="storeSearchStatus" class="store-search-status" style="display:none;"></div>
+
         <div id="nearbyStoresPanel" class="nearby-stores-panel" hidden>
             <div class="nearby-stores-header">
                 <div class="nearby-stores-title"><i class="fa-solid fa-store"></i> Nearby Ice &amp; Convenience Stores</div>
@@ -132,6 +149,7 @@
             <div id="nearbyStoresList" class="nearby-stores-list"></div>
         </div>
     </section>
+
     <section class="panel">
         <div class="panel-header-flex"><h3>All Active Deliveries</h3></div>
         <table class="delivery-table qc-table">
@@ -144,6 +162,7 @@
         </table>
     </section>
 </main>
+
 <!-- MODAL: New Delivery -->
 <div class="qc-modal-overlay" id="modal-new-delivery">
     <div class="qc-modal wide">
@@ -191,6 +210,7 @@
         </div>
     </div>
 </div>
+
 <!-- MODAL: Pending -->
 <div class="qc-modal-overlay" id="modal-pending">
     <div class="qc-modal wide">
@@ -206,6 +226,7 @@
         </div>
     </div>
 </div>
+
 <!-- MODAL: En Route -->
 <div class="qc-modal-overlay" id="modal-enroute">
     <div class="qc-modal wide">
@@ -221,6 +242,7 @@
         </div>
     </div>
 </div>
+
 <!-- MODAL: Delivered -->
 <div class="qc-modal-overlay" id="modal-delivered">
     <div class="qc-modal wide">
@@ -236,6 +258,7 @@
         </div>
     </div>
 </div>
+
 <!-- MODAL: Delayed -->
 <div class="qc-modal-overlay" id="modal-delayed">
     <div class="qc-modal wide">
@@ -251,6 +274,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script type="module" src="sidebar.js"></script>
