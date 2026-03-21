@@ -21,16 +21,12 @@ let deliveryRoutes  = {};
 let watchId         = null;
 let isNavigating    = false;
 
-/* Current driver GPS position — updated by watchPosition */
 let driverLat = null;
 let driverLng = null;
 
-/* Store markers currently on the map */
 let storeMarkers = [];
-
-/* Active store detour route — replaces delivery route temporarily */
 let storeRoute       = null;
-let savedDeliveryId  = null; // which delivery route was hidden for the detour
+let savedDeliveryId  = null;
 
 const deliveriesCol  = collection(db, "deliveries");
 const usersCol       = collection(db, "users");
@@ -45,12 +41,11 @@ let batchesMap     = {};
 ========================================= */
 
 const LOGS_PATH          = "AquaFresh_Logs";
-const LIVE_POLL_INTERVAL = 10_000; // 10 seconds
-const STORE_SEARCH_RADIUS = 5000;  // 5 km in meters
+const LIVE_POLL_INTERVAL = 10_000;
+const STORE_SEARCH_RADIUS = 5000;
 
 /* =========================================
-   ALERT SOUND — delivery role only
-   Same Web Audio double-beep as other pages
+   ALERT SOUND
 ========================================= */
 
 let audioCtx         = null;
@@ -105,8 +100,6 @@ function unlockAudio() {
 
 /* =========================================
    THRESHOLD CHECKS
-   temp  : alert if < 0 OR > 4 °C
-   pH    : alert if < 6.5 OR > 7.5
 ========================================= */
 
 function parseNumericValue(value) {
@@ -136,9 +129,7 @@ function getAlarmMessages(payload) {
 }
 
 /* =========================================
-   THRESHOLD ALERT BANNER (on-map overlay)
-   Shows/hides the floating red banner
-   above the map. Clicking goes to Analytics.
+   THRESHOLD ALERT BANNER
 ========================================= */
 
 function renderMapAlarmBanner(messages, timestamp) {
@@ -171,11 +162,6 @@ function renderMapAlarmBanner(messages, timestamp) {
 
 /* =========================================
    NEAREST STORE FINDER
-   Uses Overpass API to find convenience
-   stores, supermarkets, and shops near
-   the driver's current GPS position.
-   Only runs when delivery is en_route
-   AND a threshold alert is active.
 ========================================= */
 
 let lastStoreFetchLat = null;
@@ -183,7 +169,6 @@ let lastStoreFetchLng = null;
 let storeFetchActive  = false;
 
 async function findNearestStores(lat, lng) {
-    // Avoid refetching if driver hasn't moved much (within ~200m)
     if (lastStoreFetchLat !== null) {
         const dist = getDistanceMeters(lat, lng, lastStoreFetchLat, lastStoreFetchLng);
         if (dist < 200 && storeFetchActive) return;
@@ -193,11 +178,6 @@ async function findNearestStores(lat, lng) {
     lastStoreFetchLng = lng;
     storeFetchActive  = true;
 
-    // Overpass query — searches for:
-    // - convenience stores
-    // - supermarkets
-    // - shops selling ice
-    // within STORE_SEARCH_RADIUS meters
     const radius = STORE_SEARCH_RADIUS;
     const overpassQuery = `
         [out:json][timeout:15];
@@ -230,14 +210,13 @@ async function findNearestStores(lat, lng) {
             return;
         }
 
-        // Sort by distance from driver
         const sorted = stores
             .map(s => ({
                 ...s,
                 distance: getDistanceMeters(lat, lng, s.lat, s.lon)
             }))
             .sort((a, b) => a.distance - b.distance)
-            .slice(0, 10); // show up to 10 nearest
+            .slice(0, 10);
 
         plotStoreMarkers(sorted, lat, lng);
         renderStoreList(sorted);
@@ -324,37 +303,24 @@ function clearStoresAndHidePanel() {
     updateStoreStatus("", "");
 }
 
-/* =========================================
-   FIND NEARBY STORES — manual trigger
-   Called when driver taps the banner button.
-   Checks GPS is available first.
-========================================= */
-
 window.onFindStoresClicked = function () {
     if (!currentlyEnRoute) {
         showStoreBtnFeedback("Start your delivery first to find nearby stores.", "empty");
         return;
     }
-
     if (driverLat === null || driverLng === null) {
         showStoreBtnFeedback("Waiting for GPS signal… try again in a moment.", "loading");
         return;
     }
-
-    // Scroll smoothly down to the map so driver can see the pins appear
     document.getElementById("delivery-map")?.scrollIntoView({ behavior: "smooth", block: "center" });
-
     findNearestStores(driverLat, driverLng);
 };
 
-/* Brief feedback shown on the store button itself */
 function showStoreBtnFeedback(message, type) {
     updateStoreStatus(message, type);
-    // Scroll to status line so driver sees it
     document.getElementById("storeSearchStatus")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-/* Focus map on a store when list item clicked */
 window.focusStore = function(lat, lng) {
     if (map) map.setView([lat, lng], 17);
     storeMarkers.forEach(m => {
@@ -365,53 +331,26 @@ window.focusStore = function(lat, lng) {
     });
 };
 
-/* =========================================
-   NAVIGATE TO STORE ON LEAFLET MAP
-   Replaces the active delivery route with
-   a new route from driver → chosen store.
-   Shows a "Back to Delivery Route" button.
-========================================= */
-
 window.navigateToStore = function(storeLat, storeLng, storeName) {
     if (driverLat === null || driverLng === null) {
         alert("GPS position not available yet. Please wait a moment and try again.");
         return;
     }
-
-    // Close any open popup
     map.closePopup();
-
-    // Hide all active delivery routes temporarily
     Object.keys(deliveryRoutes).forEach(id => {
         const route = deliveryRoutes[id];
-        if (route) {
-            map.removeControl(route);
-            savedDeliveryId = id; // remember which one to restore
-        }
+        if (route) { map.removeControl(route); savedDeliveryId = id; }
     });
-
-    // Remove existing store route if any
-    if (storeRoute) {
-        map.removeControl(storeRoute);
-        storeRoute = null;
-    }
-
-    // Draw new route: driver → store in blue
+    if (storeRoute) { map.removeControl(storeRoute); storeRoute = null; }
     storeRoute = L.Routing.control({
-        waypoints: [
-            L.latLng(driverLat, driverLng),
-            L.latLng(storeLat, storeLng)
-        ],
+        waypoints: [ L.latLng(driverLat, driverLng), L.latLng(storeLat, storeLng) ],
         addWaypoints      : false,
         routeWhileDragging: false,
         fitSelectedRoutes : true,
         show              : false,
-        lineOptions: {
-            styles: [{ color: '#0ea5e9', opacity: 1, weight: 6 }]
-        },
+        lineOptions: { styles: [{ color: '#0ea5e9', opacity: 1, weight: 6 }] },
         createMarker: () => null
     }).addTo(map);
-
     storeRoute.on('routesfound', function(e) {
         const route      = e.routes[0];
         const distKm     = (route.summary.totalDistance / 1000).toFixed(1);
@@ -420,41 +359,26 @@ window.navigateToStore = function(storeLat, storeLng, storeName) {
         if (statusBox) {
             statusBox.innerHTML = `
                 <i class="fa-solid fa-store" style="color:#0ea5e9;"></i>
-                <b>Detour to ${storeName}:</b>
-                ${distKm} km · ~${minutes} min
+                <b>Detour to ${storeName}:</b> ${distKm} km · ~${minutes} min
                 &nbsp;
                 <button class="back-to-delivery-btn" onclick="backToDeliveryRoute()">
                     <i class="fa-solid fa-rotate-left"></i> Back to Delivery Route
                 </button>`;
         }
     });
-
-    // Update store status line
     updateStoreStatus(`Routing to ${storeName}…`, "loading");
 };
 
-/* Restores the original delivery route */
 window.backToDeliveryRoute = function() {
-    // Remove store route
-    if (storeRoute) {
-        map.removeControl(storeRoute);
-        storeRoute = null;
-    }
-
-    // Restore the saved delivery route
+    if (storeRoute) { map.removeControl(storeRoute); storeRoute = null; }
     if (savedDeliveryId && deliveryRoutes[savedDeliveryId]) {
         deliveryRoutes[savedDeliveryId].addTo(map);
     }
-
     savedDeliveryId = null;
-
     const statusBox = document.getElementById('map-status');
     if (statusBox) {
-        statusBox.innerHTML = `
-            <i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i>
-            Navigation Mode Active`;
+        statusBox.innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
     }
-
     updateStoreStatus("", "");
 };
 
@@ -472,29 +396,13 @@ function getStoreTypeLabel(tags) {
 function updateStoreStatus(message, type) {
     const el = document.getElementById("storeSearchStatus");
     if (!el) return;
-
-    const colors = {
-        loading: "#0ea5e9",
-        ok     : "#16a34a",
-        empty  : "#94a3b8",
-        error  : "#dc2626",
-        ""     : "#94a3b8"
-    };
-
-    const icons = {
-        loading: `<i class="fa-solid fa-spinner fa-spin"></i>`,
-        ok     : `<i class="fa-solid fa-check-circle"></i>`,
-        empty  : `<i class="fa-solid fa-inbox"></i>`,
-        error  : `<i class="fa-solid fa-triangle-exclamation"></i>`,
-        ""     : ""
-    };
-
+    const colors = { loading: "#0ea5e9", ok: "#16a34a", empty: "#94a3b8", error: "#dc2626", "": "#94a3b8" };
+    const icons  = { loading: `<i class="fa-solid fa-spinner fa-spin"></i>`, ok: `<i class="fa-solid fa-check-circle"></i>`, empty: `<i class="fa-solid fa-inbox"></i>`, error: `<i class="fa-solid fa-triangle-exclamation"></i>`, "": "" };
     el.style.color   = colors[type] || "#94a3b8";
     el.innerHTML     = message ? `${icons[type] || ""} ${message}` : "";
     el.style.display = message ? "flex" : "none";
 }
 
-/* Haversine distance in meters */
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
     const R    = 6371000;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -507,14 +415,10 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
 }
 
 /* =========================================
-   SENSOR WATCHER — every 10 seconds
-   Checks thresholds and decides whether to:
-   - show/hide the map alarm banner
-   - play the alert sound
-   - trigger the store finder (if en_route)
+   SENSOR WATCHER
 ========================================= */
 
-let currentlyEnRoute = false; // true when driver has an active en_route delivery
+let currentlyEnRoute = false;
 
 function startSensorWatch() {
     watchSensor();
@@ -527,25 +431,16 @@ function watchSensor() {
         orderByKey(),
         limitToLast(1)
     );
-
     onValue(latestQuery, (snapshot) => {
         if (!snapshot.exists()) return;
-
         let payload = null;
         snapshot.forEach((child) => { payload = child.val(); });
-
         const messages  = getAlarmMessages(payload);
         const hasAlarms = messages.length > 0;
         const timestamp = payload?.timestamp ?? Date.now();
-
         renderMapAlarmBanner(messages, timestamp);
         handleAlarmSound(hasAlarms);
-
-        // If alarm cleared — remove store markers and hide panel
-        if (!hasAlarms && storeFetchActive) {
-            clearStoresAndHidePanel();
-        }
-
+        if (!hasAlarms && storeFetchActive) clearStoresAndHidePanel();
     }, (error) => { console.warn("Sensor watch error on TransportDelivery:", error); });
 }
 
@@ -557,23 +452,17 @@ document.addEventListener("DOMContentLoaded", initPage);
 
 async function initPage() {
     const role = localStorage.getItem("role");
-
     unlockAudio();
     await loadBatches();
 
     if (["superadmin", "admin", "manager"].includes(role)) {
         const triggerWrap = document.getElementById("createDeliveryWrapper");
         if (triggerWrap) triggerWrap.style.display = "block";
-
         loadDrivers();
         setupLocationAutocomplete();
-
         document.getElementById("btn-new-delivery")?.addEventListener("click", async () => {
             const preview = document.getElementById("deliveryCodeDisplay");
-            if (preview) {
-                preview.value = "Generating...";
-                preview.value = await generateDeliveryCode();
-            }
+            if (preview) { preview.value = "Generating..."; preview.value = await generateDeliveryCode(); }
         });
     }
 
@@ -624,10 +513,8 @@ function initMap() {
 function setupLocationAutocomplete() {
     const originInput = document.getElementById("origin");
     const destInput   = document.getElementById("destination");
-
     originInput.addEventListener("input", (e) => handleSearch(e.target.value, "origin"));
     destInput.addEventListener("input",   (e) => handleSearch(e.target.value, "destination"));
-
     document.addEventListener("click", (e) => {
         if (e.target.id !== "origin")      document.getElementById("origin-suggestions").style.display = "none";
         if (e.target.id !== "destination") document.getElementById("dest-suggestions").style.display   = "none";
@@ -639,7 +526,6 @@ async function handleSearch(queryText, type) {
     clearTimeout(searchTimeout);
     const suggestionBox = document.getElementById(type === "origin" ? "origin-suggestions" : "dest-suggestions");
     if (queryText.length < 3) { suggestionBox.style.display = "none"; return; }
-
     searchTimeout = setTimeout(async () => {
         try {
             const res     = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${queryText}&limit=5&countrycodes=ph`);
@@ -680,29 +566,22 @@ function selectLocation(place, type) {
 async function loadBatches() {
     const select = document.getElementById("batchSelect");
     if (select) select.innerHTML = `<option value="">Select Batch</option>`;
-
     try {
         const passedSnap = await getDocs(query(inspectionsCol, where("overallStatus", "==", "Passed")));
         if (passedSnap.empty) {
             if (select) select.innerHTML += `<option value="" disabled>No passed batches available</option>`;
             return;
         }
-
         const deliveriesSnap = await getDocs(deliveriesCol);
         const usedBatchIds   = new Set();
         deliveriesSnap.forEach(d => { if (d.data().batchId) usedBatchIds.add(d.data().batchId); });
-
-        passedSnap.forEach(docSnap => {
-            batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id;
-        });
-
+        passedSnap.forEach(docSnap => { batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id; });
         let availableCount = 0;
         passedSnap.forEach(docSnap => {
             if (usedBatchIds.has(docSnap.id)) return;
             availableCount++;
             if (select) select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
         });
-
         if (availableCount === 0 && select) {
             select.innerHTML += `<option value="" disabled>All passed batches are already scheduled</option>`;
         }
@@ -760,14 +639,12 @@ window.createDelivery = async function () {
     });
 
     alert(`Delivery ${deliveryCode} created successfully!`);
-
     document.getElementById("origin").value      = "";
     document.getElementById("destination").value = "";
     document.getElementById("truckSelect").value = "";
     document.getElementById("deliveryCodeDisplay").value = "";
     selectedOrigin = { lat: null, lng: null, name: "" };
     selectedDest   = { lat: null, lng: null, name: "" };
-
     await loadBatches();
     if (window.closeModal) window.closeModal("modal-new-delivery");
 };
@@ -811,7 +688,6 @@ function listenToDeliveries() {
         snapshot.forEach(docSnap => docsArray.push({ id: docSnap.id, ...docSnap.data() }));
         docsArray.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
-        // Track if ANY delivery is en_route for this driver
         currentlyEnRoute = docsArray.some(d => d.status === "en_route");
 
         docsArray.forEach(d => {
@@ -889,7 +765,9 @@ function listenToDeliveries() {
             const formattedDate = d.eta         ? new Date(d.eta).toLocaleString() : "-";
             const deliveredDate = d.deliveredAt ? d.deliveredAt.toDate().toLocaleString() : "-";
 
-            allBody.innerHTML += `
+            // ─── All Active Deliveries — exclude delivered ───
+            if (d.status !== "delivered") {
+                allBody.innerHTML += `
                 <tr>
                     <td><strong>${d.deliveryCode}</strong></td>
                     <td>${displayBatch}</td>
@@ -900,6 +778,7 @@ function listenToDeliveries() {
                     <td>${formattedDate}</td>
                     <td>${actionButton}</td>
                 </tr>`;
+            }
 
             if (d.status === "pending") {
                 counts.pending++;
@@ -934,19 +813,16 @@ function listenToDeliveries() {
 
 window.updateStatus = async function (id, status, destLat = null, destLng = null) {
     const updateData = { status };
-
     if (status === "en_route") {
         updateData.startedAt = serverTimestamp();
         startTracking(id, destLat, destLng);
     }
-
     if (status === "delivered") {
         updateData.deliveredAt = serverTimestamp();
         stopTracking();
         clearStoresAndHidePanel();
         await loadBatches();
     }
-
     await updateDoc(doc(db, "deliveries", id), updateData);
 };
 
@@ -955,7 +831,6 @@ function startTracking(deliveryId, destLat, destLng) {
         alert("Geolocation is not supported by your browser.");
         return;
     }
-
     navigator.geolocation.getCurrentPosition(position => {
         isNavigating = true;
         document.getElementById('map-status').innerHTML =
@@ -965,21 +840,17 @@ function startTracking(deliveryId, destLat, destLng) {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
 
-            // Keep driver position updated for store search
             driverLat = lat;
             driverLng = lng;
 
             map.setView([lat, lng], 18);
-
             if (deliveryMarkers[deliveryId]) deliveryMarkers[deliveryId].setLatLng([lat, lng]);
-
             if (deliveryRoutes[deliveryId] && destLat && destLng) {
                 deliveryRoutes[deliveryId].setWaypoints([
                     L.latLng(lat, lng),
                     L.latLng(destLat, destLng)
                 ]);
             }
-
             await updateDoc(doc(db, "deliveries", deliveryId), { currentLat: lat, currentLng: lng });
 
         }, error => {
