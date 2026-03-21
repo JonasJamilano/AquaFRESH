@@ -66,14 +66,70 @@
             <i class="fa-solid fa-chevron-right card-arrow"></i>
         </div>
     </section>
-    <section class="panel" id="trendsPanelSection">
-        <div class="panel-header-flex"><h3>Trends</h3></div>
-        <p class="subtitle" style="margin-top:-10px;margin-bottom:20px;">Analytics insights across sensors, freshness evaluation, and delivery performance</p>
-        <div class="trends-tabs">
-            <div class="trends-tab active" data-trendtab="sensor">Sensor Trends</div>
-            <div class="trends-tab" data-trendtab="freshness">Freshness Trends</div>
-            <div class="trends-tab" data-trendtab="delivery">Delivery Performance</div>
+    <section class="panel" id="selectionPanel">
+    <div class="panel-header-flex">
+        <h3>Select a Tank for Analytics</h3>
+    </div>
+    <div class="summary-cards">
+        <div class="card success" id="select-tank1" onclick="selectTank('tank1')" style="cursor: pointer; border-left: 5px solid #10b981; min-width: 320px;">
+            <div class="panel-header-flex" style="margin-bottom: 10px;">
+                <div>
+                    <h2 style="font-size: 20px;">Tank 1</h2>
+                    <p class="subtitle" style="margin-top: 2px;">
+                        <i class="fa-solid fa-truck" style="margin-right: 5px; color: #0ea5e9;"></i> Assigned to: Truck A
+                    </p>
+                </div>
+                <span class="status good" id="tank1-selection-status"><i class="fa-solid fa-check"></i> ONLINE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-weight: 600;">
+                <span id="card-tank1-temp"><i class="fa-solid fa-temperature-half" style="color: #0ea5e9;"></i> --°C</span>
+                <span id="card-tank1-ph"><i class="fa-solid fa-droplet" style="color: #10b981;"></i> --</span>
+                <span id="card-tank1-hum"><i class="fa-solid fa-cloud" style="color: #f97316;"></i> --%</span>
+            </div>
+            <div style="text-align: right; margin-top: 10px;">
+                <small class="subtitle" id="card-tank1-time" style="font-size: 10px;">Awaiting data...</small>
+            </div>
         </div>
+
+        <div class="card" style="opacity: 0.6; cursor: not-allowed; min-width: 320px;">
+            <div class="panel-header-flex" style="margin-bottom: 10px;">
+                <div>
+                    <h2 style="font-size: 20px; color: #94a3b8;">Tank 2</h2>
+                    <p class="subtitle"><i class="fa-solid fa-truck" style="margin-right: 5px;"></i> Assigned to: Truck B</p>
+                </div>
+                <span class="status offline" style="background:#f1f5f9; color:#94a3b8;">OFFLINE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #cbd5e1; margin-top: 15px;">
+                <span><i class="fa-solid fa-temperature-half"></i> --</span>
+                <span><i class="fa-solid fa-droplet"></i> --</span>
+                <span><i class="fa-solid fa-cloud"></i> --</span>
+            </div>
+        </div>
+        
+        <div class="card" style="opacity: 0.6; cursor: not-allowed; min-width: 320px;">
+            <div class="panel-header-flex" style="margin-bottom: 10px;">
+                <div>
+                    <h2 style="font-size: 20px; color: #94a3b8;">Tank 2</h2>
+                    <p class="subtitle"><i class="fa-solid fa-truck" style="margin-right: 5px;"></i> Assigned to: Truck C</p>
+                </div>
+                <span class="status offline" style="background:#f1f5f9; color:#94a3b8;">OFFLINE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #cbd5e1; margin-top: 15px;">
+                <span><i class="fa-solid fa-temperature-half"></i> --</span>
+                <span><i class="fa-solid fa-droplet"></i> --</span>
+                <span><i class="fa-solid fa-cloud"></i> --</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel" id="trendsPanelSection" style="display: none;">
+    <div class="panel-header-flex">
+        <h2 id="selectedTankTitle" style="font-size: 20px;">Analytics Trends for Tank 1 (Truck A)</h2>
+        <button onclick="backToSelection()" style="background:#f1f5f9; border:none; padding: 8px 12px; border-radius: 6px; color:#475569; cursor:pointer; font-weight:600;">
+            <i class="fa-solid fa-arrow-rotate-left"></i> Change Tank
+        </button>
+    </div>
         <!-- SENSOR TRENDS -->
         <div class="trends-panel active" id="sensor">
             <div class="trend-tabs">

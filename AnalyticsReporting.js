@@ -679,3 +679,65 @@ function normalizeTimestampValue(value) {
     }
     return new Date();
 }
+
+/* =========================================
+   TANK SELECTION & DYNAMIC UI
+========================================= */
+
+window.selectTank = function(tankId) {
+    // Reveal the analytics section
+    document.getElementById("selectionPanel").style.display = "none";
+    const trends = document.getElementById("trendsPanelSection");
+    trends.style.display = "block";
+    
+    // Smoothly scroll to the charts
+    trends.scrollIntoView({ behavior: 'smooth' });
+
+    // Ensure Chart.js renders correctly now that the container is visible
+    Object.values(liveCharts).forEach(chart => chart.resize());
+};
+
+window.backToSelection = function() {
+    document.getElementById("selectionPanel").style.display = "block";
+    document.getElementById("trendsPanelSection").style.display = "none";
+};
+
+// Hook into your existing updateTankMonitoring to update selection cards in real-time
+// Add this inside your updateTankMonitoring function in AnalyticsReporting.js
+const originalUpdateTankMonitoring = updateTankMonitoring;
+updateTankMonitoring = function(payload) {
+    originalUpdateTankMonitoring(payload);
+    
+    if (payload) {
+        const temp = parseNumericValue(payload.water_temp);
+        const ph = parseNumericValue(payload.ph_level);
+        const hum = parseNumericValue(payload.humidity);
+        
+        // Handle timestamp formatting
+        const tsDate = normalizeTimestampValue(payload.timestamp || Date.now());
+        const timeString = tsDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        // Update Card 1 UI
+        if (document.getElementById("card-tank1-temp")) {
+            document.getElementById("card-tank1-temp").innerHTML = `<i class="fa-solid fa-temperature-half" style="color: #0ea5e9;"></i> ${temp.toFixed(1)}°C`;
+            document.getElementById("card-tank1-ph").innerHTML = `<i class="fa-solid fa-droplet" style="color: #10b981;"></i> ${ph.toFixed(2)}`;
+            document.getElementById("card-tank1-hum").innerHTML = `<i class="fa-solid fa-cloud" style="color: #f97316;"></i> ${hum.toFixed(1)}%`;
+            document.getElementById("card-tank1-time").textContent = timeString;
+        }
+        
+        // Status and Alert logic...
+        const card1 = document.getElementById("select-tank1");
+        const status1 = document.getElementById("tank1-selection-status");
+        const isAlert = temp < 0 || temp > 4 || ph < 6.5 || ph > 7.5;
+
+        if (isAlert && card1) {
+            card1.style.borderColor = "#ef4444";
+            status1.className = "status alert";
+            status1.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> THRESHOLD ALERT`;
+        } else if (card1) {
+            card1.style.borderColor = "#10b981";
+            status1.className = "status good";
+            status1.innerHTML = `<i class="fa-solid fa-check"></i> ONLINE`;
+        }
+    }
+};
