@@ -1,57 +1,326 @@
 @import url("DeliveryDashboard.css");
 
-/* Only keep inspector-specific styles below */
+/* =====================
+   PAGE HEADER
+===================== */
+.insp-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.insp-page-header h2 { color: #0f172a; font-size: 24px; font-weight: 700; }
+.subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
-.task-list {
-    list-style: none;
-    font-size: 14px;
+.insp-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.task-list li {
-    padding: 12px 0;
-    border-bottom: 1px solid #e2e8f0;
+.insp-today-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdfa;
+    border: 1.5px solid #99f6e4;
+    color: #0f766e;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.insp-today-badge i { font-size: 0.85rem; }
+.insp-today-badge strong { font-size: 1rem; }
+
+.insp-log-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 4px 12px rgba(13,148,136,0.25);
+    white-space: nowrap;
+}
+.insp-log-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* =====================
+   FILTER BAR
+===================== */
+.insp-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.insp-search-wrap {
+    flex: 1;
+    min-width: 180px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.insp-search-wrap i {
+    position: absolute;
+    left: 10px;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+.insp-search-wrap input {
+    width: 100%;
+    padding: 8px 12px 8px 30px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
     color: #334155;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color 0.15s;
 }
+.insp-search-wrap input:focus { border-color: #0d9488; background: #fff; }
+.insp-search-wrap input::placeholder { color: #cbd5e1; }
 
-.task-list li:last-child {
-    border-bottom: none;
+.insp-filter-select {
+    padding: 8px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    color: #475569;
+    background: #f8fafc;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
 }
+.insp-filter-select:focus { border-color: #0d9488; }
+
+/* =====================
+   STATUS BADGES
+===================== */
+.status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.status.success { background: #dcfce7; color: #166534; }
+.status.warning { background: #fef9c3; color: #854d0e; }
+.status.danger  { background: #fee2e2; color: #991b1b; }
+
+/* =====================
+   NEEDS ATTENTION
+===================== */
+.task-list { list-style: none; font-size: 14px; }
+.task-list li { padding: 4px 0; }
 
 .task-card {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     background: #f8fafc;
     padding: 12px 14px;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border: 1px solid #e2e8f0;
+    gap: 12px;
 }
-
-.task-sub {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 2px;
-}
+.task-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+.task-criteria { font-size: 11px; color: #94a3b8; margin-top: 3px; }
 
 .task-status {
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.task-status.success { background: #dcfce7; color: #166534; }
+.task-status.warning { background: #fef9c3; color: #854d0e; }
+.task-status.danger  { background: #fee2e2; color: #991b1b; }
+
+/* =====================
+   MOBILE
+===================== */
+
+
+/* =====================
+   NEEDS ATTENTION TRIGGER
+===================== */
+.needs-attention-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-left: 4px solid #ca8a04;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.12s, border-color 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.needs-attention-trigger:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+.needs-attention-trigger.has-items {
+    background: #fefce8;
+    border-color: #fde047;
+    border-left-color: #ca8a04;
 }
 
-.task-status.success {
-    background: #dcfce7;
-    color: #166534;
+.na-trigger-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.na-trigger-icon {
+    width: 44px;
+    height: 44px;
+    background: #fef9c3;
+    color: #ca8a04;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.needs-attention-trigger.has-items .na-trigger-icon {
+    animation: pulse-warn 1.8s infinite;
+}
+@keyframes pulse-warn {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(202,138,4,0.35); }
+    50%       { box-shadow: 0 0 0 8px rgba(202,138,4,0); }
 }
 
-.task-status.warning {
-    background: #fef08a;
-    color: #92400e;
+.na-trigger-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.na-trigger-sub {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 2px;
 }
 
-.task-status.danger {
-    background: #fee2e2;
-    color: #991b1b;
+.na-trigger-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.na-count-badge {
+    min-width: 28px;
+    height: 28px;
+    background: #ca8a04;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+}
+.na-arrow {
+    color: #94a3b8;
+    font-size: 1rem;
+    transition: transform 0.15s, color 0.15s;
+}
+.needs-attention-trigger:hover .na-arrow {
+    color: #ca8a04;
+    transform: translateX(4px);
+}
+
+/* =====================
+   MODAL SHARED (from DeliveryDashboard.css import)
+   Just in case it's not covered by the import
+===================== */
+.qc-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; }
+.qc-modal-overlay.active { display: flex; }
+.qc-modal { background: #fff; border-radius: 14px; width: 90%; max-width: 640px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; animation: modalIn 0.22s ease; }
+@keyframes modalIn { from { opacity:0; transform: translateY(20px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+.qc-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; color: #fff; flex-shrink: 0; }
+.qc-modal-header.yellow { background: #ca8a04; }
+.qc-modal-header h3 { margin: 0; font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.qc-modal-close { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.qc-modal-close:hover { background: rgba(255,255,255,0.35); }
+.qc-modal-body { overflow-y: auto; padding: 16px 20px 20px; flex: 1; }
+
+
+
+/* =====================
+   MOBILE RESPONSIVE
+===================== */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+}
+.sidebar-overlay.active { display: block; }
+
+@media (max-width: 768px) {
+    /* Sidebar slides off-screen */
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+    .sidebar.mobile-open { transform: translateX(0); }
+
+    /* Topbar full width */
+    .topbar { margin-left: 0 !important; width: 100% !important; padding: 0 16px; }
+
+    /* Content full width */
+    .content { margin-left: 0 !important; padding: 84px 16px 32px; }
+
+    /* Page header stacks */
+    .insp-page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .insp-header-right { width: 100%; flex-direction: column; gap: 8px; }
+    .insp-today-badge { width: 100%; justify-content: center; }
+    .insp-log-btn { width: 100%; justify-content: center; }
+
+    /* Filter bar stacks */
+    .insp-filter-bar { flex-direction: column; gap: 8px; }
+    .insp-search-wrap { width: 100%; }
+    .insp-filter-select { width: 100%; }
+
+    /* Needs attention trigger */
+    .needs-attention-trigger { padding: 12px 14px; }
+    .na-trigger-icon { width: 38px; height: 38px; font-size: 1rem; }
+    .na-trigger-title { font-size: 0.88rem; }
+
+    /* Table horizontal scroll */
+    .panel { padding: 16px; }
+    .qc-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 480px; }
+
+    /* Modal slides up from bottom */
+    .qc-modal-overlay { align-items: flex-end; }
+    .qc-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 85vh;
+        border-radius: 16px 16px 0 0;
+    }
+    .qc-modal-body { padding: 14px 16px 20px; }
+    .qc-modal-header { padding: 14px 16px; }
+
+    /* Task cards in modal */
+    .task-card { flex-wrap: wrap; gap: 8px; }
+
+    /* Panel header */
+    .panel-header-flex { flex-wrap: wrap; gap: 6px; }
+}
+
+@media (max-width: 480px) {
+    .insp-page-header h2 { font-size: 20px; }
 }

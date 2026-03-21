@@ -1,187 +1,176 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  getDocs,
-  query,
-  orderBy
+    collection, getDocs, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+let allDocs = [];
+
 document.addEventListener("DOMContentLoaded", async () => {
-  setupModals();
-  await loadInspectorDashboard();
+    await loadInspectorDashboard();
+
+    // Bind search & sort controls
+    document.getElementById("insp-search")?.addEventListener("input", renderTable);
+    document.getElementById("insp-sort-status")?.addEventListener("change", renderTable);
+    document.getElementById("insp-sort-date")?.addEventListener("change", renderTable);
 });
 
+/* =========================================
+   LOAD DATA
+========================================= */
 async function loadInspectorDashboard() {
+    try {
+        const q        = query(collection(db, "inspections"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
 
-  try {
+        allDocs = [];
+        snapshot.forEach(docSnap => {
+            const d = docSnap.data();
+            if (d.createdAt?.toDate) allDocs.push({ id: docSnap.id, ...d });
+        });
 
-    const q = query(collection(db, "inspections"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
+        renderTable();
+        renderAttention();
+
+    } catch (err) {
+        console.error("Inspector Dashboard error:", err);
+    }
+}
+
+/* =========================================
+   RENDER TODAY TABLE (with search/sort)
+========================================= */
+function renderTable() {
+    const tbody     = document.getElementById("today-body");
+    const search    = (document.getElementById("insp-search")?.value    || "").toLowerCase();
+    const status    =  document.getElementById("insp-sort-status")?.value || "";
+    const sortDir   =  document.getElementById("insp-sort-date")?.value   || "desc";
 
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
-    let todayCount = 0, passed = 0, issues = 0, rejected = 0;
+    // Filter to today only first
+    let filtered = allDocs.filter(d => {
+        const date = d.createdAt.toDate();
+        return date >= today;
+    });
 
-    const pendingList = document.getElementById("pending-inspections");
+    // Update today count badge
+    document.getElementById("today-count-badge").textContent = filtered.length;
 
-    const todayBody = document.getElementById("today-body");
-    const passedBody = document.getElementById("passed-body");
-    const issuesBody = document.getElementById("issues-body");
-    const rejectedBody = document.getElementById("rejected-body");
+    // Apply search
+    if (search) {
+        filtered = filtered.filter(d =>
+            (d.batchCode    || "").toLowerCase().includes(search) ||
+            (d.productType  || "").toLowerCase().includes(search) ||
+            (d.location     || "").toLowerCase().includes(search)
+        );
+    }
 
-    // SAFE RESET
-    if (pendingList) pendingList.innerHTML = "";
-    if (todayBody) todayBody.innerHTML = "";
-    if (passedBody) passedBody.innerHTML = "";
-    if (issuesBody) issuesBody.innerHTML = "";
-    if (rejectedBody) rejectedBody.innerHTML = "";
+    // Apply status filter
+    if (status) {
+        filtered = filtered.filter(d => d.overallStatus === status);
+    }
 
-    snapshot.forEach(docSnap => {
+    // Apply sort
+    filtered.sort((a, b) => {
+        const aTime = a.createdAt.toDate().getTime();
+        const bTime = b.createdAt.toDate().getTime();
+        return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+    });
 
-      const d = docSnap.data();
-      const createdAt = d.createdAt?.toDate?.();
+    tbody.innerHTML = "";
 
-      if (!createdAt) return; // skip invalid data
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:#94a3b8;">No inspections found.</td></tr>`;
+        return;
+    }
 
-      const time = formatDate(d.createdAt);
+    filtered.forEach(d => {
+        const time = formatDate(d.createdAt);
+        const statusClass = d.overallStatus === "Passed"     ? "status success"
+                          : d.overallStatus === "With Issues" ? "status warning"
+                          : "status danger";
+        const icon = d.overallStatus === "Passed"     ? "fa-check"
+                   : d.overallStatus === "With Issues" ? "fa-triangle-exclamation"
+                   : "fa-circle-xmark";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><strong>${d.batchCode || "—"}</strong></td>
+            <td>${d.productType || "—"}</td>
+            <td>${d.location || "—"}</td>
+            <td><span class="${statusClass}"><i class="fa-solid ${icon}"></i> ${d.overallStatus}</span></td>
+            <td>${time}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-      const row = `
-        <tr>
-          <td><strong>${d.batchCode || "-"}</strong></td>
-          <td>${d.productType || "Fish"}</td>
-          <td>${d.location || "-"}</td>
-          <td>${d.overallStatus || "-"}</td>
-          <td>${time}</td>
-        </tr>
-      `;
+/* =========================================
+   NEEDS ATTENTION
+========================================= */
+function renderAttention() {
+    const list = document.getElementById("pending-inspections");
+    if (!list) return;
 
-      // TODAY
-      if (createdAt >= today) {
-        todayCount++;
-        if (todayBody) todayBody.innerHTML += row;
-      }
+    const attention = allDocs.filter(d =>
+        d.overallStatus === "With Issues" || d.overallStatus === "Rejected"
+    );
 
-      // STATUS
-      if (d.overallStatus === "Passed") {
-        passed++;
-        if (passedBody) passedBody.innerHTML += row;
-      }
-      else if (d.overallStatus === "With Issues") {
-        issues++;
-        if (issuesBody) issuesBody.innerHTML += row;
-      }
-      else if (d.overallStatus === "Rejected") {
-        rejected++;
-        if (rejectedBody) rejectedBody.innerHTML += row;
-      }
+    // Update badge count on the trigger card
+    const badge = document.getElementById("na-count-badge");
+    if (badge) {
+        badge.textContent = attention.length;
+        badge.style.display = attention.length > 0 ? "flex" : "none";
+    }
 
-      // PENDING
-      if (d.overallStatus !== "Passed" && pendingList) {
+    // Update trigger card style when there are items
+    const trigger = document.getElementById("btn-needs-attention");
+    if (trigger) {
+        trigger.classList.toggle("has-items", attention.length > 0);
+    }
+
+    list.innerHTML = "";
+
+    if (attention.length === 0) {
+        list.innerHTML = `
+            <li style="text-align:center;padding:32px 0;color:#94a3b8;font-size:0.88rem;">
+                <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:1.6rem;display:block;margin-bottom:8px;"></i>
+                All clear — no issues or rejections.
+            </li>`;
+        return;
+    }
+
+    attention.forEach(d => {
+        const isIssue    = d.overallStatus === "With Issues";
+        const statusClass = isIssue ? "warning" : "danger";
+
+        const criteriaFlagged = (d.criteria || [])
+            .filter(c => c.assessment !== "Excellent")
+            .map(c => c.criteriaName)
+            .join(", ") || "—";
 
         const li = document.createElement("li");
-
         li.innerHTML = `
-          <div class="task-card">
-            <div>
-              <strong>${d.batchCode}</strong>
-              <div class="task-sub">${d.productType || "Fish"} • ${d.location}</div>
+            <div class="task-card">
+                <div>
+                    <strong>${d.batchCode || "—"}</strong>
+                    <div class="task-sub">${d.productType || "—"} · ${d.location || "—"}</div>
+                    <div class="task-criteria">Flagged: ${criteriaFlagged}</div>
+                </div>
+                <span class="task-status ${statusClass}">${d.overallStatus}</span>
             </div>
-            <span class="task-status ${getStatusClass(d.overallStatus)}">
-              ${d.overallStatus}
-            </span>
-          </div>
         `;
-
-        pendingList.appendChild(li);
-      }
-
+        list.appendChild(li);
     });
-
-    // UPDATE COUNTS
-    document.getElementById("inspections-today").textContent = todayCount;
-    document.getElementById("passed-count").textContent = passed;
-    document.getElementById("issues-count").textContent = issues;
-    document.getElementById("rejected-count").textContent = rejected;
-
-    // EMPTY STATE
-    // EMPTY STATE FOR MODALS
-    if (todayBody && !todayBody.innerHTML) {
-      todayBody.innerHTML = `<tr><td colspan="5">No inspections today</td></tr>`;
-    }
-
-    if (passedBody && !passedBody.innerHTML) {
-      passedBody.innerHTML = `<tr><td colspan="5">No passed records</td></tr>`;
-    }
-
-    if (issuesBody && !issuesBody.innerHTML) {
-      issuesBody.innerHTML = `<tr><td colspan="5">No issues records</td></tr>`;
-    }
-
-    if (rejectedBody && !rejectedBody.innerHTML) {
-      rejectedBody.innerHTML = `<tr><td colspan="5">No rejected records</td></tr>`;
-    }
-
-  } catch (error) {
-    console.error("🔥 Inspector Dashboard Error:", error);
-  }
-
 }
 
-/* ================= MODALS ================= */
-
-function setupModals() {
-
-  function openModal(id) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.classList.add("active");
-      document.body.style.overflow = "hidden";
-    }
-  }
-
-  function closeModal(id) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.classList.remove("active");
-      document.body.style.overflow = "";
-    }
-  }
-
-  document.getElementById("btn-today")?.addEventListener("click", () => openModal("modal-today"));
-  document.getElementById("btn-passed")?.addEventListener("click", () => openModal("modal-passed"));
-  document.getElementById("btn-issues")?.addEventListener("click", () => openModal("modal-issues"));
-  document.getElementById("btn-rejected")?.addEventListener("click", () => openModal("modal-rejected"));
-
-  document.querySelectorAll(".qc-modal-close").forEach(btn => {
-    btn.addEventListener("click", () => closeModal(btn.dataset.close));
-  });
-
-  document.querySelectorAll(".qc-modal-overlay").forEach(overlay => {
-    overlay.addEventListener("click", e => {
-      if (e.target === overlay) closeModal(overlay.id);
-    });
-  });
-
-}
-
-/* ================= HELPERS ================= */
-
+/* =========================================
+   HELPERS
+========================================= */
 function formatDate(timestamp) {
-  if (!timestamp || !timestamp.toDate) return "--";
-
-  return timestamp.toDate().toLocaleString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true
-  });
-}
-
-function getStatusClass(status) {
-  if (status === "Passed") return "success";
-  if (status === "With Issues") return "warning";
-  return "danger";
+    if (!timestamp?.toDate) return "—";
+    return timestamp.toDate().toLocaleString("en-PH", {
+        month: "short", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit", hour12: true
+    });
 }

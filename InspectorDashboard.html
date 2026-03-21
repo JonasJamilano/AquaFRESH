@@ -11,6 +11,9 @@
 </head>
 <body>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="brand">
@@ -81,125 +84,129 @@
 
 <!-- CONTENT -->
 <main class="content">
-    <h2>Inspector Dashboard</h2>
-    <p>Overview of today's inspection activities.</p>
 
-    <!-- KPI -->
+    <!-- Page Header with Quick Log + Today count -->
+    <div class="insp-page-header">
+        <div class="insp-header-left">
+            <h2>Inspector Dashboard</h2>
+            <p class="subtitle">Overview of today's inspection activities.</p>
+        </div>
+        <div class="insp-header-right">
+            <div class="insp-today-badge">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Today: <strong id="today-count-badge">0</strong></span>
+            </div>
+            <a href="QualityControl.html" class="insp-log-btn">
+                <i class="fa-solid fa-plus"></i> Log New Inspection
+            </a>
+        </div>
+    </div>
+
+    <!-- Needs Attention Trigger Card -->
+    <div class="needs-attention-trigger" id="btn-needs-attention">
+        <div class="na-trigger-left">
+            <div class="na-trigger-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="na-trigger-text">
+                <div class="na-trigger-title">Needs Attention</div>
+                <div class="na-trigger-sub">Batches with issues or rejections</div>
+            </div>
+        </div>
+        <div class="na-trigger-right">
+            <span class="na-count-badge" id="na-count-badge">0</span>
+            <i class="fa-solid fa-arrow-right na-arrow"></i>
+        </div>
+    </div>
+
+    <!-- Inspections Today -->
     <section class="panel">
         <div class="panel-header-flex">
-            <h3>Inspection Summary</h3>
-            <span class="summary-hint">Today's activity overview</span>
+            <h3>Inspections Today</h3>
         </div>
 
-        <div class="qc-status-cards">
-            <div class="qc-status-card blue" id="btn-today">
-                <div class="card-icon"><i class="fa-solid fa-clipboard"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Today</div>
-                    <div class="card-count" id="inspections-today">0</div>
-                </div>
+        <!-- Search & Sort Bar -->
+        <div class="insp-filter-bar">
+            <div class="insp-search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="insp-search" placeholder="Search batch ID or product...">
             </div>
-            <div class="qc-status-card green" id="btn-passed">
-                <div class="card-icon"><i class="fa-solid fa-check"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Passed</div>
-                    <div class="card-count" id="passed-count">0</div>
-                </div>
-            </div>
-            <div class="qc-status-card yellow" id="btn-issues">
-                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <div class="card-info">
-                    <div class="card-title">With Issues</div>
-                    <div class="card-count" id="issues-count">0</div>
-                </div>
-            </div>
-            <div class="qc-status-card red" id="btn-rejected">
-                <div class="card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Rejected</div>
-                    <div class="card-count" id="rejected-count">0</div>
-                </div>
-            </div>
+            <select id="insp-sort-status" class="insp-filter-select">
+                <option value="">All Statuses</option>
+                <option value="Passed">Passed</option>
+                <option value="With Issues">With Issues</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <select id="insp-sort-date" class="insp-filter-select">
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+            </select>
         </div>
 
-        <!-- TODAY MODAL -->
-        <div class="qc-modal-overlay" id="modal-today">
-            <div class="qc-modal wide">
-                <div class="qc-modal-header blue">
-                    <h3><i class="fa-solid fa-clipboard"></i> Today's Inspections</h3>
-                    <button class="qc-modal-close" data-close="modal-today"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="qc-modal-body">
-                    <table class="qc-table">
-                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
-                        <tbody id="today-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- PASSED -->
-        <div class="qc-modal-overlay" id="modal-passed">
-            <div class="qc-modal wide">
-                <div class="qc-modal-header green">
-                    <h3><i class="fa-solid fa-check"></i> Passed</h3>
-                    <button class="qc-modal-close" data-close="modal-passed"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="qc-modal-body">
-                    <table class="qc-table">
-                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
-                        <tbody id="passed-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ISSUES -->
-        <div class="qc-modal-overlay" id="modal-issues">
-            <div class="qc-modal wide">
-                <div class="qc-modal-header yellow">
-                    <h3><i class="fa-solid fa-triangle-exclamation"></i> With Issues</h3>
-                    <button class="qc-modal-close" data-close="modal-issues"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="qc-modal-body">
-                    <table class="qc-table">
-                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
-                        <tbody id="issues-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- REJECTED -->
-        <div class="qc-modal-overlay" id="modal-rejected">
-            <div class="qc-modal wide">
-                <div class="qc-modal-header red">
-                    <h3><i class="fa-solid fa-circle-xmark"></i> Rejected</h3>
-                    <button class="qc-modal-close" data-close="modal-rejected"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <div class="qc-modal-body">
-                    <table class="qc-table">
-                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
-                        <tbody id="rejected-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <table class="qc-table">
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Product</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Date &amp; Time</th>
+                </tr>
+            </thead>
+            <tbody id="today-body">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">Loading...</td></tr>
+            </tbody>
+        </table>
     </section>
 
-    <!-- TASKS -->
-    <section class="panel">
-        <div class="panel-header-flex">
-            <h3>Pending Inspections</h3>
-            <span class="summary-hint">Needs attention</span>
+    <!-- Needs Attention Modal -->
+    <div class="qc-modal-overlay" id="modal-needs-attention">
+        <div class="qc-modal">
+            <div class="qc-modal-header yellow">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Needs Attention</h3>
+                <button class="qc-modal-close" id="close-na-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="qc-modal-body">
+                <ul class="task-list" id="pending-inspections"></ul>
+            </div>
         </div>
-        <ul class="task-list" id="pending-inspections"></ul>
-    </section>
+    </div>
+
 </main>
 
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="InspectorDashboard.js"></script>
+<script>
+    // Needs Attention modal
+    const naBtn     = document.getElementById('btn-needs-attention');
+    const naOverlay = document.getElementById('modal-needs-attention');
+    const naClose   = document.getElementById('close-na-modal');
 
+    function openNA()  { naOverlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
+    function closeNA() { naOverlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+    naBtn?.addEventListener('click', openNA);
+    naClose?.addEventListener('click', closeNA);
+    naOverlay?.addEventListener('click', e => { if (e.target === naOverlay) closeNA(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNA(); });
+</script>
+
+<script>
+    (function() {
+        const menuBtn = document.querySelector('.menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function openSidebar()  { sidebar.classList.add('mobile-open');    overlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
+        function closeSidebar() { sidebar.classList.remove('mobile-open'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+        if (menuBtn) menuBtn.addEventListener('click', () =>
+            sidebar.classList.contains('mobile-open') ? closeSidebar() : openSidebar()
+        );
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+        document.querySelectorAll('.menu li a').forEach(link =>
+            link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); })
+        );
+    })();
+</script>
 </body>
 </html>
