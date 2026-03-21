@@ -6,10 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="UserManagement.css">
+    <link rel="stylesheet" href="UserManagement.css?v=3">
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
 </head>
 <body>
+
+<!-- CHANGE 1: checkbox MUST be first element in body -->
+<input type="checkbox" id="nav-toggle">
+
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -29,8 +33,13 @@
         </ul>
     </nav>
 </aside>
+
+<!-- CHANGE 2: sidebar overlay after </aside> -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <!-- CHANGE 3: span → label -->
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -42,6 +51,7 @@
         </div>
     </div>
 </header>
+
 <main class="content">
     <section class="page-header">
         <h2>User Management</h2>
@@ -88,14 +98,16 @@
                 <button id="applyFilter" class="btn apply">Apply</button>
             </div>
         </div>
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>User ID</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Role</th><th>Status</th><th>Account Created</th><th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="table-scroll">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Role</th><th>Status</th><th>Account Created</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </section>
     <section class="panel panel-trigger">
         <button class="new-user-trigger" id="btn-new-user">
@@ -105,6 +117,7 @@
         </button>
     </section>
 </main>
+
 <!-- ADD USER MODAL -->
 <div class="qc-modal-overlay" id="modal-new-user">
     <div class="qc-modal">
@@ -144,9 +157,10 @@
         </div>
     </div>
 </div>
-<script type="module" src="sidebar.js"></script>
-<script type="module" src="role-ui.js"></script>
-<script type="module" src="UserManagement.js"></script>
+
+<script type="module" src="sidebar.js?v=3"></script>
+<script type="module" src="role-ui.js?v=3"></script>
+<script type="module" src="UserManagement.js?v=3"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const newUserBtn = document.getElementById("btn-new-user");
@@ -156,6 +170,7 @@
         modal.addEventListener("click", (e) => { if (e.target === modal) closeUserModal(); });
     });
 </script>
+
 <!-- EDIT USER -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -180,6 +195,7 @@
         </div>
     </div>
 </div>
+
 <!-- DELETE CONFIRM -->
 <div id="deleteModal" class="modal">
     <div class="modal-content">
@@ -192,9 +208,11 @@
         </div>
     </div>
 </div>
+
 <div id="toast-success" class="toast-notification">
     <i class="fa-solid fa-circle-check"></i>
     <span>User created successfully</span>
 </div>
+
 </body>
 </html>
