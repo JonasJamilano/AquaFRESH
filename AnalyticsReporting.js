@@ -150,9 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================
    VIEW TANKS CARD
-   Switches between green (all normal)
-   and red (at least one alert) based on
-   the live threshold result.
 ========================================= */
 
 function updateViewTanksCard(isAlert, alertCount) {
@@ -168,9 +165,7 @@ function updateViewTanksCard(isAlert, alertCount) {
         card.className    = "view-tanks-card red";
         icon.className    = "card-icon";
         glyph.className   = "fa-solid fa-circle-exclamation";
-        title.textContent = alertCount > 1
-            ? `${alertCount} Tanks in Alert`
-            : "Attention Required";
+        title.textContent = alertCount > 1 ? `${alertCount} Tanks in Alert` : "Attention Required";
         subtitle.textContent = "One or more tanks exceeded safe thresholds";
     } else {
         card.className    = "view-tanks-card green";
@@ -187,12 +182,10 @@ function updateViewTanksCard(isAlert, alertCount) {
 
 function watchConnectionStatus() {
     const connectedRef = ref(database, ".info/connected");
-
     onValue(connectedRef, (snap) => {
         const isOnline = snap.val() === true;
         const cell     = document.getElementById("tank1-connection");
         if (!cell) return;
-
         cell.innerHTML = isOnline
             ? `<span class="connection-badge online"><i class="fa-solid fa-circle-dot"></i> Online</span>`
             : `<span class="connection-badge offline"><i class="fa-solid fa-circle-xmark"></i> Offline</span>`;
@@ -394,6 +387,7 @@ function renderAlarmBanner(alarms, payloadTimestamp) {
 /* =========================================
    TANK MONITORING
    Also drives the View Tanks card color
+   AND updates the selection cards in real-time
 ========================================= */
 
 function updateTankMonitoring(payload) {
@@ -405,39 +399,61 @@ function updateTankMonitoring(payload) {
 
     const tsDate    = normalizeTimestampValue(payload.timestamp || Date.now());
     const timestamp = tsDate.toLocaleString([], {
-        month  : "short",
-        day    : "numeric",
-        year   : "numeric",
-        hour   : "2-digit",
-        minute : "2-digit",
-        second : "2-digit"
+        month: "short", day: "numeric", year: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
+    const timeString = tsDate.toLocaleTimeString([], {
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
     });
 
-    const isAlert  = temp < 0 || temp > 4 || ph < 6.5 || ph > 7.5;
+    const isAlert    = temp < 0 || temp > 4 || ph < 6.5 || ph > 7.5;
     const alertCount = isAlert ? 1 : 0;
 
-    /* ── Update the single View Tanks card ── */
     updateViewTanksCard(isAlert, alertCount);
 
     const statusHTML = isAlert
         ? `<span class="status alert"><i class="fa-solid fa-circle-exclamation"></i> Threshold Alert</span>`
         : `<span class="status good"><i class="fa-solid fa-check"></i> Threshold Normal</span>`;
 
-    const tanks = ["tank1"];
-
-    tanks.forEach((tank) => {
+    // Update modal tank table
+    ["tank1"].forEach((tank) => {
         const tempEl   = document.getElementById(`${tank}-temp`);
         const phEl     = document.getElementById(`${tank}-ph`);
         const humEl    = document.getElementById(`${tank}-humidity`);
         const statusEl = document.getElementById(`${tank}-status`);
         const timeEl   = document.getElementById(`${tank}-time`);
 
-        if (tempEl)   tempEl.innerHTML   = `<i class="fa-solid fa-temperature-half"></i> ${Number.isNaN(temp)    ? "--" : temp.toFixed(1)   + "°C"}`;
+        if (tempEl)   tempEl.innerHTML   = `<i class="fa-solid fa-temperature-half"></i> ${Number.isNaN(temp)    ? "--" : temp.toFixed(1)    + "°C"}`;
         if (phEl)     phEl.innerHTML     = `<i class="fa-solid fa-droplet"></i> ${Number.isNaN(ph)       ? "--" : ph.toFixed(2)}`;
-        if (humEl)    humEl.innerHTML    = `<i class="fa-solid fa-cloud"></i> ${Number.isNaN(humidity)   ? "--" : humidity.toFixed(1) + "%"}`;
+        if (humEl)    humEl.innerHTML    = `<i class="fa-solid fa-cloud"></i> ${Number.isNaN(humidity)   ? "--" : humidity.toFixed(1)  + "%"}`;
         if (statusEl) statusEl.innerHTML = statusHTML;
         if (timeEl)   timeEl.textContent = timestamp;
     });
+
+    // Update selection card (Tank 1) in real-time
+    const tempCard   = document.getElementById("card-tank1-temp");
+    const phCard     = document.getElementById("card-tank1-ph");
+    const humCard    = document.getElementById("card-tank1-hum");
+    const timeCard   = document.getElementById("card-tank1-time");
+    const card1      = document.getElementById("select-tank1");
+    const status1    = document.getElementById("tank1-selection-status");
+
+    if (tempCard) tempCard.innerHTML = `<i class="fa-solid fa-temperature-half" style="color:#0ea5e9;"></i> ${Number.isNaN(temp) ? "--" : temp.toFixed(1) + "°C"}`;
+    if (phCard)   phCard.innerHTML   = `<i class="fa-solid fa-droplet" style="color:#10b981;"></i> ${Number.isNaN(ph) ? "--" : ph.toFixed(2)}`;
+    if (humCard)  humCard.innerHTML  = `<i class="fa-solid fa-cloud" style="color:#f97316;"></i> ${Number.isNaN(humidity) ? "--" : humidity.toFixed(1) + "%"}`;
+    if (timeCard) timeCard.textContent = timeString;
+
+    if (card1 && status1) {
+        if (isAlert) {
+            card1.style.borderColor = "#ef4444";
+            status1.className       = "status alert";
+            status1.innerHTML       = `<i class="fa-solid fa-circle-exclamation"></i> THRESHOLD ALERT`;
+        } else {
+            card1.style.borderColor = "#10b981";
+            status1.className       = "status good";
+            status1.innerHTML       = `<i class="fa-solid fa-check"></i> ONLINE`;
+        }
+    }
 }
 
 /* =========================================
@@ -600,7 +616,7 @@ function renderHistoryTable(m, rows) {
 function getRowStatus(firebaseKey, value) {
     let isAlert = false;
     if (firebaseKey === "water_temp") isAlert = value < 0 || value > 4;
-    else if (firebaseKey === "ph_level") isAlert = value >= 7.7;
+    else if (firebaseKey === "ph_level") isAlert = value < 6.5 || value > 7.5;
     return isAlert
         ? `<span class="history-status-badge alert-badge"><i class="fa-solid fa-circle-exclamation"></i> Alert</span>`
         : `<span class="history-status-badge ok-badge"><i class="fa-solid fa-check"></i> Optimal</span>`;
@@ -685,59 +701,15 @@ function normalizeTimestampValue(value) {
 ========================================= */
 
 window.selectTank = function(tankId) {
-    // Reveal the analytics section
     document.getElementById("selectionPanel").style.display = "none";
     const trends = document.getElementById("trendsPanelSection");
     trends.style.display = "block";
-    
-    // Smoothly scroll to the charts
-    trends.scrollIntoView({ behavior: 'smooth' });
-
-    // Ensure Chart.js renders correctly now that the container is visible
+    trends.scrollIntoView({ behavior: "smooth" });
+    // Resize charts now that container is visible
     Object.values(liveCharts).forEach(chart => chart.resize());
 };
 
 window.backToSelection = function() {
     document.getElementById("selectionPanel").style.display = "block";
     document.getElementById("trendsPanelSection").style.display = "none";
-};
-
-// Hook into your existing updateTankMonitoring to update selection cards in real-time
-// Add this inside your updateTankMonitoring function in AnalyticsReporting.js
-const originalUpdateTankMonitoring = updateTankMonitoring;
-updateTankMonitoring = function(payload) {
-    originalUpdateTankMonitoring(payload);
-    
-    if (payload) {
-        const temp = parseNumericValue(payload.water_temp);
-        const ph = parseNumericValue(payload.ph_level);
-        const hum = parseNumericValue(payload.humidity);
-        
-        // Handle timestamp formatting
-        const tsDate = normalizeTimestampValue(payload.timestamp || Date.now());
-        const timeString = tsDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        // Update Card 1 UI
-        if (document.getElementById("card-tank1-temp")) {
-            document.getElementById("card-tank1-temp").innerHTML = `<i class="fa-solid fa-temperature-half" style="color: #0ea5e9;"></i> ${temp.toFixed(1)}°C`;
-            document.getElementById("card-tank1-ph").innerHTML = `<i class="fa-solid fa-droplet" style="color: #10b981;"></i> ${ph.toFixed(2)}`;
-            document.getElementById("card-tank1-hum").innerHTML = `<i class="fa-solid fa-cloud" style="color: #f97316;"></i> ${hum.toFixed(1)}%`;
-            document.getElementById("card-tank1-time").textContent = timeString;
-        }
-        
-        // Status and Alert logic...
-        const card1 = document.getElementById("select-tank1");
-        const status1 = document.getElementById("tank1-selection-status");
-        const isAlert = temp < 0 || temp > 4 || ph < 6.5 || ph > 7.5;
-
-        if (isAlert && card1) {
-            card1.style.borderColor = "#ef4444";
-            status1.className = "status alert";
-            status1.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> THRESHOLD ALERT`;
-        } else if (card1) {
-            card1.style.borderColor = "#10b981";
-            status1.className = "status good";
-            status1.innerHTML = `<i class="fa-solid fa-check"></i> ONLINE`;
-        }
-    }
 };

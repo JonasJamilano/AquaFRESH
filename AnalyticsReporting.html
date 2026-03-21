@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="AnalyticsReporting.css">
 </head>
 <body>
+
+<!-- CHANGE 1: checkbox MUST be first element in body -->
+<input type="checkbox" id="nav-toggle">
+
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -29,8 +33,13 @@
         </ul>
     </nav>
 </aside>
+
+<!-- CHANGE 2: sidebar overlay added after </aside> -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <!-- CHANGE 3: span → label so it controls the checkbox -->
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -42,6 +51,7 @@
         </div>
     </div>
 </header>
+
 <main class="content">
     <h2>System Analytics</h2>
     <p class="subtitle">Real-time environmental readings, sensor health, and connectivity status</p>
@@ -165,6 +175,7 @@
         </div>
     </section>
 </main>
+
 <!-- SENSOR MODAL -->
 <div class="qc-modal-overlay" id="sensorModal">
     <div class="qc-modal">
@@ -197,6 +208,7 @@
         </div>
     </div>
 </div>
+
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -1,34 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const role = localStorage.getItem("role");
 
-    if (!role) return;
-
-    // Show nav items for this role
-    document.querySelectorAll(".menu li[data-role]").forEach(item => {
-        const allowedRoles = item.dataset.role.split(" ");
-        if (allowedRoles.includes(role)) {
-            item.style.display = "block";
-        }
-    });
-
+    // ── Menu button (hamburger) ───────────────────────────────────────
+    // This MUST be set up regardless of role, so the sidebar works
+    // on every page even if role hasn't loaded yet.
+    // ─────────────────────────────────────────────────────────────────
     const navToggle = document.getElementById("nav-toggle");
     const menuBtn   = document.querySelector(".menu-btn");
 
     if (menuBtn && navToggle) {
-        // Remove the label's default checkbox-toggling behaviour on desktop
-        // so we can handle desktop collapse ourselves via classList
         menuBtn.addEventListener("click", (e) => {
             if (window.innerWidth > 768) {
-                // Desktop: prevent the label from toggling the checkbox
-                // and instead toggle the collapsed class
+                // Desktop: prevent label toggling checkbox, use collapsed class instead
                 e.preventDefault();
                 navToggle.checked = false;
                 document.querySelector(".sidebar")?.classList.toggle("collapsed");
                 document.querySelector(".topbar")?.classList.toggle("collapsed");
                 document.querySelector(".content")?.classList.toggle("collapsed");
             }
-            // Mobile: do NOT call preventDefault — let the label
-            // naturally toggle the checkbox so CSS drawer works
+            // Mobile: do NOT preventDefault — let label toggle checkbox naturally
         });
     }
 
@@ -39,5 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 navToggle.checked = false;
             }
         });
+    });
+
+    // ── Role-based nav visibility ─────────────────────────────────────
+    const role = localStorage.getItem("role");
+    if (!role) return;
+
+    document.querySelectorAll(".menu li[data-role]").forEach(item => {
+        const allowedRoles = item.dataset.role.split(" ");
+        if (allowedRoles.includes(role)) {
+            item.style.display = "block";
+        }
     });
 });
