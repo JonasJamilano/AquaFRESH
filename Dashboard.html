@@ -4,70 +4,32 @@
     <meta charset="UTF-8">
     <title>Dashboard | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
-
 </head>
 <body>
-
 <input type="checkbox" id="nav-toggle">
-
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
         <img src="assets/ColAquaFRESH.png" class="logo-icon">
         <p class="brand-text">Aquaculture Freshness Monitoring System</p>
     </div>
-
     <nav class="menu">
         <ul>
-            <li data-role="superadmin admin manager">
-                <a href="Dashboard.html" class="active">
-                    <i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span>
-                </a>
-            </li>
-            <li data-role="inspector">
-                <a href="InspectorDashboard.html">
-                    <i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span>
-                </a>
-            </li>
-            <li data-role="delivery">
-                <a href="DeliveryDashboard.html">
-                    <i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span>
-                </a>
-            </li>
-            <li data-role="superadmin admin manager inspector delivery">
-                <a href="FreshnessEvaluation.html">
-                    <i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span>
-                </a>
-            </li>
-            <li data-role="superadmin admin manager delivery">
-                <a href="TransportDelivery.html">
-                    <i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span>
-                </a>
-            </li>
-            <li data-role="superadmin admin manager inspector">
-                <a href="AnalyticsReporting.html">
-                    <i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span>
-                </a>
-            </li>
-            <li data-role="superadmin admin manager inspector">
-                <a href="QualityControl.html">
-                    <i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span>
-                </a>
-            </li>
-            <li data-role="superadmin admin manager">
-                <a href="UserManagement.html">
-                    <i class="fa-solid fa-users"></i><span class="label">User Management</span>
-                </a>
-            </li>
+            <li data-role="superadmin admin manager"><a href="Dashboard.html" class="active"><i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span></a></li>
+            <li data-role="inspector"><a href="InspectorDashboard.html"><i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span></a></li>
+            <li data-role="delivery"><a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a></li>
+            <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
+            <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
+            <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a></li>
+            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
+            <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
 </aside>
-
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
@@ -81,45 +43,31 @@
         </div>
     </div>
 </header>
-
 <main class="content">
-
     <section class="page-header">
         <h2>System Dashboard</h2>
         <p class="subtitle">Real-time overview of all aquaculture operations</p>
     </section>
-
     <div class="summary-cards">
         <div class="card blue" onclick="window.location.href='TransportDelivery.html'">
-            <h3>Active Deliveries</h3>
-            <p id="kpi-deliveries">0</p>
-            <div class="card-link">View Details &rarr;</div>
+            <h3>Active Deliveries</h3><p id="kpi-deliveries">0</p><div class="card-link">View Details &rarr;</div>
         </div>
         <div class="card green" onclick="window.location.href='QualityControl.html'">
-            <h3>Inspections Today</h3>
-            <p id="kpi-inspections">0</p>
-            <div class="card-link">View Details &rarr;</div>
+            <h3>Inspections Today</h3><p id="kpi-inspections">0</p><div class="card-link">View Details &rarr;</div>
         </div>
         <div class="card yellow" onclick="window.location.href='QualityControl.html'">
-            <h3>Batches with Issues</h3>
-            <p id="kpi-issues">0</p>
-            <div class="card-link">View Details &rarr;</div>
+            <h3>Batches with Issues</h3><p id="kpi-issues">0</p><div class="card-link">View Details &rarr;</div>
         </div>
         <div class="card teal" onclick="window.location.href='UserManagement.html'">
-            <h3>Active Personnel</h3>
-            <p id="kpi-users">0</p>
-            <div class="card-link">View Details &rarr;</div>
+            <h3>Active Personnel</h3><p id="kpi-users">0</p><div class="card-link">View Details &rarr;</div>
         </div>
     </div>
-
     <section class="panel tabular-panel">
-        
         <div class="tabs-nav">
             <button class="tab-btn active" data-target="tab-recent"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</button>
             <button class="tab-btn" data-target="tab-qc"><i class="fa-solid fa-shield-halved"></i> Quality Control</button>
             <button class="tab-btn" data-target="tab-transport"><i class="fa-solid fa-truck"></i> Transport</button>
         </div>
-
         <div class="tab-content active" id="tab-recent">
             <div class="panel-header-flex">
                 <h3>Latest System Actions</h3>
@@ -127,21 +75,11 @@
             </div>
             <div class="table-responsive">
                 <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Module</th>
-                            <th>Action Details</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recent-activity-body">
-                        <tr><td colspan="4" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Time</th><th>Module</th><th>Action Details</th><th>Status</th></tr></thead>
+                    <tbody id="recent-activity-body"><tr><td colspan="4" class="text-center" style="padding:30px;">Loading live data...</td></tr></tbody>
                 </table>
             </div>
         </div>
-
         <div class="tab-content" id="tab-qc">
             <div class="panel-header-flex">
                 <h3>Today's Inspections</h3>
@@ -149,21 +87,11 @@
             </div>
             <div class="table-responsive">
                 <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>Batch ID</th>
-                            <th>Inspector</th>
-                            <th>Location</th>
-                            <th>Result</th>
-                        </tr>
-                    </thead>
-                    <tbody id="qc-summary-body">
-                        <tr><td colspan="4" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Batch ID</th><th>Inspector</th><th>Location</th><th>Result</th></tr></thead>
+                    <tbody id="qc-summary-body"><tr><td colspan="4" class="text-center" style="padding:30px;">Loading live data...</td></tr></tbody>
                 </table>
             </div>
         </div>
-
         <div class="tab-content" id="tab-transport">
             <div class="panel-header-flex">
                 <h3>Active Deliveries</h3>
@@ -171,33 +99,15 @@
             </div>
             <div class="table-responsive">
                 <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>Delivery ID</th>
-                            <th>Batch</th>
-                            <th>Truck</th>
-                            <th>Driver</th>
-                            <th>Origin</th>
-                            <th>Destination</th>
-                            <th>Temp (°C)</th>
-                            <th>ETA</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transport-summary-body">
-                        <tr><td colspan="9" class="text-center" style="padding: 30px;">Loading live data...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>Temp (°C)</th><th>ETA</th><th>Status</th></tr></thead>
+                    <tbody id="transport-summary-body"><tr><td colspan="9" class="text-center" style="padding:30px;">Loading live data...</td></tr></tbody>
                 </table>
             </div>
         </div>
-
     </section>
-
 </main>
-
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="Dashboard.js"></script>
-
 </body>
 </html>
