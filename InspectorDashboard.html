@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <title>Inspector Dashboard | AquaFRESH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="InspectorDashboard.css">
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
-
 </head>
 <body>
 
@@ -23,79 +18,59 @@
         <img src="assets/ColAquaFRESH.png" class="logo-icon">
         <p class="brand-text">Aquaculture Freshness Monitoring System</p>
     </div>
-
-        <nav class="menu">
-                <ul>
-            <!-- ADMIN / MANAGER DASHBOARD -->
+    <nav class="menu">
+        <ul>
             <li data-role="superadmin admin manager">
                 <a href="Dashboard.html">
-                    <i class="fa-solid fa-gauge"></i>
-                    <span class="label">Dashboard</span>
+                    <i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span>
                 </a>
             </li>
-
-            <!-- INSPECTOR DASHBOARD -->
             <li data-role="inspector">
-                <a href="InspectorDashboard.html">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                    <span class="label">Inspector Dashboard</span>
+                <a href="InspectorDashboard.html" class="active">
+                    <i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span>
                 </a>
             </li>
-
-            <!-- DELIVERY DASHBOARD -->
             <li data-role="delivery">
                 <a href="DeliveryDashboard.html">
-                    <i class="fa-solid fa-truck"></i>
-                    <span class="label">Delivery Dashboard</span>
+                    <i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span>
                 </a>
             </li>
-
-            <li data-role="superadmin admin manager inspector delivery">
-                <a href="FreshnessEvaluation.html">
-                    <i class="fa-solid fa-water"></i>
-                    <span class="label">Freshness Evaluation</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager delivery">
-                <a href="TransportDelivery.html">
-                    <i class="fa-solid fa-route"></i>
-                    <span class="label">Transport & Delivery</span>
-                </a>
-            </li>
-
-            <li data-role="superadmin admin manager">
-                <a href="AnalyticsReporting.html">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span class="label">Analytics & Reporting</span>
-                </a>
-            </li>
-
             <li data-role="superadmin admin manager inspector">
                 <a href="QualityControl.html">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span class="label">Quality Control</span>
+                    <i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span>
                 </a>
             </li>
-
-            <li data-role="superadmin admin">
+            <li data-role="superadmin admin manager inspector delivery">
+                <a href="FreshnessEvaluation.html">
+                    <i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager delivery">
+                <a href="TransportDelivery.html">
+                    <i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager">
+                <a href="AnalyticsReporting.html">
+                    <i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span>
+                </a>
+            </li>
+            <li data-role="superadmin admin manager">
                 <a href="UserManagement.html">
-                    <i class="fa-solid fa-users"></i>
-                    <span class="label">User Management</span>
+                    <i class="fa-solid fa-users"></i><span class="label">User Management</span>
                 </a>
             </li>
         </ul>
-        </nav>
+    </nav>
 </aside>
 
 <!-- TOP BAR -->
 <header class="topbar">
     <span class="menu-btn">☰</span>
-
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
-    <span id="userRoleLabel">User</span> <span class="caret">▾</span>
+            <span id="userRoleLabel">User</span> <span class="caret">▾</span>
         </label>
         <div class="dropdown-menu">
             <a href="Profile.html">Profile</a>
@@ -107,163 +82,119 @@
 <!-- CONTENT -->
 <main class="content">
     <h2>Inspector Dashboard</h2>
-    <p>Overview of today’s inspection activities.</p>
+    <p>Overview of today's inspection activities.</p>
 
     <!-- KPI -->
     <section class="panel">
-    <div class="panel-header-flex">
-        <h3>Inspection Summary</h3>
-        <span class="summary-hint">Today’s activity overview</span>
-    </div>
-
-    <div class="qc-status-cards">
-
-        <div class="qc-status-card blue" id="btn-today">
-            <div class="card-icon"><i class="fa-solid fa-clipboard"></i></div>
-            <div class="card-info">
-                <div class="card-title">Today</div>
-                <div class="card-count" id="inspections-today">0</div>
-            </div>
+        <div class="panel-header-flex">
+            <h3>Inspection Summary</h3>
+            <span class="summary-hint">Today's activity overview</span>
         </div>
 
-        <div class="qc-status-card green" id="btn-passed">
-            <div class="card-icon"><i class="fa-solid fa-check"></i></div>
-            <div class="card-info">
-                <div class="card-title">Passed</div>
-                <div class="card-count" id="passed-count">0</div>
+        <div class="qc-status-cards">
+            <div class="qc-status-card blue" id="btn-today">
+                <div class="card-icon"><i class="fa-solid fa-clipboard"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Today</div>
+                    <div class="card-count" id="inspections-today">0</div>
+                </div>
+            </div>
+            <div class="qc-status-card green" id="btn-passed">
+                <div class="card-icon"><i class="fa-solid fa-check"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Passed</div>
+                    <div class="card-count" id="passed-count">0</div>
+                </div>
+            </div>
+            <div class="qc-status-card yellow" id="btn-issues">
+                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="card-info">
+                    <div class="card-title">With Issues</div>
+                    <div class="card-count" id="issues-count">0</div>
+                </div>
+            </div>
+            <div class="qc-status-card red" id="btn-rejected">
+                <div class="card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div class="card-info">
+                    <div class="card-title">Rejected</div>
+                    <div class="card-count" id="rejected-count">0</div>
+                </div>
             </div>
         </div>
-
-        <div class="qc-status-card yellow" id="btn-issues">
-            <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div class="card-info">
-                <div class="card-title">With Issues</div>
-                <div class="card-count" id="issues-count">0</div>
-            </div>
-        </div>
-
-        <div class="qc-status-card red" id="btn-rejected">
-            <div class="card-icon"><i class="fa-solid fa-circle-xmark"></i></div>
-            <div class="card-info">
-                <div class="card-title">Rejected</div>
-                <div class="card-count" id="rejected-count">0</div>
-            </div>
-        </div>
-
-    </div>
 
         <!-- TODAY MODAL -->
-    <div class="qc-modal-overlay" id="modal-today">
-    <div class="qc-modal wide">
-        <div class="qc-modal-header blue">
-        <h3><i class="fa-solid fa-clipboard"></i> Today’s Inspections</h3>
-        <button class="qc-modal-close" data-close="modal-today"><i class="fa-solid fa-xmark"></i></button>
+        <div class="qc-modal-overlay" id="modal-today">
+            <div class="qc-modal wide">
+                <div class="qc-modal-header blue">
+                    <h3><i class="fa-solid fa-clipboard"></i> Today's Inspections</h3>
+                    <button class="qc-modal-close" data-close="modal-today"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="qc-modal-body">
+                    <table class="qc-table">
+                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
+                        <tbody id="today-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="qc-modal-body">
-        <table class="qc-table">
-            <thead>
-            <tr>
-                <th>Batch</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Date & Time</th>
-            </tr>
-            </thead>
-            <tbody id="today-body"></tbody>
-        </table>
-        </div>
-    </div>
-    </div>
 
-    <!-- PASSED -->
-    <div class="qc-modal-overlay" id="modal-passed">
-    <div class="qc-modal wide">
-        <div class="qc-modal-header green">
-        <h3><i class="fa-solid fa-check"></i> Passed</h3>
-        <button class="qc-modal-close" data-close="modal-passed">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+        <!-- PASSED -->
+        <div class="qc-modal-overlay" id="modal-passed">
+            <div class="qc-modal wide">
+                <div class="qc-modal-header green">
+                    <h3><i class="fa-solid fa-check"></i> Passed</h3>
+                    <button class="qc-modal-close" data-close="modal-passed"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="qc-modal-body">
+                    <table class="qc-table">
+                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
+                        <tbody id="passed-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="qc-modal-body">
-        <table class="qc-table">
-            <thead>
-            <tr>
-                <th>Batch</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Date & Time</th>
-            </tr>
-            </thead>
-            <tbody id="passed-body"></tbody>
-        </table>
-        </div>
-    </div>
-    </div>
 
-    <!-- ISSUES -->
-    <div class="qc-modal-overlay" id="modal-issues">
-    <div class="qc-modal wide">
-        <div class="qc-modal-header yellow">
-        <h3><i class="fa-solid fa-triangle-exclamation"></i> With Issues</h3>
-        <button class="qc-modal-close" data-close="modal-issues">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+        <!-- ISSUES -->
+        <div class="qc-modal-overlay" id="modal-issues">
+            <div class="qc-modal wide">
+                <div class="qc-modal-header yellow">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> With Issues</h3>
+                    <button class="qc-modal-close" data-close="modal-issues"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="qc-modal-body">
+                    <table class="qc-table">
+                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
+                        <tbody id="issues-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="qc-modal-body">
-        <table class="qc-table">
-            <thead>
-            <tr>
-                <th>Batch</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Date & Time</th>
-            </tr>
-            </thead>
-            <tbody id="issues-body"></tbody>
-        </table>
-        </div>
-    </div>
-    </div>
 
-    <!-- REJECTED -->
-    <div class="qc-modal-overlay" id="modal-rejected">
-    <div class="qc-modal wide">
-        <div class="qc-modal-header red">
-        <h3><i class="fa-solid fa-circle-xmark"></i> Rejected</h3>
-        <button class="qc-modal-close" data-close="modal-rejected">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+        <!-- REJECTED -->
+        <div class="qc-modal-overlay" id="modal-rejected">
+            <div class="qc-modal wide">
+                <div class="qc-modal-header red">
+                    <h3><i class="fa-solid fa-circle-xmark"></i> Rejected</h3>
+                    <button class="qc-modal-close" data-close="modal-rejected"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="qc-modal-body">
+                    <table class="qc-table">
+                        <thead><tr><th>Batch</th><th>Product</th><th>Location</th><th>Status</th><th>Date & Time</th></tr></thead>
+                        <tbody id="rejected-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="qc-modal-body">
-        <table class="qc-table">
-            <thead>
-            <tr>
-                <th>Batch</th>
-                <th>Product</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Date & Time</th>
-            </tr>
-            </thead>
-            <tbody id="rejected-body"></tbody>
-        </table>
-        </div>
-    </div>
-    </div>
-</section>
+    </section>
 
     <!-- TASKS -->
     <section class="panel">
-    <div class="panel-header-flex">
-        <h3>Pending Inspections</h3>
-        <span class="summary-hint">Needs attention</span>
-    </div>
-
-    <ul class="task-list" id="pending-inspections"></ul>
-</section>
+        <div class="panel-header-flex">
+            <h3>Pending Inspections</h3>
+            <span class="summary-hint">Needs attention</span>
+        </div>
+        <ul class="task-list" id="pending-inspections"></ul>
+    </section>
 </main>
 
 <script type="module" src="sidebar.js"></script>
