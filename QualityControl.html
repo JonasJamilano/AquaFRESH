@@ -13,8 +13,8 @@
 </head>
 <body>
 
-<!-- Sidebar overlay for mobile -->
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<!-- ① checkbox MUST be first in body, before sidebar -->
+<input type="checkbox" id="nav-toggle">
 
 <!-- ===================== SIDEBAR ===================== -->
 <aside class="sidebar">
@@ -30,16 +30,20 @@
             <li data-role="delivery"><a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a></li>
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html" class="active"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
-            <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport & Delivery</span></a></li>
-            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics & Reporting</span></a></li>
+            <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a></li>
+            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
 </aside>
 
+<!-- ② overlay — closes drawer on mobile tap -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
 <!-- ===================== TOPBAR ===================== -->
+<!-- ③ menu-btn MUST be a <label> pointing to nav-toggle, not a <span> -->
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -204,13 +208,9 @@
         <div class="qc-modal-body" style="padding: 32px 28px;">
             <p class="chooser-heading">What would you like to log today?</p>
             <p class="chooser-sub">Select the product type to load the appropriate quality criteria.</p>
-
             <div class="chooser-options">
-                <!-- Fish Card -->
                 <button class="chooser-card" id="choose-fish" data-type="fish">
-                    <div class="chooser-card-icon fish">
-                        <i class="fa-solid fa-fish"></i>
-                    </div>
+                    <div class="chooser-card-icon fish"><i class="fa-solid fa-fish"></i></div>
                     <div class="chooser-card-body">
                         <div class="chooser-card-title">Fish</div>
                         <div class="chooser-card-products">Bangus &nbsp;·&nbsp; Tilapia</div>
@@ -218,12 +218,8 @@
                     </div>
                     <i class="fa-solid fa-arrow-right chooser-arrow"></i>
                 </button>
-
-                <!-- Shrimp Card -->
                 <button class="chooser-card" id="choose-shrimp" data-type="shrimp">
-                    <div class="chooser-card-icon shrimp">
-                        <i class="fa-solid fa-shrimp"></i>
-                    </div>
+                    <div class="chooser-card-icon shrimp"><i class="fa-solid fa-shrimp"></i></div>
                     <div class="chooser-card-body">
                         <div class="chooser-card-title">Fresh Water Shrimp</div>
                         <div class="chooser-card-products">Fresh Water Shrimp</div>
@@ -243,10 +239,7 @@
             <h3 id="modal-inspection-title"><i class="fa-solid fa-clipboard-list"></i> New Inspection Log</h3>
             <button class="qc-modal-close" data-close="modal-new-inspection" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
-
         <div class="qc-modal-body">
-
-            <!-- Product Type Badge -->
             <div class="ni-product-badge-row">
                 <div id="ni-product-badge" class="ni-product-badge fish">
                     <i class="fa-solid fa-fish"></i>
@@ -256,13 +249,11 @@
                     <i class="fa-solid fa-arrows-rotate"></i> Change Type
                 </button>
             </div>
-
             <div class="ni-divider"><i class="fa-solid fa-tag"></i> Batch Details</div>
             <div class="ni-modal-grid">
                 <div class="ni-form-group">
                     <label>Batch ID <span style="font-size:0.72rem;color:#94a3b8;font-weight:400;">(auto-generated)</span></label>
-                    <input type="text" id="batch-code" placeholder="Generating..." readonly
-                        style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;">
+                    <input type="text" id="batch-code" placeholder="Generating..." readonly style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;">
                 </div>
                 <div class="ni-form-group">
                     <label>Inspection Location</label>
@@ -281,24 +272,20 @@
                     </select>
                 </div>
             </div>
-
             <div class="ni-divider"><i class="fa-solid fa-list-check"></i> Quality Criteria</div>
             <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-            <table class="ni-criteria-table">
-                <thead>
-                    <tr>
-                        <th>Criteria</th>
-                        <th>Weight</th>
-                        <th>Assessment</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody id="new-inspection-tbody">
-                    <!-- Rows injected by JS based on product type -->
-                </tbody>
-            </table>
+                <table class="ni-criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Criteria</th>
+                            <th>Weight</th>
+                            <th>Assessment</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="new-inspection-tbody"></tbody>
+                </table>
             </div>
-
             <div id="score-container" class="ni-score-widget">
                 <div>
                     <div class="ni-score-label">Live Freshness Score</div>
@@ -312,9 +299,7 @@
                     <div id="live-classification" class="status success"><i class="fa-solid fa-check"></i> Passed</div>
                 </div>
             </div>
-
-        </div><!-- /.qc-modal-body -->
-
+        </div>
         <div class="ni-modal-footer">
             <button class="ni-btn-clear" id="add-inspection-btn">Clear Form</button>
             <button class="ni-btn-save" id="save-inspection-btn"><i class="fa-solid fa-floppy-disk"></i> Save Inspection Log</button>
@@ -332,9 +317,7 @@
         <div class="qc-modal-body">
             <table class="qc-table">
                 <thead>
-                    <tr>
-                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Criteria / Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
-                    </tr>
+                    <tr><th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="passed-body"></tbody>
             </table>
@@ -355,9 +338,7 @@
         <div class="qc-modal-body">
             <table class="qc-table">
                 <thead>
-                    <tr>
-                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Criteria / Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
-                    </tr>
+                    <tr><th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Issue Noted</th><th>Date</th><th class="text-right">Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="issues-body"></tbody>
             </table>
@@ -378,9 +359,7 @@
         <div class="qc-modal-body">
             <table class="qc-table">
                 <thead>
-                    <tr>
-                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Criteria / Remarks</th><th>Date</th><th class="text-right">Status</th><th>Actions</th>
-                    </tr>
+                    <tr><th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Reason for Rejection</th><th>Date</th><th class="text-right">Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="rejected-body"></tbody>
             </table>
@@ -399,7 +378,6 @@
             <button class="qc-modal-close" data-close="modal-disposal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="qc-modal-body">
-            <!-- Tabs inside modal -->
             <div class="disposal-info-banner">
                 <i class="fa-solid fa-circle-info"></i>
                 <span><strong>Rejected</strong> batches are auto-disposed. <strong>With Issues</strong> can be disposed or continued.</span>
@@ -416,14 +394,7 @@
             <table class="qc-table" id="disposal-table">
                 <thead>
                     <tr>
-                        <th>Batch ID</th>
-                        <th>Inspector</th>
-                        <th>Product</th>
-                        <th>Location</th>
-                        <th>Issue / Reason</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Batch ID</th><th>Inspector</th><th>Product</th><th>Location</th><th>Issue / Reason</th><th>Date</th><th>Status</th><th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="disposal-body"></tbody>
@@ -514,37 +485,6 @@
             dst.textContent = src.textContent;
             new MutationObserver(() => { dst.textContent = src.textContent; })
                 .observe(src, { childList: true, characterData: true, subtree: true });
-        });
-    })();
-</script>
-
-<script>
-    (function() {
-        const menuBtn   = document.querySelector('.menu-btn');
-        const sidebar   = document.querySelector('.sidebar');
-        const overlay   = document.getElementById('sidebar-overlay');
-
-        function openSidebar() {
-            sidebar.classList.add('mobile-open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeSidebar() {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        if (menuBtn) menuBtn.addEventListener('click', () => {
-            sidebar.classList.contains('mobile-open') ? closeSidebar() : openSidebar();
-        });
-        if (overlay) overlay.addEventListener('click', closeSidebar);
-
-        // Close sidebar on nav link click (mobile)
-        document.querySelectorAll('.menu li a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) closeSidebar();
-            });
         });
     })();
 </script>
