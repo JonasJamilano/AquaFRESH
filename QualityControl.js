@@ -519,6 +519,7 @@ async function loadInspectionsByStatus() {
         { bodyId: "issues-body",   countId: "issues-count",   status: "With Issues" },
         { bodyId: "rejected-body", countId: "rejected-count", status: "Rejected"    },
     ];
+    // Note: Disposed records are shown in the For Disposal modal, not in status summary cards
 
     for (const s of statuses) {
         try {
@@ -537,11 +538,17 @@ async function loadInspectionsByStatus() {
 
                 let detailCell = "";
                 if (s.status === "Passed") {
-                    detailCell = (r.criteria || []).filter(c => c.remarks).map(c => c.remarks).join(", ") || "—";
+                    const remarks  = (r.criteria || []).filter(c => c.remarks).map(c => c.remarks).join(", ");
+                    const flagged  = (r.criteria || []).filter(c => c.assessment !== "Excellent").map(c => c.criteriaName).join(", ");
+                    detailCell = remarks || flagged || "—";
                 } else if (s.status === "With Issues") {
-                    detailCell = (r.criteria || []).filter(c => c.assessment === "Acceptable").map(c => c.criteriaName).join(", ") || "—";
+                    const flagged  = (r.criteria || []).filter(c => c.assessment === "Acceptable").map(c => c.criteriaName).join(", ");
+                    const remarks  = (r.criteria || []).filter(c => c.remarks).map(c => c.remarks).join(", ");
+                    detailCell = flagged ? `${flagged}${remarks ? " — " + remarks : ""}` : remarks || "—";
                 } else if (s.status === "Rejected") {
-                    detailCell = (r.criteria || []).filter(c => c.assessment === "Rejected").map(c => c.criteriaName).join(", ") || "—";
+                    const flagged  = (r.criteria || []).filter(c => c.assessment === "Rejected").map(c => c.criteriaName).join(", ");
+                    const remarks  = (r.criteria || []).filter(c => c.remarks).map(c => c.remarks).join(", ");
+                    detailCell = flagged ? `${flagged}${remarks ? " — " + remarks : ""}` : remarks || "—";
                 }
 
                 const safeData = encodeURIComponent(JSON.stringify({
