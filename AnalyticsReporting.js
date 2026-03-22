@@ -24,7 +24,7 @@ const deliveriesCol  = collection(db, "deliveries");
 
 const MAX_LIVE_POINTS    = 30;
 const MAX_HISTORY_POINTS = 50;
-const LIVE_POLL_INTERVAL = 10_000;
+const LIVE_POLL_INTERVAL = 3_000; // matches IoT 2-3 second send rate
 const HISTORY_DAYS       = 7;
 const LOGS_PATH          = "AquaFresh_Logs";
 
@@ -294,7 +294,7 @@ function startLivePolling() {
 function fetchLatestReading() {
     const latestQuery = query(ref(database, LOGS_PATH), orderByKey(), limitToLast(1));
 
-    onValue(latestQuery, (snapshot) => {
+    get(latestQuery).then((snapshot) => {
         if (!snapshot.exists()) { showNoDataMessage("No logs found in AquaFresh_Logs."); return; }
 
         let payload = null;
@@ -317,8 +317,10 @@ function fetchLatestReading() {
 
         renderAlarmBanner(triggeredAlarms, payloadTimestamp);
         handleAlarmSound(triggeredAlarms.length > 0);
-    },
-    (error) => { console.error("Failed to fetch live sensor data:", error); showNoDataMessage("Unable to load live data."); });
+    }).catch((error) => {
+        console.error("Failed to fetch live sensor data:", error);
+        showNoDataMessage("Unable to load live data.");
+    });
 }
 
 /* =========================================
@@ -548,7 +550,7 @@ function injectHistorySections() {
 async function loadAllHistory() {
     const cutoff   = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
     const snapshot = await get(
-        query(ref(database, LOGS_PATH), orderByKey(), limitToLast(500))
+        query(ref(database, LOGS_PATH), orderByKey(), limitToLast(1000))
     ).catch((err) => { console.error("History fetch failed:", err); return null; });
 
     if (!snapshot || !snapshot.exists()) {
@@ -567,8 +569,17 @@ async function loadAllHistory() {
 
     allRows.sort((a, b) => a.ts - b.ts);
 
+    // Deduplicate — keep only one entry per unique timestamp, cap at 500
+    const seen       = new Set();
+    const uniqueRows = allRows.filter(r => {
+        const key = r.ts.getTime();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    }).slice(-500); // keep the most recent 500 unique entries
+
     Object.entries(historyMeta).forEach(([, m]) => {
-        const rows = allRows
+        const rows = uniqueRows
             .map((r) => ({ ts: r.ts, value: parseNumericValue(r.val[m.firebaseKey]) }))
             .filter((r) => !Number.isNaN(r.value));
 
@@ -1058,7 +1069,7 @@ async function loadDeliveryPerformance() {
                         mode     : "index",
                         intersect: false,
                         callbacks: {
-                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} deliver${ctx.parsed.y !== 1 ? "ies" : ""}`
+                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} deliver${ctx.parsed.y !== 1 ? "ies" : "y"}`
                         }
                     }
                 }
