@@ -7,7 +7,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 /* =====================
    SIDEBAR & TOPBAR
 ===================== */
-.sidebar { width: 260px; height: 100vh; background: #0b1e2b; position: fixed; top: 0; left: 0; color: #fff; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
+.sidebar { width: 260px; height: 100vh; background: #0b1e2b; position: fixed; top: 0; left: 0; color: #fff; z-index: 200; box-shadow: 4px 0 15px rgba(0,0,0,0.05); overflow-y: auto; transition: transform 0.3s ease; }
 .brand { padding: 32px 24px 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 16px; }
 .brand h1 { color: #4dd0c8; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
 .brand p { font-size: 12px; color: #94a3b8; margin-top: 8px; line-height: 1.4; }
@@ -67,7 +67,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 /* =====================
    STATUS BADGES
 ===================== */
-.status { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 120px; padding: 8px 16px; border-radius: 50px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.status { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 .status.success  { background-color: #dcfce7; color: #166534; }
 .status.warning  { background-color: #fef08a; color: #854d0e; }
 .status.danger   { background-color: #fee2e2; color: #991b1b; }
@@ -104,7 +104,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
     #nav-toggle:checked ~ .sidebar { transform: translateX(0); }
     #nav-toggle:checked ~ .sidebar-overlay { display: block; }
-    .topbar { margin-left: 0; width: 100%; padding: 0 16px; }
+    .topbar { margin-left: 0; width: 100%; padding: 0 16px; left: 0; right: 0; }
     .content { margin-left: 0; padding: 84px 16px 32px; }
     .page-header h2 { font-size: 20px; }
     .panel { padding: 20px 16px; margin-bottom: 20px; }
@@ -113,15 +113,19 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .ni-trigger-text h3 { font-size: 0.95rem; }
     .ni-trigger-text p { font-size: 0.78rem; }
     .ni-trigger-arrow { display: none; }
-    .qc-status-cards { grid-template-columns: 1fr; gap: 10px; }
-    .qc-status-card { padding: 14px 16px; }
-    .qc-action-cards { grid-template-columns: 1fr; }
-    .qc-action-card { flex-wrap: wrap; gap: 12px; }
+    .qc-status-cards { grid-template-columns: 1fr; gap: 12px; }
+    .qc-status-card { padding: 16px 14px; }
+    .qc-status-card .card-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+    .qc-status-card .card-count { font-size: 1.5rem; }
+    .qc-status-card .card-arrow { display: none; }
+    .qc-action-cards { grid-template-columns: 1fr; gap: 12px; }
+    .qc-action-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .qc-action-info { min-width: 0; width: 100%; }
     .qc-action-btn { width: 100%; justify-content: center; }
     .qc-modal-overlay { align-items: flex-end; }
-    .qc-modal { width: 100%; max-width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; }
+    .qc-modal { width: 100%; max-width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; overflow: hidden; display: flex; flex-direction: column; }
     .qc-modal.wide { max-width: 100%; }
-    .qc-modal-body { padding: 16px; }
+    .qc-modal-body { padding: 16px; overflow-y: auto; overflow-x: auto; flex: 1; -webkit-overflow-scrolling: touch; }
     .qc-modal-header { padding: 14px 16px; }
     .qc-modal-header h3 { font-size: 0.95rem; }
     .ni-modal-grid { grid-template-columns: 1fr; gap: 10px; }
@@ -134,13 +138,14 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .chooser-card { padding: 14px 16px; }
     .chooser-card-icon { width: 44px; height: 44px; font-size: 1.2rem; }
     .panel-header-flex { flex-wrap: wrap; gap: 6px; }
+    .panel-header-flex h3 { font-size: 1rem; width: 100%; }
+    .panel-header-flex > div { flex-wrap: wrap; width: 100%; justify-content: flex-start; }
     .insp-card { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
     .insp-meta-col { gap: 12px; width: 100%; }
     .insp-date-col { display: none; }
     .insp-batch-col { min-width: unset; flex: 1; }
-    /* Disposal button — stays compact on mobile, just shortens label */
-    .disposal-icon-btn { padding: 6px 10px; font-size: 0.78rem; }
-    .disposal-icon-btn::before { content: "Disposal"; }
+    .disposal-icon-btn { padding: 6px 12px; font-size: 0.78rem; }
+    .disposal-icon-btn::before { content: none; }
     .qc-modal-body .qc-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .disposal-tabs { gap: 4px; }
     .disposal-tab  { padding: 5px 12px; font-size: 0.78rem; }
@@ -148,9 +153,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .clear-disposed-btn { width: 100%; justify-content: center; }
 }
 
-@media (min-width: 480px) and (max-width: 768px) {
-    .qc-status-cards { grid-template-columns: 1fr 1fr; }
-}
+
 
 /* ==============================================
    NEW INSPECTION — TRIGGER BUTTON
@@ -261,9 +264,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 /* ==============================================
    MODAL — SHARED BASE
 ============================================== */
-.qc-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; }
+.qc-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
 .qc-modal-overlay.active { display: flex; }
-.qc-modal { background: #fff; border-radius: 14px; width: 90%; max-width: 820px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden; animation: modalIn 0.22s ease; }
+.qc-modal { background: #fff; border-radius: 14px; width: 90%; max-width: 820px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: modalIn 0.22s ease; }
 .qc-modal.wide { max-width: 900px; }
 @keyframes modalIn {
     from { opacity: 0; transform: translateY(24px) scale(0.97); }
@@ -439,5 +442,11 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .insp-today-scroll-container .insp-card { border-radius: 8px; }
 
 @media (max-width: 768px) {
-    .insp-today-scroll-container { max-height: 220px; padding: 6px; }
+    .insp-today-scroll-container { max-height: 320px; padding: 6px; overflow-x: hidden; }
+    .insp-card { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+    .insp-batch-col { min-width: unset; flex: 1; }
+    .insp-meta-col { width: 100%; gap: 10px; }
+    .insp-meta-item { min-width: 80px; }
+    .insp-date-col { display: none; }
+    .insp-badge { margin-left: auto; }
 }

@@ -12,6 +12,10 @@
 </head>
 <body>
 
+<!-- ① nav-toggle checkbox MUST be first in body -->
+<input type="checkbox" id="nav-toggle">
+
+<!-- ===================== SIDEBAR ===================== -->
 <aside class="sidebar">
     <div class="brand">
         <img src="assets/AquaFRESH.png" class="logo-full">
@@ -26,14 +30,19 @@
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
             <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a></li>
-            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
+            <li data-role="superadmin admin manager delivery"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
 </aside>
 
+<!-- ② overlay — closes drawer on mobile tap -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
+<!-- ===================== TOPBAR ===================== -->
+<!-- ③ menu-btn is a label not a span -->
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -52,7 +61,6 @@
         <h2>System Dashboard</h2>
         <p class="subtitle">Real-time overview of all aquaculture operations</p>
     </section>
-
 
     <!-- Tab Switcher Bar -->
     <div class="section-tabs-bar">
@@ -89,35 +97,38 @@
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" id="recent-search" placeholder="Search module or details...">
             </div>
+            <!-- Level 1: Module filter -->
+            <select id="recent-filter-module" class="dash-filter-select">
+                <option value="">All Modules</option>
+                <option value="qc">Quality Control</option>
+                <option value="transport">Transport &amp; Delivery</option>
+            </select>
+            <!-- Level 2: Status filter — updates dynamically based on module -->
             <select id="recent-sort-status" class="dash-filter-select">
                 <option value="">All Statuses</option>
-                <option value="Passed">Passed</option>
-                <option value="With Issues">With Issues</option>
-                <option value="Rejected">Rejected</option>
-                <option value="pending">Pending</option>
-                <option value="en_route">En Route</option>
-                <option value="delivered">Delivered</option>
-                <option value="delayed">Delayed</option>
             </select>
             <select id="recent-sort-date" class="dash-filter-select">
                 <option value="desc">Newest First</option>
                 <option value="asc">Oldest First</option>
             </select>
         </div>
-        <div class="table-responsive">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Module</th>
-                        <th>Action Details</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="recent-activity-body">
-                    <tr><td colspan="4" class="text-center empty-row">Loading live data...</td></tr>
-                </tbody>
-            </table>
+        <!-- Scrollable recent activity container -->
+        <div class="activity-scroll-container">
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Module</th>
+                            <th>Action Details</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-activity-body">
+                        <tr><td colspan="4" class="text-center empty-row">Loading live data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 
@@ -231,7 +242,7 @@
             </select>
         </div>
 
-        <!-- Active (Pending + En Route) -->
+        <!-- Active -->
         <div class="transport-sub-section">
             <div class="transport-sub-header active-header">
                 <i class="fa-solid fa-truck-fast"></i>
@@ -241,9 +252,7 @@
             <div class="table-responsive">
                 <table class="modern-table">
                     <thead>
-                        <tr>
-                            <th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Status</th>
-                        </tr>
+                        <tr><th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Status</th></tr>
                     </thead>
                     <tbody id="transport-active-body">
                         <tr><td colspan="8" class="text-center empty-row">No active deliveries.</td></tr>
@@ -262,9 +271,7 @@
             <div class="table-responsive">
                 <table class="modern-table">
                     <thead>
-                        <tr>
-                            <th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Status</th>
-                        </tr>
+                        <tr><th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Status</th></tr>
                     </thead>
                     <tbody id="transport-delayed-body">
                         <tr><td colspan="8" class="text-center empty-row">No delayed deliveries.</td></tr>
@@ -283,9 +290,7 @@
             <div class="table-responsive">
                 <table class="modern-table">
                     <thead>
-                        <tr>
-                            <th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>Delivered At</th><th>Status</th>
-                        </tr>
+                        <tr><th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Driver</th><th>Origin</th><th>Destination</th><th>Delivered At</th><th>Status</th></tr>
                     </thead>
                     <tbody id="transport-delivered-body">
                         <tr><td colspan="8" class="text-center empty-row">No delivered records yet.</td></tr>
@@ -304,19 +309,6 @@
 <script type="module" src="delay-bell.js"></script>
 
 <script>
-    (function() {
-        const menuBtn = document.querySelector('.menu-btn');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        document.body.appendChild(overlay);
-        function openSidebar()  { sidebar.classList.add('mobile-open');    overlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
-        function closeSidebar() { sidebar.classList.remove('mobile-open'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
-        if (menuBtn) menuBtn.addEventListener('click', () => sidebar.classList.contains('mobile-open') ? closeSidebar() : openSidebar());
-        overlay.addEventListener('click', closeSidebar);
-        document.querySelectorAll('.menu li a').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
-    })();
-
     // Switch to a specific tab and scroll to it
     function switchTab(tabId) {
         document.querySelectorAll('.section-tab-btn').forEach(b => b.classList.remove('active'));
@@ -328,10 +320,54 @@
         targetContent?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Section tab bar switcher
     document.querySelectorAll('.section-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.target));
     });
+
+    // ── 2-level filter: Module → Status ──────────────────────────────
+    const STATUS_OPTIONS = {
+        qc: [
+            { value: "Passed",      label: "Passed"      },
+            { value: "With Issues", label: "With Issues" },
+            { value: "Rejected",    label: "Rejected"    }
+        ],
+        transport: [
+            { value: "pending",   label: "Pending"   },
+            { value: "en_route",  label: "En Route"  },
+            { value: "delivered", label: "Delivered" },
+            { value: "delayed",   label: "Delayed"   }
+        ]
+    };
+
+    const moduleSelect = document.getElementById("recent-filter-module");
+    const statusSelect = document.getElementById("recent-sort-status");
+
+    function updateStatusOptions(module) {
+        // Reset status dropdown
+        statusSelect.innerHTML = '<option value="">All Statuses</option>';
+        statusSelect.disabled  = !module;
+
+        if (!module) return;
+
+        STATUS_OPTIONS[module].forEach(opt => {
+            const el = document.createElement("option");
+            el.value       = opt.value;
+            el.textContent = opt.label;
+            statusSelect.appendChild(el);
+        });
+    }
+
+    moduleSelect.addEventListener("change", () => {
+        updateStatusOptions(moduleSelect.value);
+        // Reset status selection and trigger re-filter in Dashboard.js
+        statusSelect.value = "";
+        statusSelect.dispatchEvent(new Event("change"));
+        // Also trigger input event so Dashboard.js renderActivities picks up module change
+        moduleSelect.dispatchEvent(new Event("input"));
+    });
+
+    // Initialize — status starts disabled until module is chosen
+    updateStatusOptions("");
 </script>
 
 </body>

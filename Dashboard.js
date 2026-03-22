@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadBatches() {
     try {
-        // Batches live in the "inspections" collection — map doc ID → batchCode
         const snap = await getDocs(collection(db, "inspections"));
         snap.forEach(docSnap => {
             const b = docSnap.data();
@@ -25,39 +24,47 @@ async function loadBatches() {
 }
 
 function setupTabs() {
-    // Tab switching is now handled inline in Dashboard.html
-    // via section-tab-btn click listeners
+    // Tab switching handled inline in Dashboard.html
 }
 
 function getStatusBadgeHTML(statusStr) {
     if (!statusStr) return "";
     let norm = statusStr.toLowerCase().replace(/_/g, ' ');
     let colorClass = 'status-default';
-    if (norm.includes('pending'))                           colorClass = 'status-pending';
-    else if (norm.includes('route'))                        colorClass = 'status-enroute';
+    if (norm.includes('pending'))                                    colorClass = 'status-pending';
+    else if (norm.includes('route'))                                 colorClass = 'status-enroute';
     else if (norm.includes('delivered') || norm.includes('passed')) colorClass = 'status-success';
     else if (norm.includes('delayed')   || norm.includes('rejected')) colorClass = 'status-danger';
-    else if (norm.includes('issue'))                        colorClass = 'status-warning';
+    else if (norm.includes('issue'))                                 colorClass = 'status-warning';
     const displayStr = statusStr.replace("_", " ");
     return `<div class="status-pill ${colorClass}"><span class="status-dot"></span><span>${displayStr}</span></div>`;
 }
 
-
-
 let allActivities = [];
 
 function renderActivities() {
-    const tbody      = document.getElementById("recent-activity-body");
-    const search     = (document.getElementById("recent-search")?.value     || "").toLowerCase();
-    const statusFilter = document.getElementById("recent-sort-status")?.value || "";
-    const sortDir    = document.getElementById("recent-sort-date")?.value    || "desc";
+    const tbody        = document.getElementById("recent-activity-body");
+    const search       = (document.getElementById("recent-search")?.value        || "").toLowerCase();
+    const moduleFilter =  document.getElementById("recent-filter-module")?.value || "";
+    const statusFilter =  document.getElementById("recent-sort-status")?.value   || "";
+    const sortDir      =  document.getElementById("recent-sort-date")?.value     || "desc";
 
     let filtered = allActivities.filter(a => {
+        // Search filter
         const matchSearch = !search ||
             a.module.toLowerCase().includes(search) ||
             a.detail.toLowerCase().includes(search);
-        const matchStatus = !statusFilter || (a.status || "").toLowerCase() === statusFilter.toLowerCase();
-        return matchSearch && matchStatus;
+
+        // Module filter — "qc" matches inspection type, "transport" matches delivery type
+        const matchModule = !moduleFilter ||
+            (moduleFilter === "qc"        && a.type === "inspection") ||
+            (moduleFilter === "transport" && a.type === "delivery");
+
+        // Status filter
+        const matchStatus = !statusFilter ||
+            (a.status || "").toLowerCase() === statusFilter.toLowerCase();
+
+        return matchSearch && matchModule && matchStatus;
     });
 
     filtered.sort((a, b) => sortDir === "asc" ? a.time - b.time : b.time - a.time);
@@ -71,7 +78,7 @@ function renderActivities() {
         const tr = document.createElement('tr');
         tr.onclick = () => { window.location.href = act.link; };
         tr.innerHTML = `
-            <td>${act.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+            <td>${act.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
             <td><strong>${act.module}</strong></td>
             <td>${act.detail}</td>
             <td>${getStatusBadgeHTML(act.status)}</td>
@@ -81,10 +88,8 @@ function renderActivities() {
 }
 
 function listenToRecentActivity() {
-    const tbody = document.getElementById("recent-activity-body");
-
-    // Bind filter/sort controls
-    ["recent-search","recent-sort-status","recent-sort-date"].forEach(id => {
+    // Bind all filter/sort controls including the new module filter
+    ["recent-search", "recent-filter-module", "recent-sort-status", "recent-sort-date"].forEach(id => {
         document.getElementById(id)?.addEventListener("input",  renderActivities);
         document.getElementById(id)?.addEventListener("change", renderActivities);
     });
@@ -96,12 +101,12 @@ function listenToRecentActivity() {
             if (d.createdAt) {
                 const displayBatch = batchesMap[d.batchId] || d.batchCode || d.batchId || "-";
                 allActivities.push({
-                    type: "inspection",
-                    time: d.createdAt.toDate(),
+                    type:   "inspection",
+                    time:   d.createdAt.toDate(),
                     module: "QC Inspection",
                     detail: `Batch ${displayBatch} inspected`,
                     status: d.overallStatus,
-                    link: "QualityControl.html"
+                    link:   "QualityControl.html"
                 });
             }
         });
@@ -114,12 +119,12 @@ function listenToRecentActivity() {
             const d = doc.data();
             if (d.createdAt) {
                 allActivities.push({
-                    type: "delivery",
-                    time: d.createdAt.toDate(),
+                    type:   "delivery",
+                    time:   d.createdAt.toDate(),
                     module: "Transport",
-                    detail: `Delivery ${d.deliveryCode} — ${d.status?.replace("_"," ")}`,
+                    detail: `Delivery ${d.deliveryCode} — ${d.status?.replace("_", " ")}`,
                     status: d.status,
-                    link: "TransportDelivery.html"
+                    link:   "TransportDelivery.html"
                 });
             }
         });
@@ -140,9 +145,9 @@ function buildQCRows(list, tbodyId) {
     list.forEach(d => {
         const displayBatch = d.batchCode || batchesMap[d.batchId] || d.batchId || "—";
         const dateStr = d.createdAt?.toDate
-            ? d.createdAt.toDate().toLocaleString("en-PH", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit", hour12:true })
+            ? d.createdAt.toDate().toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true })
             : "—";
-        const modalParam = d.overallStatus === "Passed"     ? "passed"
+        const modalParam = d.overallStatus === "Passed"      ? "passed"
                          : d.overallStatus === "With Issues" ? "issues"
                          : d.overallStatus === "Rejected"    ? "rejected" : "";
         const tr = document.createElement('tr');
@@ -191,7 +196,7 @@ function renderQC() {
 }
 
 function listenToQualityControl() {
-    ["qc-search","qc-filter-location","qc-sort-date"].forEach(id => {
+    ["qc-search", "qc-filter-location", "qc-sort-date"].forEach(id => {
         document.getElementById(id)?.addEventListener("input",  renderQC);
         document.getElementById(id)?.addEventListener("change", renderQC);
     });
@@ -217,8 +222,8 @@ function buildDeliveryRows(list, tbodyId, dateField, modalParam) {
         const shortDest    = d.destination ? d.destination.split(',')[0] : "—";
         const displayBatch = batchesMap[d.batchId] || d.batchCode || d.batchId || "—";
         const dateVal      = dateField === "deliveredAt"
-            ? (d.deliveredAt?.toDate ? d.deliveredAt.toDate().toLocaleString("en-PH", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit", hour12:true }) : "—")
-            : (d.eta ? new Date(d.eta).toLocaleString("en-PH", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit", hour12:true }) : "—");
+            ? (d.deliveredAt?.toDate ? d.deliveredAt.toDate().toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : "—")
+            : (d.eta ? new Date(d.eta).toLocaleString("en-PH", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : "—");
         const tr = document.createElement('tr');
         tr.style.cursor = "pointer";
         const rowModal = modalParam || (d.status === "pending" ? "pending" : d.status === "en_route" ? "enroute" : modalParam);
@@ -226,8 +231,8 @@ function buildDeliveryRows(list, tbodyId, dateField, modalParam) {
         tr.innerHTML = `
             <td><strong>${d.deliveryCode}</strong></td>
             <td>${displayBatch}</td>
-            <td>${d.truck || "—"}</td>
-            <td>${d.driverName || "—"}</td>
+            <td>${d.truck       || "—"}</td>
+            <td>${d.driverName  || "—"}</td>
             <td>${shortOrigin}</td>
             <td>${shortDest}</td>
             <td>${dateVal}</td>
@@ -238,7 +243,7 @@ function buildDeliveryRows(list, tbodyId, dateField, modalParam) {
 }
 
 function renderTransport() {
-    const search  = (document.getElementById("transport-search")?.value || "").toLowerCase();
+    const search  = (document.getElementById("transport-search")?.value  || "").toLowerCase();
     const sortDir =  document.getElementById("transport-sort-date")?.value || "desc";
 
     let filtered = allDeliveryDocs.filter(d => {
@@ -266,7 +271,7 @@ function renderTransport() {
 }
 
 function listenToTransport() {
-    ["transport-search","transport-sort-date"].forEach(id => {
+    ["transport-search", "transport-sort-date"].forEach(id => {
         document.getElementById(id)?.addEventListener("input",  renderTransport);
         document.getElementById(id)?.addEventListener("change", renderTransport);
     });
