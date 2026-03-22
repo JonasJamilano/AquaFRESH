@@ -94,6 +94,23 @@
         <div id="delivery-map"></div>
         <div id="storeSearchStatus" class="store-search-status" style="display:none;"></div>
 
+        <!-- ROUTE ALTERNATIVES PANEL — delivery role only, shown for pending deliveries -->
+        <div id="route-alternatives-panel" class="route-alternatives-panel" style="display:none;">
+            <div class="route-alt-header">
+                <div class="route-alt-title">
+                    <i class="fa-solid fa-route"></i>
+                    <span>Choose Your Route</span>
+                </div>
+                <span class="route-alt-hint">Select the best route before starting your delivery</span>
+            </div>
+            <div class="route-alt-cards" id="route-alt-cards">
+                <div class="route-alt-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Calculating available routes…
+                </div>
+            </div>
+        </div>
+
         <div id="nearbyStoresPanel" class="nearby-stores-panel" hidden>
             <div class="nearby-stores-header">
                 <div class="nearby-stores-title"><i class="fa-solid fa-store"></i> Nearby Ice &amp; Convenience Stores</div>
@@ -103,7 +120,7 @@
         </div>
     </section>
 
-    <!-- 2. ALL ACTIVE DELIVERIES (no Avg Temp column) -->
+    <!-- 2. ALL ACTIVE DELIVERIES -->
     <section class="panel">
         <div class="panel-header-flex"><h3>All Active Deliveries</h3></div>
         <table class="delivery-table qc-table">
@@ -116,7 +133,7 @@
         </table>
     </section>
 
-    <!-- 3. DELIVERY STATUS SUMMARY — all 4 cards -->
+    <!-- 3. DELIVERY STATUS SUMMARY -->
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Delivery Status Summary</h3>
@@ -202,7 +219,11 @@
                     <input type="text" id="destination" placeholder="Type to search..." autocomplete="off">
                     <div id="dest-suggestions" class="autocomplete-dropdown"></div>
                 </div>
-                <div class="ni-form-group"><label>Estimated Arrival</label><input type="datetime-local" id="eta"><p id="eta-hint" style="font-size:11px;color:#64748b;margin-top:4px;min-height:16px;"></p></div>
+                <div class="ni-form-group">
+                    <label>Estimated Arrival</label>
+                    <input type="datetime-local" id="eta">
+                    <p id="eta-hint" style="font-size:11px;color:#64748b;margin-top:4px;min-height:16px;"></p>
+                </div>
             </div>
         </div>
         <div class="ni-modal-footer">

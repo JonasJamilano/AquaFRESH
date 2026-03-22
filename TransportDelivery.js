@@ -24,9 +24,9 @@ let isNavigating    = false;
 let driverLat = null;
 let driverLng = null;
 
-let storeMarkers = [];
-let storeRoute       = null;
-let savedDeliveryId  = null;
+let storeMarkers    = [];
+let storeRoute      = null;
+let savedDeliveryId = null;
 
 const deliveriesCol  = collection(db, "deliveries");
 const usersCol       = collection(db, "users");
@@ -34,7 +34,26 @@ const inspectionsCol = collection(db, "inspections");
 
 let selectedOrigin = { lat: null, lng: null, name: "" };
 let selectedDest   = { lat: null, lng: null, name: "" };
-let batchesMap     = {}; // batchDocId → batchCode (ALL passed batches, not just available)
+let batchesMap     = {};
+
+/* =========================================
+   ROUTE ALTERNATIVES STATE
+   Tracks the fetched routes, which one the
+   driver selected, and which delivery the
+   panel is currently showing.
+========================================= */
+
+const ROUTE_COLORS = [
+    { line: '#0d9488', colorClass: 'color-primary',   numClass: 'num-primary'   },
+    { line: '#3b82f6', colorClass: 'color-secondary',  numClass: 'num-secondary' },
+    { line: '#8b5cf6', colorClass: 'color-tertiary',   numClass: 'num-tertiary'  },
+];
+
+let altRoutes          = [];   // up to 3 LRM route objects
+let selectedAltIndex   = 0;    // which card is selected (0 = first)
+let altDeliveryId      = null; // which delivery the panel belongs to
+let altPolylines       = [];   // drawn polylines for alternatives
+let altFetchControl    = null; // temporary LRM control used only to fetch routes
 
 /* =========================================
    CONSTANTS
@@ -451,8 +470,6 @@ async function initPage() {
     const role = localStorage.getItem("role");
     unlockAudio();
 
-    // FIX: await loadBatches() fully before starting the listener
-    // so batchesMap is populated before onSnapshot fires
     await loadBatches();
 
     if (["superadmin", "admin", "manager"].includes(role)) {
@@ -557,7 +574,6 @@ function selectLocation(place, type) {
         selectedDest = { lat: parseFloat(place.lat), lng: parseFloat(place.lon), name: place.display_name };
         document.getElementById("dest-suggestions").style.display = "none";
     }
-    // Auto-calculate ETA once both locations are selected
     if (selectedOrigin.lat && selectedDest.lat) {
         autoCalculateETA();
     }
@@ -565,20 +581,14 @@ function selectLocation(place, type) {
 
 /* =========================================
    AUTO-CALCULATE ETA VIA OSRM
-   Uses the free OSRM routing API (same
-   engine as Leaflet Routing Machine).
-   Auto-fills the ETA field with:
-   now + estimated driving time.
-   Admin can still manually adjust it.
 ========================================= */
 
 async function autoCalculateETA() {
-    const etaInput   = document.getElementById("eta");
-    const etaHint    = document.getElementById("eta-hint");
+    const etaInput = document.getElementById("eta");
+    const etaHint  = document.getElementById("eta-hint");
 
     if (!etaInput) return;
 
-    // Show loading state
     etaInput.value       = "";
     etaInput.placeholder = "Calculating route…";
     if (etaHint) etaHint.textContent = "⏳ Fetching route estimate…";
@@ -598,17 +608,15 @@ async function autoCalculateETA() {
             return;
         }
 
-        const seconds  = data.routes[0].duration;
-        const distKm   = (data.routes[0].distance / 1000).toFixed(1);
-        const hours    = Math.floor(seconds / 3600);
-        const minutes  = Math.round((seconds % 3600) / 60);
-        const timeStr  = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
+        const seconds = data.routes[0].duration;
+        const distKm  = (data.routes[0].distance / 1000).toFixed(1);
+        const hours   = Math.floor(seconds / 3600);
+        const minutes = Math.round((seconds % 3600) / 60);
+        const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
 
-        // Add a 15-minute loading/preparation buffer
         const BUFFER_MINUTES = 15;
-        const etaDate  = new Date(Date.now() + seconds * 1000 + BUFFER_MINUTES * 60 * 1000);
+        const etaDate = new Date(Date.now() + seconds * 1000 + BUFFER_MINUTES * 60 * 1000);
 
-        // Format for datetime-local input (YYYY-MM-DDTHH:MM)
         const pad = n => String(n).padStart(2, "0");
         const formatted = `${etaDate.getFullYear()}-${pad(etaDate.getMonth()+1)}-${pad(etaDate.getDate())}` +
                           `T${pad(etaDate.getHours())}:${pad(etaDate.getMinutes())}`;
@@ -628,10 +636,6 @@ async function autoCalculateETA() {
 
 /* =========================================
    LOAD BATCHES
-   FIX: Populate batchesMap for ALL passed
-   batches — not just unused ones — so that
-   deliveries already assigned still resolve
-   their batch code correctly.
 ========================================= */
 
 async function loadBatches() {
@@ -646,20 +650,16 @@ async function loadBatches() {
             return;
         }
 
-        // FIX: Populate batchesMap for ALL passed batches first
-        // This ensures existing deliveries always resolve their batch code
         passedSnap.forEach(docSnap => {
             batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id;
         });
 
-        // Then figure out which are already assigned (for the dropdown only)
         const deliveriesSnap = await getDocs(deliveriesCol);
         const usedBatchIds   = new Set();
         deliveriesSnap.forEach(d => {
             if (d.data().batchId) usedBatchIds.add(d.data().batchId);
         });
 
-        // Only show unassigned batches in the dropdown
         let availableCount = 0;
         passedSnap.forEach(docSnap => {
             if (usedBatchIds.has(docSnap.id)) return;
@@ -687,9 +687,6 @@ async function loadDrivers() {
 
 /* =========================================
    CREATE DELIVERY
-   FIX: Save batchCode directly on the
-   delivery document so display never
-   depends solely on batchesMap lookup.
 ========================================= */
 
 window.createDelivery = async function () {
@@ -708,13 +705,12 @@ window.createDelivery = async function () {
     let driverName     = "";
     driverSnap.forEach(d => driverName = d.data().fullName);
 
-    // FIX: Save batchCode directly on the delivery document
     const batchCode = batchesMap[batchId] || batchId;
 
     await addDoc(deliveriesCol, {
         deliveryCode,
         batchId,
-        batchCode,   // ← stored directly so display never breaks
+        batchCode,
         driverId,
         driverName,
         truck,
@@ -742,6 +738,220 @@ window.createDelivery = async function () {
     await loadBatches();
     if (window.closeModal) window.closeModal("modal-new-delivery");
 };
+
+/* =========================================
+   ROUTE ALTERNATIVES
+   Shows up to 3 route cards below the map
+   for a pending delivery. Delivery role only.
+   The driver selects a route, then presses
+   "Start Delivery" which uses the chosen one.
+========================================= */
+
+function showRouteAlternatives(deliveryId, oLat, oLng, dLat, dLng) {
+    const role = localStorage.getItem("role");
+    if (role !== "delivery") return;
+
+    // Don't re-render if already showing for this delivery
+    if (altDeliveryId === deliveryId && altRoutes.length > 0) return;
+
+    altDeliveryId    = deliveryId;
+    altRoutes        = [];
+    selectedAltIndex = 0;
+
+    const panel = document.getElementById("route-alternatives-panel");
+    const cards = document.getElementById("route-alt-cards");
+    if (!panel || !cards) return;
+
+    panel.style.display = "block";
+    cards.innerHTML = `
+        <div class="route-alt-loading">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Calculating available routes…
+        </div>`;
+
+    // Clean up any previous fetch control
+    clearAltFetchControl();
+
+    // Use a hidden LRM control purely to fetch the route alternatives
+    altFetchControl = L.Routing.control({
+        waypoints: [
+            L.latLng(oLat, oLng),
+            L.latLng(dLat, dLng)
+        ],
+        addWaypoints:       false,
+        routeWhileDragging: false,
+        fitSelectedRoutes:  true,
+        show:               false,
+        showAlternatives:   true,
+        lineOptions: {
+            styles: [{ color: ROUTE_COLORS[0].line, opacity: 1, weight: 5 }]
+        },
+        altLineOptions: {
+            styles: [
+                { color: 'black',                  opacity: 0.15, weight: 9   },
+                { color: 'white',                  opacity: 0.8,  weight: 6   },
+                { color: ROUTE_COLORS[1].line,     opacity: 0.85, weight: 4.5 }
+            ]
+        },
+        createMarker: () => null
+    }).addTo(map);
+
+    altFetchControl.on('routesfound', function(e) {
+        // Cap at 3 alternatives
+        altRoutes = e.routes.slice(0, 3);
+
+        // Draw all route lines on the map so driver can preview them
+        clearAltPolylines();
+        altRoutes.forEach((route, idx) => {
+            const color = ROUTE_COLORS[idx] || ROUTE_COLORS[0];
+            const opacity = idx === 0 ? 1 : 0.45;
+            const weight  = idx === 0 ? 6 : 4;
+            const poly = L.polyline(route.coordinates, {
+                color:   color.line,
+                weight,
+                opacity,
+                dashArray: idx === 0 ? null : '6, 8'
+            }).addTo(map);
+            altPolylines.push(poly);
+        });
+
+        // Fit map to show all routes
+        if (altPolylines.length > 0) {
+            const group = L.featureGroup(altPolylines);
+            map.fitBounds(group.getBounds(), { padding: [30, 30] });
+        }
+
+        renderRouteCards(altRoutes, deliveryId);
+
+        // Update status bar with first route info
+        updateStatusBarForRoute(0);
+    });
+
+    altFetchControl.on('routingerror', function() {
+        cards.innerHTML = `
+            <div class="route-alt-loading" style="color:#dc2626;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Could not load route alternatives. Check your connection.
+            </div>`;
+    });
+}
+
+function clearAltFetchControl() {
+    if (altFetchControl) {
+        try { map.removeControl(altFetchControl); } catch (_) {}
+        altFetchControl = null;
+    }
+}
+
+function clearAltPolylines() {
+    altPolylines.forEach(p => { try { map.removeLayer(p); } catch (_) {} });
+    altPolylines = [];
+}
+
+function hideRouteAlternatives() {
+    const panel = document.getElementById("route-alternatives-panel");
+    if (panel) panel.style.display = "none";
+    clearAltFetchControl();
+    clearAltPolylines();
+    altRoutes        = [];
+    altDeliveryId    = null;
+    selectedAltIndex = 0;
+}
+
+function renderRouteCards(routes, deliveryId) {
+    const cards = document.getElementById("route-alt-cards");
+    if (!cards) return;
+
+    // Find fastest and shortest for badge labelling
+    const minTime = Math.min(...routes.map(r => r.summary.totalTime));
+    const minDist = Math.min(...routes.map(r => r.summary.totalDistance));
+
+    cards.innerHTML = routes.map((route, idx) => {
+        const color   = ROUTE_COLORS[idx] || ROUTE_COLORS[0];
+        const distKm  = (route.summary.totalDistance / 1000).toFixed(1);
+        const secs    = route.summary.totalTime;
+        const hrs     = Math.floor(secs / 3600);
+        const mins    = Math.round((secs % 3600) / 60);
+        const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+
+        // Use the first segment of the LRM route name if available
+        const routeName = route.name
+            ? route.name.split(',')[0].trim()
+            : `Route ${idx + 1}`;
+
+        let badges = '';
+        if (route.summary.totalTime === minTime && routes.length > 1) {
+            badges += `<span class="route-alt-badge fastest"><i class="fa-solid fa-bolt"></i> Fastest</span>`;
+        }
+        if (route.summary.totalDistance === minDist && routes.length > 1) {
+            badges += `<span class="route-alt-badge shortest"><i class="fa-solid fa-minimize"></i> Shortest</span>`;
+        }
+
+        const isSelected = idx === selectedAltIndex;
+
+        return `
+        <div class="route-alt-card ${isSelected ? 'selected' : ''}"
+             data-route-idx="${idx}"
+             onclick="selectRouteAlternative(${idx}, '${deliveryId}')">
+            <div class="route-alt-color ${color.colorClass}"></div>
+            <div class="route-alt-num ${color.numClass}">${idx + 1}</div>
+            <div class="route-alt-info">
+                <div class="route-alt-name">${routeName}${badges}</div>
+                <div class="route-alt-meta">
+                    <span class="route-alt-stat">
+                        <i class="fa-solid fa-road"></i> ${distKm} km
+                    </span>
+                    <span class="route-alt-stat">
+                        <i class="fa-solid fa-clock"></i> ~${timeStr}
+                    </span>
+                </div>
+            </div>
+            <div class="route-alt-check"><i class="fa-solid fa-check"></i></div>
+        </div>`;
+    }).join('');
+}
+
+// Called when driver taps a route card
+window.selectRouteAlternative = function(idx, deliveryId) {
+    if (idx < 0 || idx >= altRoutes.length) return;
+
+    selectedAltIndex = idx;
+
+    // Update card selected state
+    document.querySelectorAll('.route-alt-card').forEach((card, i) => {
+        card.classList.toggle('selected', i === idx);
+    });
+
+    // Redraw polylines: selected route solid + full opacity, others faded
+    altPolylines.forEach((poly, i) => {
+        poly.setStyle({
+            opacity:   i === idx ? 1    : 0.3,
+            weight:    i === idx ? 6    : 3,
+            dashArray: i === idx ? null : '6, 8'
+        });
+        if (i === idx) poly.bringToFront();
+    });
+
+    updateStatusBarForRoute(idx);
+};
+
+function updateStatusBarForRoute(idx) {
+    if (!altRoutes[idx]) return;
+    const route   = altRoutes[idx];
+    const color   = ROUTE_COLORS[idx] || ROUTE_COLORS[0];
+    const distKm  = (route.summary.totalDistance / 1000).toFixed(1);
+    const secs    = route.summary.totalTime;
+    const hrs     = Math.floor(secs / 3600);
+    const mins    = Math.round((secs % 3600) / 60);
+    const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+    const statusBox = document.getElementById('map-status');
+    if (statusBox) {
+        statusBox.innerHTML = `
+            <i class="fa-solid fa-route" style="color:${color.line};"></i>
+            <b>Route ${idx + 1} selected:</b> ${distKm} km · ~${timeStr}
+            <span style="font-size:11px;color:#94a3b8;margin-left:8px;">Press Start Delivery to begin navigation</span>`;
+    }
+}
 
 /* =========================================
    REAL-TIME DELIVERIES LISTENER
@@ -784,9 +994,9 @@ function listenToDeliveries() {
 
         currentlyEnRoute = docsArray.some(d => d.status === "en_route");
 
-        // ── Auto-mark delayed: en_route deliveries more than 20 mins past ETA ──
-        const now = Date.now();
-        const GRACE_MS = 20 * 60 * 1000; // 20-minute grace period
+        // Auto-mark delayed: en_route deliveries more than 20 mins past ETA
+        const now      = Date.now();
+        const GRACE_MS = 20 * 60 * 1000;
         docsArray.forEach(async d => {
             if (d.status === "en_route" && d.eta) {
                 const etaMs = new Date(d.eta).getTime();
@@ -798,43 +1008,72 @@ function listenToDeliveries() {
             }
         });
 
+        // Track whether the delivery role user has a pending delivery
+        // to decide whether to show/hide the route alternatives panel
+        let hasPendingDelivery = false;
+
         docsArray.forEach(d => {
             const id = d.id;
 
             if (d.status === "delivered") {
+                // Clean up map layers for completed deliveries
                 if (deliveryMarkers[id]) { map.removeLayer(deliveryMarkers[id]); delete deliveryMarkers[id]; }
                 if (deliveryRoutes[id])  { map.removeControl(deliveryRoutes[id]); delete deliveryRoutes[id]; }
             } else {
+                // Draw route on map for non-delivered deliveries
                 if (d.originLat && d.destLat && !deliveryRoutes[id]) {
-                    deliveryRoutes[id] = L.Routing.control({
-                        waypoints:          [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
-                        addWaypoints:       false,
-                        routeWhileDragging: false,
-                        fitSelectedRoutes:  true,
-                        show:               true,
-                        showAlternatives:   true,
-                        altLineOptions: {
-                            styles: [
-                                { color: 'black',   opacity: 0.15, weight: 9   },
-                                { color: 'white',   opacity: 0.8,  weight: 6   },
-                                { color: '#64748b', opacity: 0.9,  weight: 4.5 }
-                            ]
-                        },
-                        lineOptions:  { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] },
-                        createMarker: function() { return null; }
-                    }).addTo(map);
 
-                    deliveryRoutes[id].on('routeselected', function(e) {
-                        const route      = e.route;
-                        const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
-                        const hours      = Math.floor(route.summary.totalTime / 3600);
-                        const minutes    = Math.round((route.summary.totalTime % 3600) / 60);
-                        const timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
-                        const statusBox  = document.getElementById('map-status');
-                        if (statusBox) {
-                            statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
-                        }
-                    });
+                    if (role === "delivery" && d.status === "pending") {
+                        // ── DELIVERY ROLE + PENDING ──
+                        // Show route alternatives panel instead of a fixed LRM route.
+                        // The polylines are drawn inside showRouteAlternatives().
+                        hasPendingDelivery = true;
+                        showRouteAlternatives(
+                            id,
+                            d.currentLat || d.originLat,
+                            d.currentLng || d.originLng,
+                            d.destLat,
+                            d.destLng
+                        );
+                        // Store a placeholder so we don't re-trigger on next snapshot
+                        deliveryRoutes[id] = { _placeholder: true, setWaypoints: () => {} };
+
+                    } else {
+                        // ── ALL OTHER ROLES / EN ROUTE / DELAYED ──
+                        // Standard LRM route with alternatives visible on map
+                        deliveryRoutes[id] = L.Routing.control({
+                            waypoints: [
+                                L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng),
+                                L.latLng(d.destLat, d.destLng)
+                            ],
+                            addWaypoints:       false,
+                            routeWhileDragging: false,
+                            fitSelectedRoutes:  true,
+                            show:               true,
+                            showAlternatives:   true,
+                            altLineOptions: {
+                                styles: [
+                                    { color: 'black',   opacity: 0.15, weight: 9   },
+                                    { color: 'white',   opacity: 0.8,  weight: 6   },
+                                    { color: '#64748b', opacity: 0.9,  weight: 4.5 }
+                                ]
+                            },
+                            lineOptions: { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] },
+                            createMarker: () => null
+                        }).addTo(map);
+
+                        deliveryRoutes[id].on('routeselected', function(e) {
+                            const route      = e.route;
+                            const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+                            const hours      = Math.floor(route.summary.totalTime / 3600);
+                            const minutes    = Math.round((route.summary.totalTime % 3600) / 60);
+                            const timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
+                            const statusBox  = document.getElementById('map-status');
+                            if (statusBox) {
+                                statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
+                            }
+                        });
+                    }
                 }
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -853,15 +1092,19 @@ function listenToDeliveries() {
                     }
                 }
 
+                // Resume GPS tracking for en_route / delayed deliveries
                 if (role === "delivery" && (d.status === "en_route" || d.status === "delayed") && !isNavigating) {
                     startTracking(id, d.destLat, d.destLng);
                 }
             }
 
+            // Build action buttons
             let actionButton = "";
             if (role === "delivery") {
-                if (d.status === "pending")                            actionButton = `<button class="start-btn"   onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
-                if (d.status === "en_route" || d.status === "delayed") actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
+                if (d.status === "pending")
+                    actionButton = `<button class="start-btn" onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
+                if (d.status === "en_route" || d.status === "delayed")
+                    actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
             } else {
                 actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
             }
@@ -872,13 +1115,8 @@ function listenToDeliveries() {
             const formattedDate = d.eta          ? new Date(d.eta).toLocaleString() : "-";
             const deliveredDate = d.deliveredAt  ? d.deliveredAt.toDate().toLocaleString() : "-";
 
-            // FIX: Priority order for batch display:
-            // 1. d.batchCode — saved directly on document (new deliveries)
-            // 2. batchesMap[d.batchId] — resolved from inspections collection
-            // 3. d.batchId — raw Firestore ID (last resort, should not happen)
             const displayBatch = d.batchCode || batchesMap[d.batchId] || d.batchId || "-";
 
-            // All Active Deliveries — exclude delivered
             if (d.status !== "delivered") {
                 allBody.innerHTML += `
                 <tr>
@@ -908,6 +1146,11 @@ function listenToDeliveries() {
             }
         });
 
+        // Hide alternatives panel if the delivery role user has no pending deliveries
+        if (role === "delivery" && !hasPendingDelivery) {
+            hideRouteAlternatives();
+        }
+
         document.getElementById("pending-count").textContent   = counts.pending;
         document.getElementById("enroute-count").textContent   = counts.enroute;
         document.getElementById("delivered-count").textContent = counts.delivered;
@@ -926,16 +1169,50 @@ function listenToDeliveries() {
 
 window.updateStatus = async function (id, status, destLat = null, destLng = null) {
     const updateData = { status };
+
     if (status === "en_route") {
         updateData.startedAt = serverTimestamp();
+
+        // Hide the route alternatives panel — driver has committed to a route
+        hideRouteAlternatives();
+
+        // Clean up the placeholder entry so the real LRM control can be created
+        if (deliveryRoutes[id]?._placeholder) {
+            delete deliveryRoutes[id];
+        }
+
+        // If the driver selected a non-default route, draw it as a proper LRM
+        // control so GPS tracking can update waypoints via setWaypoints()
+        if (altRoutes.length > 0 && selectedAltIndex < altRoutes.length) {
+            const chosenColor = ROUTE_COLORS[selectedAltIndex] || ROUTE_COLORS[0];
+            // The route is already drawn as a polyline from showRouteAlternatives.
+            // For GPS tracking we need a real LRM control with setWaypoints support.
+            deliveryRoutes[id] = L.Routing.control({
+                waypoints: [
+                    L.latLng(destLat ? altRoutes[selectedAltIndex].coordinates[0].lat : altRoutes[0].coordinates[0].lat,
+                             destLat ? altRoutes[selectedAltIndex].coordinates[0].lng : altRoutes[0].coordinates[0].lng),
+                    L.latLng(destLat, destLng)
+                ],
+                addWaypoints:       false,
+                routeWhileDragging: false,
+                fitSelectedRoutes:  false,
+                show:               false,
+                lineOptions: { styles: [{ color: chosenColor.line, opacity: 1, weight: 6 }] },
+                createMarker: () => null
+            }).addTo(map);
+        }
+
         startTracking(id, destLat, destLng);
     }
+
     if (status === "delivered") {
         updateData.deliveredAt = serverTimestamp();
         stopTracking();
         clearStoresAndHidePanel();
+        hideRouteAlternatives();
         await loadBatches();
     }
+
     await updateDoc(doc(db, "deliveries", id), updateData);
 };
 
@@ -958,7 +1235,8 @@ function startTracking(deliveryId, destLat, destLng) {
 
             map.setView([lat, lng], 18);
             if (deliveryMarkers[deliveryId]) deliveryMarkers[deliveryId].setLatLng([lat, lng]);
-            if (deliveryRoutes[deliveryId] && destLat && destLng) {
+            if (deliveryRoutes[deliveryId] && destLat && destLng &&
+                typeof deliveryRoutes[deliveryId].setWaypoints === "function") {
                 deliveryRoutes[deliveryId].setWaypoints([
                     L.latLng(lat, lng),
                     L.latLng(destLat, destLng)
