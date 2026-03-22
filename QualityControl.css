@@ -450,3 +450,74 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .insp-date-col { display: none; }
     .insp-badge { margin-left: auto; }
 }
+
+/* =====================
+   MOBILE FIXES — inspection status summary & data management
+===================== */
+@media (max-width: 768px) {
+
+    /* --- Panel header: stack title above hint+disposal row --- */
+    .panel-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    /* hint and disposal button sit on the same row, wrapping if needed */
+    .panel-header-flex > div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+    }
+
+    /* --- Status summary cards: force single column --- */
+    .qc-status-cards {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    /* make each card more compact on mobile */
+    .qc-status-card {
+        padding: 14px 16px;
+    }
+
+    /* --- Data management: force single column, full-width button --- */
+    .qc-action-cards {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    .qc-action-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    /* top row inside card (icon + text) stays horizontal */
+    .qc-action-card > .qc-action-icon,
+    .qc-action-card > .qc-action-info {
+        align-self: flex-start;
+    }
+
+    /* button spans full width */
+    .qc-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* --- Disposal tabs row: stack vertically so tabs don't overlap table --- */
+    .disposal-tabs-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .clear-disposed-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
