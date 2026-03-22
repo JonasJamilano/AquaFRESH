@@ -862,18 +862,34 @@ async function clearDisposedRecords() {
     const btn = document.getElementById("clear-disposed-btn");
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Clearing...'; }
     try {
-        const qRejected = query(collection(db, "inspections"), where("overallStatus", "==", "Rejected"));
-        const qDisposed = query(collection(db, "inspections"), where("disposalStatus", "==", "disposed"));
-        const [rejSnap, dispSnap] = await Promise.all([getDocs(qRejected), getDocs(qDisposed)]);
+        // Get all inspections and filter client-side to catch both cases:
+        // 1. overallStatus === "Rejected" (auto-disposed)
+        // 2. disposalStatus === "disposed" (manually disposed With Issues)
+        const allSnap = await getDocs(collection(db, "inspections"));
         const deletions = [];
-        rejSnap.forEach(d  => deletions.push(deleteDoc(doc(db, "inspections", d.id))));
-        dispSnap.forEach(d => deletions.push(deleteDoc(doc(db, "inspections", d.id))));
+        allSnap.forEach(d => {
+            const data = d.data();
+            if (
+                data.overallStatus === "Rejected" ||
+                data.disposalStatus === "disposed"
+            ) {
+                deletions.push(deleteDoc(doc(db, "inspections", d.id)));
+            }
+        });
+
+        if (deletions.length === 0) {
+            alert("No disposed records found to clear.");
+            return;
+        }
+
         await Promise.all(deletions);
         await loadDisposalRecords();
         await loadInspectionsByStatus();
         await loadInspectionsToday();
+        alert(`Successfully cleared ${deletions.length} disposed record(s).`);
     } catch (err) {
         console.error("Clear disposed error:", err);
+        alert("Failed to clear records. Check console for details.");
     } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-broom"></i> Clear Disposed Records'; }
     }
