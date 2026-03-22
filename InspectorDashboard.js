@@ -54,8 +54,10 @@ function renderTable() {
         return date >= today;
     });
 
-    // Update today count badge
+    // Update today count badges (header + tab)
     document.getElementById("today-count-badge").textContent = filtered.length;
+    const tabBadge = document.getElementById("tab-today-badge");
+    if (tabBadge) tabBadge.textContent = filtered.length;
 
     // Apply search
     if (search) {
@@ -116,18 +118,16 @@ function renderAttention() {
         d.overallStatus === "With Issues" || d.overallStatus === "Rejected"
     );
 
-    // Update badge count on the trigger card
+    // Update attention tab badge
     const badge = document.getElementById("na-count-badge");
     if (badge) {
-        badge.textContent = attention.length;
+        badge.textContent   = attention.length;
         badge.style.display = attention.length > 0 ? "flex" : "none";
     }
 
-    // Update trigger card style when there are items
-    const trigger = document.getElementById("btn-needs-attention");
-    if (trigger) {
-        trigger.classList.toggle("has-items", attention.length > 0);
-    }
+    // Highlight the attention tab if there are items
+    const attTab = document.querySelector('.insp-tab[data-tab="attention"]');
+    if (attTab) attTab.classList.toggle("has-alerts", attention.length > 0);
 
     list.innerHTML = "";
 

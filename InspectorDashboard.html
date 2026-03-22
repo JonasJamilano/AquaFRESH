@@ -102,27 +102,22 @@
         </div>
     </div>
 
-    <!-- Needs Attention Trigger Card -->
-    <div class="needs-attention-trigger" id="btn-needs-attention">
-        <div class="na-trigger-left">
-            <div class="na-trigger-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div class="na-trigger-text">
-                <div class="na-trigger-title">Needs Attention</div>
-                <div class="na-trigger-sub">Batches with issues or rejections</div>
-            </div>
-        </div>
-        <div class="na-trigger-right">
-            <span class="na-count-badge" id="na-count-badge">0</span>
-            <i class="fa-solid fa-arrow-right na-arrow"></i>
-        </div>
+    <!-- Tab Bar -->
+    <div class="insp-tab-bar">
+        <button class="insp-tab active" data-tab="today">
+            <i class="fa-solid fa-calendar-day"></i>
+            <span>Today</span>
+            <span class="insp-tab-badge" id="tab-today-badge">0</span>
+        </button>
+        <button class="insp-tab" data-tab="attention">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Needs Attention</span>
+            <span class="insp-tab-badge attention" id="na-count-badge" style="display:none;">0</span>
+        </button>
     </div>
 
-    <!-- Inspections Today -->
-    <section class="panel">
-        <div class="panel-header-flex">
-            <h3>Inspections Today</h3>
-        </div>
-
+    <!-- Tab: Today -->
+    <section class="panel insp-tab-panel active" id="tab-today">
         <!-- Search & Sort Bar -->
         <div class="insp-filter-bar">
             <div class="insp-search-wrap">
@@ -140,35 +135,28 @@
                 <option value="asc">Oldest First</option>
             </select>
         </div>
-
-        <table class="qc-table">
-            <thead>
-                <tr>
-                    <th>Batch</th>
-                    <th>Product</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                    <th>Date &amp; Time</th>
-                </tr>
-            </thead>
-            <tbody id="today-body">
-                <tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">Loading...</td></tr>
-            </tbody>
-        </table>
+        <div class="insp-table-scroll">
+            <table class="qc-table">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Product</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Date &amp; Time</th>
+                    </tr>
+                </thead>
+                <tbody id="today-body">
+                    <tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
-    <!-- Needs Attention Modal -->
-    <div class="qc-modal-overlay" id="modal-needs-attention">
-        <div class="qc-modal">
-            <div class="qc-modal-header yellow">
-                <h3><i class="fa-solid fa-triangle-exclamation"></i> Needs Attention</h3>
-                <button class="qc-modal-close" id="close-na-modal"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="qc-modal-body">
-                <ul class="task-list" id="pending-inspections"></ul>
-            </div>
-        </div>
-    </div>
+    <!-- Tab: Needs Attention -->
+    <section class="panel insp-tab-panel" id="tab-attention">
+        <ul class="task-list" id="pending-inspections"></ul>
+    </section>
 
 </main>
 
@@ -176,21 +164,17 @@
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="InspectorDashboard.js"></script>
 <script>
-    // Needs Attention modal
-    const naBtn     = document.getElementById('btn-needs-attention');
-    const naOverlay = document.getElementById('modal-needs-attention');
-    const naClose   = document.getElementById('close-na-modal');
+    // Tab switching
+    document.querySelectorAll('.insp-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.insp-tab-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const target = document.getElementById('tab-' + tab.dataset.tab);
+            if (target) target.classList.add('active');
+        });
+    });
 
-    function openNA()  { naOverlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
-    function closeNA() { naOverlay.classList.remove('active'); document.body.style.overflow = ''; }
-
-    naBtn?.addEventListener('click', openNA);
-    naClose?.addEventListener('click', closeNA);
-    naOverlay?.addEventListener('click', e => { if (e.target === naOverlay) closeNA(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNA(); });
-</script>
-
-<script>
     (function() {
         const menuBtn = document.querySelector('.menu-btn');
         const sidebar = document.querySelector('.sidebar');
