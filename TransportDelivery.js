@@ -34,14 +34,14 @@ const inspectionsCol = collection(db, "inspections");
 
 let selectedOrigin = { lat: null, lng: null, name: "" };
 let selectedDest   = { lat: null, lng: null, name: "" };
-let batchesMap     = {};
+let batchesMap     = {}; // batchDocId → batchCode (ALL passed batches, not just available)
 
 /* =========================================
    CONSTANTS
 ========================================= */
 
-const LOGS_PATH          = "AquaFresh_Logs";
-const LIVE_POLL_INTERVAL = 10_000;
+const LOGS_PATH           = "AquaFresh_Logs";
+const LIVE_POLL_INTERVAL  = 10_000;
 const STORE_SEARCH_RADIUS = 5000;
 
 /* =========================================
@@ -211,10 +211,7 @@ async function findNearestStores(lat, lng) {
         }
 
         const sorted = stores
-            .map(s => ({
-                ...s,
-                distance: getDistanceMeters(lat, lng, s.lat, s.lon)
-            }))
+            .map(s => ({ ...s, distance: getDistanceMeters(lat, lng, s.lat, s.lon) }))
             .sort((a, b) => a.distance - b.distance)
             .slice(0, 10);
 
@@ -352,10 +349,10 @@ window.navigateToStore = function(storeLat, storeLng, storeName) {
         createMarker: () => null
     }).addTo(map);
     storeRoute.on('routesfound', function(e) {
-        const route      = e.routes[0];
-        const distKm     = (route.summary.totalDistance / 1000).toFixed(1);
-        const minutes    = Math.round(route.summary.totalTime / 60);
-        const statusBox  = document.getElementById('map-status');
+        const route     = e.routes[0];
+        const distKm    = (route.summary.totalDistance / 1000).toFixed(1);
+        const minutes   = Math.round(route.summary.totalTime / 60);
+        const statusBox = document.getElementById('map-status');
         if (statusBox) {
             statusBox.innerHTML = `
                 <i class="fa-solid fa-store" style="color:#0ea5e9;"></i>
@@ -384,12 +381,12 @@ window.backToDeliveryRoute = function() {
 
 function getStoreTypeLabel(tags) {
     if (!tags) return "Store";
-    if (tags.shop === "convenience")   return "Convenience Store";
-    if (tags.shop === "supermarket")   return "Supermarket";
-    if (tags.shop === "ice_cream")     return "Ice Cream / Ice Shop";
-    if (tags.shop === "frozen_food")   return "Frozen Food Store";
-    if (tags.amenity === "ice_cream")  return "Ice Cream Shop";
-    if (tags.vending === "ice")        return "Ice Vending Machine";
+    if (tags.shop === "convenience")  return "Convenience Store";
+    if (tags.shop === "supermarket")  return "Supermarket";
+    if (tags.shop === "ice_cream")    return "Ice Cream / Ice Shop";
+    if (tags.shop === "frozen_food")  return "Frozen Food Store";
+    if (tags.amenity === "ice_cream") return "Ice Cream Shop";
+    if (tags.vending === "ice")       return "Ice Vending Machine";
     return "Store";
 }
 
@@ -453,6 +450,9 @@ document.addEventListener("DOMContentLoaded", initPage);
 async function initPage() {
     const role = localStorage.getItem("role");
     unlockAudio();
+
+    // FIX: await loadBatches() fully before starting the listener
+    // so batchesMap is populated before onSnapshot fires
     await loadBatches();
 
     if (["superadmin", "admin", "manager"].includes(role)) {
@@ -561,27 +561,47 @@ function selectLocation(place, type) {
 
 /* =========================================
    LOAD BATCHES
+   FIX: Populate batchesMap for ALL passed
+   batches — not just unused ones — so that
+   deliveries already assigned still resolve
+   their batch code correctly.
 ========================================= */
 
 async function loadBatches() {
     const select = document.getElementById("batchSelect");
     if (select) select.innerHTML = `<option value="">Select Batch</option>`;
+
     try {
         const passedSnap = await getDocs(query(inspectionsCol, where("overallStatus", "==", "Passed")));
+
         if (passedSnap.empty) {
             if (select) select.innerHTML += `<option value="" disabled>No passed batches available</option>`;
             return;
         }
+
+        // FIX: Populate batchesMap for ALL passed batches first
+        // This ensures existing deliveries always resolve their batch code
+        passedSnap.forEach(docSnap => {
+            batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id;
+        });
+
+        // Then figure out which are already assigned (for the dropdown only)
         const deliveriesSnap = await getDocs(deliveriesCol);
         const usedBatchIds   = new Set();
-        deliveriesSnap.forEach(d => { if (d.data().batchId) usedBatchIds.add(d.data().batchId); });
-        passedSnap.forEach(docSnap => { batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id; });
+        deliveriesSnap.forEach(d => {
+            if (d.data().batchId) usedBatchIds.add(d.data().batchId);
+        });
+
+        // Only show unassigned batches in the dropdown
         let availableCount = 0;
         passedSnap.forEach(docSnap => {
             if (usedBatchIds.has(docSnap.id)) return;
             availableCount++;
-            if (select) select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
+            if (select) {
+                select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
+            }
         });
+
         if (availableCount === 0 && select) {
             select.innerHTML += `<option value="" disabled>All passed batches are already scheduled</option>`;
         }
@@ -600,6 +620,9 @@ async function loadDrivers() {
 
 /* =========================================
    CREATE DELIVERY
+   FIX: Save batchCode directly on the
+   delivery document so display never
+   depends solely on batchesMap lookup.
 ========================================= */
 
 window.createDelivery = async function () {
@@ -618,9 +641,13 @@ window.createDelivery = async function () {
     let driverName     = "";
     driverSnap.forEach(d => driverName = d.data().fullName);
 
+    // FIX: Save batchCode directly on the delivery document
+    const batchCode = batchesMap[batchId] || batchId;
+
     await addDoc(deliveriesCol, {
         deliveryCode,
         batchId,
+        batchCode,   // ← stored directly so display never breaks
         driverId,
         driverName,
         truck,
@@ -760,21 +787,26 @@ function listenToDeliveries() {
 
             const shortOrigin   = d.origin      ? d.origin.split(',')[0]      : "-";
             const shortDest     = d.destination ? d.destination.split(',')[0] : "-";
-            const truckName     = d.truck       || "-";
-            const displayBatch  = batchesMap[d.batchId] || d.batchId || "-";
-            const formattedDate = d.eta         ? new Date(d.eta).toLocaleString() : "-";
-            const deliveredDate = d.deliveredAt ? d.deliveredAt.toDate().toLocaleString() : "-";
+            const truckName     = d.truck        || "-";
+            const formattedDate = d.eta          ? new Date(d.eta).toLocaleString() : "-";
+            const deliveredDate = d.deliveredAt  ? d.deliveredAt.toDate().toLocaleString() : "-";
 
-            // ─── All Active Deliveries — exclude delivered ───
+            // FIX: Priority order for batch display:
+            // 1. d.batchCode — saved directly on document (new deliveries)
+            // 2. batchesMap[d.batchId] — resolved from inspections collection
+            // 3. d.batchId — raw Firestore ID (last resort, should not happen)
+            const displayBatch = d.batchCode || batchesMap[d.batchId] || d.batchId || "-";
+
+            // All Active Deliveries — exclude delivered
             if (d.status !== "delivered") {
                 allBody.innerHTML += `
                 <tr>
                     <td><strong>${d.deliveryCode}</strong></td>
                     <td>${displayBatch}</td>
+                    <td>${d.driverName || "-"}</td>
                     <td>${truckName}</td>
                     <td>${shortOrigin}</td>
                     <td>${shortDest}</td>
-                    <td>${d.avgTemp || "-"}</td>
                     <td>${formattedDate}</td>
                     <td>${actionButton}</td>
                 </tr>`;
@@ -782,16 +814,16 @@ function listenToDeliveries() {
 
             if (d.status === "pending") {
                 counts.pending++;
-                pendingBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+                pendingBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
             } else if (d.status === "en_route") {
                 counts.enroute++;
-                enrouteBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+                enrouteBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
             } else if (d.status === "delivered") {
                 counts.delivered++;
-                deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Delivered</span></td></tr>`;
+                deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Delivered</span></td></tr>`;
             } else {
                 counts.delayed++;
-                delayedBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
+                delayedBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
             }
         });
 
