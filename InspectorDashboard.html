@@ -11,8 +11,8 @@
 </head>
 <body>
 
-<!-- Sidebar overlay for mobile -->
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<!-- ① checkbox MUST be first in body, before sidebar -->
+<input type="checkbox" id="nav-toggle">
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -67,9 +67,13 @@
     </nav>
 </aside>
 
+<!-- ② overlay — closes drawer on mobile tap -->
+<div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
+
 <!-- TOP BAR -->
+<!-- ③ menu-btn MUST be a <label> pointing to nav-toggle, not a <span> -->
 <header class="topbar">
-    <span class="menu-btn">☰</span>
+    <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
         <input type="checkbox" id="profile-toggle">
         <label for="profile-toggle" class="profile-trigger">
@@ -174,23 +178,6 @@
             if (target) target.classList.add('active');
         });
     });
-
-    (function() {
-        const menuBtn = document.querySelector('.menu-btn');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        function openSidebar()  { sidebar.classList.add('mobile-open');    overlay.classList.add('active');    document.body.style.overflow = 'hidden'; }
-        function closeSidebar() { sidebar.classList.remove('mobile-open'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
-
-        if (menuBtn) menuBtn.addEventListener('click', () =>
-            sidebar.classList.contains('mobile-open') ? closeSidebar() : openSidebar()
-        );
-        if (overlay) overlay.addEventListener('click', closeSidebar);
-        document.querySelectorAll('.menu li a').forEach(link =>
-            link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); })
-        );
-    })();
 </script>
 </body>
 </html>
