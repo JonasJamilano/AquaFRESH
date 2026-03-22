@@ -557,6 +557,73 @@ function selectLocation(place, type) {
         selectedDest = { lat: parseFloat(place.lat), lng: parseFloat(place.lon), name: place.display_name };
         document.getElementById("dest-suggestions").style.display = "none";
     }
+    // Auto-calculate ETA once both locations are selected
+    if (selectedOrigin.lat && selectedDest.lat) {
+        autoCalculateETA();
+    }
+}
+
+/* =========================================
+   AUTO-CALCULATE ETA VIA OSRM
+   Uses the free OSRM routing API (same
+   engine as Leaflet Routing Machine).
+   Auto-fills the ETA field with:
+   now + estimated driving time.
+   Admin can still manually adjust it.
+========================================= */
+
+async function autoCalculateETA() {
+    const etaInput   = document.getElementById("eta");
+    const etaHint    = document.getElementById("eta-hint");
+
+    if (!etaInput) return;
+
+    // Show loading state
+    etaInput.value       = "";
+    etaInput.placeholder = "Calculating route…";
+    if (etaHint) etaHint.textContent = "⏳ Fetching route estimate…";
+
+    try {
+        const url = `https://router.project-osrm.org/route/v1/driving/` +
+                    `${selectedOrigin.lng},${selectedOrigin.lat};` +
+                    `${selectedDest.lng},${selectedDest.lat}` +
+                    `?overview=false`;
+
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
+            etaInput.placeholder = "Could not calculate — enter manually";
+            if (etaHint) etaHint.textContent = "⚠️ Route not found. Please set ETA manually.";
+            return;
+        }
+
+        const seconds  = data.routes[0].duration;
+        const distKm   = (data.routes[0].distance / 1000).toFixed(1);
+        const hours    = Math.floor(seconds / 3600);
+        const minutes  = Math.round((seconds % 3600) / 60);
+        const timeStr  = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
+
+        // Add a 15-minute loading/preparation buffer
+        const BUFFER_MINUTES = 15;
+        const etaDate  = new Date(Date.now() + seconds * 1000 + BUFFER_MINUTES * 60 * 1000);
+
+        // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+        const pad = n => String(n).padStart(2, "0");
+        const formatted = `${etaDate.getFullYear()}-${pad(etaDate.getMonth()+1)}-${pad(etaDate.getDate())}` +
+                          `T${pad(etaDate.getHours())}:${pad(etaDate.getMinutes())}`;
+
+        etaInput.value       = formatted;
+        etaInput.placeholder = "Estimated Arrival";
+        if (etaHint) {
+            etaHint.textContent = `🛣️ ${distKm} km · ~${timeStr} drive (+15 min buffer). You can still adjust manually.`;
+        }
+
+    } catch (err) {
+        console.error("OSRM ETA error:", err);
+        etaInput.placeholder = "Could not calculate — enter manually";
+        if (etaHint) etaHint.textContent = "⚠️ Could not reach routing service. Please set ETA manually.";
+    }
 }
 
 /* =========================================
@@ -717,6 +784,20 @@ function listenToDeliveries() {
 
         currentlyEnRoute = docsArray.some(d => d.status === "en_route");
 
+        // ── Auto-mark delayed: en_route deliveries more than 20 mins past ETA ──
+        const now = Date.now();
+        const GRACE_MS = 20 * 60 * 1000; // 20-minute grace period
+        docsArray.forEach(async d => {
+            if (d.status === "en_route" && d.eta) {
+                const etaMs = new Date(d.eta).getTime();
+                if (!isNaN(etaMs) && now > etaMs + GRACE_MS) {
+                    try {
+                        await updateDoc(doc(db, "deliveries", d.id), { status: "delayed" });
+                    } catch (e) { console.warn("Could not auto-mark delayed:", e); }
+                }
+            }
+        });
+
         docsArray.forEach(d => {
             const id = d.id;
 
@@ -772,15 +853,15 @@ function listenToDeliveries() {
                     }
                 }
 
-                if (role === "delivery" && d.status === "en_route" && !isNavigating) {
+                if (role === "delivery" && (d.status === "en_route" || d.status === "delayed") && !isNavigating) {
                     startTracking(id, d.destLat, d.destLng);
                 }
             }
 
             let actionButton = "";
             if (role === "delivery") {
-                if (d.status === "pending")  actionButton = `<button class="start-btn"   onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
-                if (d.status === "en_route") actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
+                if (d.status === "pending")                            actionButton = `<button class="start-btn"   onclick="updateStatus('${id}', 'en_route', ${d.destLat}, ${d.destLng})">Start Delivery</button>`;
+                if (d.status === "en_route" || d.status === "delayed") actionButton = `<button class="deliver-btn" onclick="updateStatus('${id}', 'delivered')">Mark Delivered</button>`;
             } else {
                 actionButton = `<span class="status-${d.status}">${d.status.replace("_", " ")}</span>`;
             }

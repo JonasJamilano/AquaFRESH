@@ -178,14 +178,34 @@ function updateViewTanksCard(isAlert, alertCount) {
 
 /* =========================================
    CONNECTION STATUS
+   Checks the last sensor log timestamp.
+   If the IoT hasn't sent data in the last
+   2 minutes, it's considered offline.
 ========================================= */
 
+const IOT_OFFLINE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes
+
 function watchConnectionStatus() {
-    const connectedRef = ref(database, ".info/connected");
-    onValue(connectedRef, (snap) => {
-        const isOnline = snap.val() === true;
-        const cell     = document.getElementById("tank1-connection");
+    const latestQuery = query(ref(database, LOGS_PATH), orderByKey(), limitToLast(1));
+
+    onValue(latestQuery, (snap) => {
+        const cell = document.getElementById("tank1-connection");
         if (!cell) return;
+
+        if (!snap.exists()) {
+            cell.innerHTML = `<span class="connection-badge offline"><i class="fa-solid fa-circle-xmark"></i> Offline</span>`;
+            return;
+        }
+
+        let payload = null;
+        snap.forEach((child) => { payload = child.val(); });
+
+        const tsRaw  = extractTimestampFromPayload(payload);
+        const tsDate = normalizeTimestampValue(tsRaw ?? 0);
+        const ageMs  = Date.now() - tsDate.getTime();
+
+        const isOnline = ageMs < IOT_OFFLINE_THRESHOLD_MS;
+
         cell.innerHTML = isOnline
             ? `<span class="connection-badge online"><i class="fa-solid fa-circle-dot"></i> Online</span>`
             : `<span class="connection-badge offline"><i class="fa-solid fa-circle-xmark"></i> Offline</span>`;
