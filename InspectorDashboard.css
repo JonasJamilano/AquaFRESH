@@ -20,7 +20,6 @@
     gap: 12px;
     flex-wrap: wrap;
 }
-
 .insp-today-badge {
     display: inline-flex;
     align-items: center;
@@ -35,7 +34,6 @@
 }
 .insp-today-badge i { font-size: 0.85rem; }
 .insp-today-badge strong { font-size: 1rem; }
-
 .insp-log-btn {
     display: inline-flex;
     align-items: center;
@@ -63,7 +61,6 @@
     margin-bottom: 16px;
     flex-wrap: wrap;
 }
-
 .insp-search-wrap {
     flex: 1;
     min-width: 180px;
@@ -92,7 +89,6 @@
 }
 .insp-search-wrap input:focus { border-color: #0d9488; background: #fff; }
 .insp-search-wrap input::placeholder { color: #cbd5e1; }
-
 .insp-filter-select {
     padding: 8px 10px;
     border: 1.5px solid #e2e8f0;
@@ -120,7 +116,6 @@
 ===================== */
 .task-list { list-style: none; font-size: 14px; }
 .task-list li { padding: 4px 0; }
-
 .task-card {
     display: flex;
     justify-content: space-between;
@@ -134,7 +129,6 @@
 }
 .task-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
 .task-criteria { font-size: 11px; color: #94a3b8; margin-top: 3px; }
-
 .task-status {
     padding: 4px 10px;
     border-radius: 20px;
@@ -160,7 +154,6 @@
     padding: 6px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-
 .insp-tab {
     flex: 1;
     display: flex;
@@ -177,17 +170,11 @@
     font-family: 'Inter', sans-serif;
     cursor: pointer;
     transition: all 0.15s;
-    position: relative;
 }
 .insp-tab:hover { background: #f8fafc; color: #334155; }
-.insp-tab.active {
-    background: #0d9488;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(13,148,136,0.25);
-}
+.insp-tab.active { background: #0d9488; color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,0.25); }
 .insp-tab.has-alerts { color: #ca8a04; }
 .insp-tab.has-alerts.active { background: #ca8a04; color: #fff; box-shadow: 0 2px 8px rgba(202,138,4,0.25); }
-
 .insp-tab-badge {
     min-width: 20px;
     height: 20px;
@@ -212,33 +199,37 @@
 .insp-tab-panel.active { display: block; }
 
 /* =====================
-   TABLE SCROLL (inside tab)
-   — max-height makes it scrollable when rows overflow
+   SCROLLABLE TABLE — TWO-DIV PATTERN
+   Same approach as Dashboard's .activity-scroll-container
+   Outer = vertical scroll, Inner = horizontal scroll
 ===================== */
-.insp-table-scroll {
-    overflow-x: auto;
-    overflow-y: auto;
+.insp-table-outer {
     max-height: 420px;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
 }
-.insp-table-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-.insp-table-scroll::-webkit-scrollbar-track { background: transparent; }
-.insp-table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-.insp-table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.insp-table-outer::-webkit-scrollbar { width: 5px; }
+.insp-table-outer::-webkit-scrollbar-track { background: transparent; }
+.insp-table-outer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.insp-table-outer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-.insp-table-scroll .qc-table {
+.insp-table-inner {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.insp-table-inner::-webkit-scrollbar { height: 5px; }
+.insp-table-inner::-webkit-scrollbar-track { background: transparent; }
+.insp-table-inner::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.insp-table-inner .qc-table {
     min-width: 480px;
     width: 100%;
-    border: none; /* border handled by wrapper */
-    border-radius: 0;
 }
 
-/* Sticky header so it stays visible while scrolling */
-.insp-table-scroll .qc-table thead th {
+/* Sticky header stays visible while scrolling vertically */
+.insp-table-outer .qc-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
@@ -246,7 +237,7 @@
 }
 
 /* =====================
-   SIDEBAR TOGGLE — DESKTOP COLLAPSE
+   SIDEBAR COLLAPSE — DESKTOP
 ===================== */
 .sidebar.collapsed { width: 80px; }
 .sidebar.collapsed .brand-text,
@@ -275,7 +266,6 @@
 ===================== */
 @media (max-width: 768px) {
 
-    /* Sidebar: hidden off-screen, slides in when checkbox checked */
     .sidebar {
         transform: translateX(-100%);
         width: 260px !important;
@@ -284,7 +274,6 @@
     #nav-toggle:checked ~ .sidebar { transform: translateX(0); }
     #nav-toggle:checked ~ .sidebar-overlay { display: block; }
 
-    /* Always show full sidebar content on mobile */
     .sidebar .brand-text,
     .sidebar .logo-full { display: block !important; }
     .sidebar .logo-icon { display: none !important; }
@@ -292,57 +281,28 @@
     .sidebar .menu li a { justify-content: flex-start !important; padding: 12px 16px !important; }
     .sidebar .menu li a i { margin-right: 12px !important; }
 
-    /* Topbar & Content: full width */
     .topbar { margin-left: 0 !important; width: 100% !important; padding: 0 16px; left: 0; right: 0; }
     .content { margin-left: 0 !important; padding: 84px 16px 32px; }
 
-    /* Page header stacks */
     .insp-page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
     .insp-header-right { width: 100%; flex-direction: column; gap: 8px; }
     .insp-today-badge { width: 100%; justify-content: center; }
     .insp-log-btn { width: 100%; justify-content: center; }
 
-    /* Filter bar stacks */
     .insp-filter-bar { flex-direction: column; gap: 8px; }
     .insp-search-wrap { width: 100%; }
     .insp-filter-select { width: 100%; }
 
-    /* Tab bar */
     .insp-tab-bar { padding: 4px; gap: 4px; }
     .insp-tab { padding: 10px 8px; font-size: 0.82rem; gap: 5px; }
     .insp-tab span:not(.insp-tab-badge) { display: none; }
 
-    /* Table scroll: shorter max-height on mobile */
-    .insp-table-scroll { max-height: 360px; }
+    /* Shorter scroll container on mobile */
+    .insp-table-outer { max-height: 360px; }
 
-    /* Panel */
     .panel { padding: 16px; }
     .panel-header-flex { flex-wrap: wrap; gap: 6px; }
     .task-card { flex-wrap: wrap; gap: 8px; }
-}
-
-/* =====================
-   FIX: override DeliveryDashboard.css table rules
-   that break .insp-table-scroll on mobile
-===================== */
-@media (max-width: 768px) {
-
-    /* Undo DeliveryDashboard's direct table override
-       so .insp-table-scroll wrapper handles scrolling instead */
-    .insp-table-scroll > .qc-table {
-        display: table !important;
-        overflow-x: visible !important;
-        table-layout: auto !important;
-    }
-
-    /* Ensure the wrapper itself scrolls both ways */
-    .insp-table-scroll {
-        overflow-x: auto !important;
-        overflow-y: auto !important;
-        max-height: 360px !important;
-        -webkit-overflow-scrolling: touch;
-        display: block;
-    }
 }
 
 @media (max-width: 480px) {

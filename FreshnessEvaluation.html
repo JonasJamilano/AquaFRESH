@@ -34,7 +34,6 @@
     </nav>
 </aside>
 
-<!-- Dark overlay — tapping closes sidebar on mobile -->
 <div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
 
 <header class="topbar">
@@ -119,17 +118,24 @@
                 <button id="clearFilter" class="btn clear">Clear</button>
             </div>
         </div>
-        <table class="evaluation-table qc-table">
-            <thead>
-                <tr>
-                    <th>Batch ID</th>
-                    <th>Location</th>
-                    <th>Freshness Status</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody id="all-freshness-body"></tbody>
-        </table>
+
+        <!-- Outer: vertical scroll container -->
+        <div class="fe-table-outer">
+            <!-- Inner: horizontal scroll container -->
+            <div class="fe-table-inner">
+                <table class="evaluation-table qc-table">
+                    <thead>
+                        <tr>
+                            <th>Batch ID</th>
+                            <th>Location</th>
+                            <th>Freshness Status</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-freshness-body"></tbody>
+                </table>
+            </div>
+        </div>
     </section>
 </main>
 

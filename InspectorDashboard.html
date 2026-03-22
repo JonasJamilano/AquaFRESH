@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<!-- ① checkbox MUST be first in body, before sidebar -->
+<!-- ① checkbox MUST be first in body -->
 <input type="checkbox" id="nav-toggle">
 
 <!-- SIDEBAR -->
@@ -24,54 +24,38 @@
     <nav class="menu">
         <ul>
             <li data-role="superadmin admin manager">
-                <a href="Dashboard.html">
-                    <i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span>
-                </a>
+                <a href="Dashboard.html"><i class="fa-solid fa-gauge"></i><span class="label">Dashboard</span></a>
             </li>
             <li data-role="inspector">
-                <a href="InspectorDashboard.html" class="active">
-                    <i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span>
-                </a>
+                <a href="InspectorDashboard.html" class="active"><i class="fa-solid fa-clipboard-check"></i><span class="label">Inspector Dashboard</span></a>
             </li>
             <li data-role="delivery">
-                <a href="DeliveryDashboard.html">
-                    <i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span>
-                </a>
+                <a href="DeliveryDashboard.html"><i class="fa-solid fa-truck"></i><span class="label">Delivery Dashboard</span></a>
             </li>
             <li data-role="superadmin admin manager inspector">
-                <a href="QualityControl.html">
-                    <i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span>
-                </a>
+                <a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a>
             </li>
             <li data-role="superadmin admin manager inspector delivery">
-                <a href="FreshnessEvaluation.html">
-                    <i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span>
-                </a>
+                <a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a>
             </li>
             <li data-role="superadmin admin manager delivery">
-                <a href="TransportDelivery.html">
-                    <i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span>
-                </a>
+                <a href="TransportDelivery.html"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a>
             </li>
             <li data-role="superadmin admin manager">
-                <a href="AnalyticsReporting.html">
-                    <i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span>
-                </a>
+                <a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a>
             </li>
             <li data-role="superadmin admin manager">
-                <a href="UserManagement.html">
-                    <i class="fa-solid fa-users"></i><span class="label">User Management</span>
-                </a>
+                <a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a>
             </li>
         </ul>
     </nav>
 </aside>
 
-<!-- ② overlay — closes drawer on mobile tap -->
+<!-- ② overlay -->
 <div class="sidebar-overlay" onclick="document.getElementById('nav-toggle').checked = false;"></div>
 
 <!-- TOP BAR -->
-<!-- ③ menu-btn MUST be a <label> pointing to nav-toggle, not a <span> -->
+<!-- ③ label not span -->
 <header class="topbar">
     <label for="nav-toggle" class="menu-btn">☰</label>
     <div class="profile-dropdown">
@@ -89,7 +73,6 @@
 <!-- CONTENT -->
 <main class="content">
 
-    <!-- Page Header with Quick Log + Today count -->
     <div class="insp-page-header">
         <div class="insp-header-left">
             <h2>Inspector Dashboard</h2>
@@ -122,7 +105,6 @@
 
     <!-- Tab: Today -->
     <section class="panel insp-tab-panel active" id="tab-today">
-        <!-- Search & Sort Bar -->
         <div class="insp-filter-bar">
             <div class="insp-search-wrap">
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -139,21 +121,26 @@
                 <option value="asc">Oldest First</option>
             </select>
         </div>
-        <div class="insp-table-scroll">
-            <table class="qc-table">
-                <thead>
-                    <tr>
-                        <th>Batch</th>
-                        <th>Product</th>
-                        <th>Location</th>
-                        <th>Status</th>
-                        <th>Date &amp; Time</th>
-                    </tr>
-                </thead>
-                <tbody id="today-body">
-                    <tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">Loading...</td></tr>
-                </tbody>
-            </table>
+
+        <!-- Outer: vertical scroll -->
+        <div class="insp-table-outer">
+            <!-- Inner: horizontal scroll -->
+            <div class="insp-table-inner">
+                <table class="qc-table">
+                    <thead>
+                        <tr>
+                            <th>Batch</th>
+                            <th>Product</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Date &amp; Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="today-body">
+                        <tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 
@@ -168,7 +155,6 @@
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="InspectorDashboard.js"></script>
 <script>
-    // Tab switching
     document.querySelectorAll('.insp-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('active'));

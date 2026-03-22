@@ -17,9 +17,8 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     z-index: 200;
     box-shadow: 4px 0 15px rgba(0,0,0,0.05);
     overflow-y: auto;
-    transition: transform 0.3s ease;
+    transition: width 0.25s ease, transform 0.25s ease;
 }
-
 .brand {
     text-align: center;
     padding: 24px;
@@ -28,11 +27,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 }
 .brand h1 { color: #4dd0c8; font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
 .brand p  { font-size: 12px; color: #94a3b8; margin-top: 8px; line-height: 1.4; }
-
 .logo-full  { width: 150px; transition: 0.3s; }
 .logo-icon  { width: 40px; display: none; }
 .brand-text { font-size: 12px; color: #94a3b8; margin-top: 8px; }
-
 .menu ul { list-style: none; padding: 0 16px; }
 .menu li { margin-bottom: 4px; }
 .menu li a {
@@ -52,7 +49,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .menu li[data-role] { display: none; }
 
 /* =====================
-   SIDEBAR OVERLAY
+   SIDEBAR OVERLAY & NAV TOGGLE
 ===================== */
 .sidebar-overlay {
     display: none;
@@ -61,10 +58,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     background: rgba(0,0,0,0.5);
     z-index: 199;
 }
-
-/* =====================
-   NAV TOGGLE
-===================== */
 #nav-toggle { display: none; }
 
 /* =====================
@@ -79,6 +72,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     position: fixed; width: calc(100% - 260px);
     z-index: 90;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    transition: margin-left 0.25s ease, width 0.25s ease;
 }
 .menu-btn { font-size: 20px; cursor: pointer; color: #64748b; display: block; }
 .profile-dropdown { position: relative; }
@@ -99,7 +93,11 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 /* =====================
    MAIN CONTENT
 ===================== */
-.content { margin-left: 260px; padding: 100px 32px 40px 32px; }
+.content {
+    margin-left: 260px;
+    padding: 100px 32px 40px 32px;
+    transition: margin-left 0.25s ease;
+}
 .page-header { margin-bottom: 32px; }
 .page-header h2 { color: #0f172a; font-size: 24px; }
 .subtitle { font-size: 14px; color: #64748b; margin-top: 8px; }
@@ -120,11 +118,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .panel-header-flex h3 { color: #1e293b; font-size: 18px; font-weight: 600; margin-bottom: 0; }
 .summary-hint { font-size: 0.82rem; color: #94a3b8; }
 
-/* Live Indicator */
-.live-indicator { font-size: 12px; color: #059669; font-weight: 600; display: flex; align-items: center; gap: 6px; background: #dcfce7; padding: 6px 12px; border-radius: 50px; }
-.live-indicator i { font-size: 8px; animation: blink 1.5s infinite; }
-@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
 /* =====================
    STATUS CARDS
 ===================== */
@@ -144,7 +137,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .qc-status-card .card-cta { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
 .qc-status-card .card-arrow { font-size: 1.1rem; color: #cbd5e1; transition: color 0.15s, transform 0.15s; }
 .qc-status-card:hover .card-arrow { color: #64748b; transform: translateX(4px); }
-
 .qc-status-card.green  { background: #f0fdf4; border-color: #86efac; }
 .qc-status-card.green  .card-icon { background: #dcfce7; color: #16a34a; }
 .qc-status-card.green  .card-count { color: #16a34a; }
@@ -188,7 +180,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 ===================== */
 .evaluation-table {
     width: 100%; border-collapse: collapse;
-    table-layout: fixed; margin-top: 8px;
+    table-layout: fixed;
     border: 1px solid #e2e8f0; background: #fff;
 }
 .evaluation-table th {
@@ -206,6 +198,44 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .evaluation-table tbody tr:hover td { background-color: #f8fafc; }
 
 /* =====================
+   SCROLLABLE TABLE — TWO-DIV PATTERN
+   Same approach as Dashboard's .activity-scroll-container
+   Outer = vertical scroll, Inner = horizontal scroll
+===================== */
+.fe-table-outer {
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+.fe-table-outer::-webkit-scrollbar { width: 5px; }
+.fe-table-outer::-webkit-scrollbar-track { background: transparent; }
+.fe-table-outer::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.fe-table-outer::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.fe-table-inner {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.fe-table-inner::-webkit-scrollbar { height: 5px; }
+.fe-table-inner::-webkit-scrollbar-track { background: transparent; }
+.fe-table-inner::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.fe-table-inner .evaluation-table {
+    min-width: 480px;
+    table-layout: auto;
+}
+
+/* Sticky header stays visible while scrolling vertically */
+.fe-table-outer .evaluation-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f1f5f9;
+}
+
+/* =====================
    STATUS BADGES
 ===================== */
 .status {
@@ -219,7 +249,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .status.spoiled  { background-color: #fee2e2; color: #991b1b; }
 
 /* =====================
-   SIDEBAR COLLAPSE (desktop)
+   SIDEBAR COLLAPSE — DESKTOP
 ===================== */
 .sidebar.collapsed { width: 80px; }
 .sidebar.collapsed .brand h1,
@@ -227,7 +257,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .menu li a .label,
 .sidebar.collapsed .menu li a span { display: none; }
-.sidebar.collapsed .menu li a { justify-content: center; }
+.sidebar.collapsed .menu li a { justify-content: center; padding: 12px 0; }
 .sidebar.collapsed .menu li a i { margin-right: 0; }
 .sidebar.collapsed .logo-full { display: none; }
 .sidebar.collapsed .logo-icon { display: block; margin: auto; }
@@ -238,7 +268,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
    FILTER UI
 ===================== */
 .header-actions { display: flex; align-items: center; gap: 8px; }
-
 .search-box {
     display: flex; align-items: center;
     background: #f8fafc; border: 1px solid #e2e8f0;
@@ -247,7 +276,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 }
 .search-box i { color: #94a3b8; font-size: 13px; }
 .search-box input { border: none; outline: none; background: transparent; font-size: 13px; margin-left: 8px; width: 100%; }
-
 .filter-btn {
     width: 36px; height: 36px; border-radius: 10px;
     background: #4dd0c8; border: none; color: #003b3b;
@@ -255,7 +283,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     flex-shrink: 0;
 }
 .filter-btn:hover { background: #2bb8ae; }
-
 .filter-dropdown {
     position: absolute; right: 32px; margin-top: 10px;
     background: #fff; border-radius: 12px; padding: 16px;
@@ -263,14 +290,12 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     display: none; z-index: 50;
 }
 .filter-dropdown.active { display: block; }
-
 .filter-dropdown select {
     height: 38px; border-radius: 10px; border: 1px solid #e2e8f0;
     padding: 0 12px; font-size: 14px; background: #fff;
     cursor: pointer; width: 100%;
 }
 .filter-dropdown label { font-size: 12px; font-weight: 600; color: #64748b; }
-
 .filter-actions {
     display: flex; justify-content: space-between;
     gap: 10px; margin-top: 14px;
@@ -286,55 +311,48 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 @media (max-width: 768px) {
 
     /* Sidebar drawer */
-    .sidebar { transform: translateX(-100%); }
+    .sidebar {
+        transform: translateX(-100%);
+        width: 260px !important;
+        transition: transform 0.25s ease;
+    }
     #nav-toggle:checked ~ .sidebar { transform: translateX(0); }
     #nav-toggle:checked ~ .sidebar-overlay { display: block; }
 
-    /* Topbar full width */
-    .topbar { margin-left: 0; width: 100%; padding: 0 16px; }
+    /* Always show full sidebar content on mobile */
+    .sidebar .brand-text,
+    .sidebar .logo-full { display: block !important; }
+    .sidebar .logo-icon { display: none !important; }
+    .sidebar .menu li a .label { display: inline !important; }
+    .sidebar .menu li a { justify-content: flex-start !important; padding: 12px 16px !important; }
+    .sidebar .menu li a i { margin-right: 12px !important; }
 
-    /* Content full width */
-    .content { margin-left: 0; padding: 80px 16px 32px 16px; }
-
+    /* Topbar & content full width */
+    .topbar { margin-left: 0 !important; width: 100% !important; padding: 0 16px; left: 0; right: 0; }
+    .content { margin-left: 0 !important; padding: 80px 16px 32px 16px; }
     .page-header h2 { font-size: 20px; }
-
-    /* Panels */
     .panel { padding: 20px 16px; }
 
-    /* Panel header stacks search below title on small screens */
+    /* Panel header stacks */
     .panel-header-flex { flex-direction: column; align-items: flex-start; gap: 12px; }
     .header-actions { width: 100%; }
     .search-box { width: 100%; flex: 1; }
 
-    /* Status cards: 1 per row (3 cards fit better as single column on mobile) */
+    /* Status cards: 1 per row */
     .qc-status-cards { grid-template-columns: 1fr; gap: 12px; }
     .qc-status-card { padding: 16px 14px; }
     .qc-status-card .card-icon { width: 40px; height: 40px; font-size: 1.1rem; }
     .qc-status-card .card-count { font-size: 1.5rem; }
     .qc-status-card .card-arrow { display: none; }
 
-    /* Table scrolls horizontally */
-    .evaluation-table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        table-layout: auto;
-    }
-    .evaluation-table th,
-    .evaluation-table td {
-        white-space: nowrap;
-        font-size: 12px;
-        padding: 10px 8px;
-    }
+    /* Scroll container: shorter on mobile */
+    .fe-table-outer { max-height: 360px; }
 
     /* Filter dropdown repositioned */
     .filter-dropdown {
         position: fixed;
-        right: 16px;
-        left: 16px;
-        width: auto;
-        top: auto;
-        margin-top: 0;
+        right: 16px; left: 16px;
+        width: auto; top: auto; margin-top: 0;
     }
 
     /* Modal bottom sheet */
