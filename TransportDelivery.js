@@ -64,12 +64,23 @@ const STORE_SEARCH_RADIUS = 5000;
    GPS SIMULATION
 ========================================= */
 
-let simInterval   = null;
-let simStepIndex  = 0;
-let simWaypoints  = [];
+let simInterval      = null;
+let simStepIndex     = 0;
+let simWaypoints     = [];
+let simDestLat       = null;
+let simDestLng       = null;
+let simDeliveryId    = null;
+let isRerouting      = false;
+let activeRouteLine  = null;  // live polyline showing remaining route
+let traveledLine     = null;  // gray line showing path already covered
 
-const SIM_STEP_MS    = 1500;
-const SIM_ZOOM_LEVEL = 16;
+const SIM_STEP_MS       = 1500;
+const SIM_ZOOM_LEVEL    = 16;
+const REROUTE_THRESHOLD = 80;
+const REROUTE_CHANCE    = 0.12;
+
+const ROUTE_LINE_COLOR    = '#2563eb';  // blue — remaining route
+const TRAVELED_LINE_COLOR = '#94a3b8'; // gray — already traveled
 
 async function fetchRouteWaypoints(fromLat, fromLng, toLat, toLng) {
     try {
@@ -89,6 +100,93 @@ async function fetchRouteWaypoints(fromLat, fromLng, toLat, toLng) {
     ]);
 }
 
+/* =========================================
+   LIVE ROUTE LINE HELPERS
+   Draws the remaining route as a polyline
+   (like Waze/Google Maps). Updates every
+   simulation step so the line shrinks as
+   the truck moves. On reroute, the line
+   flashes amber then snaps to the new path.
+========================================= */
+
+function drawRouteLine(waypoints, startIdx) {
+    // Remove existing lines
+    clearRouteLines();
+
+    if (!waypoints || waypoints.length === 0) return;
+
+    // Remaining route — from current step to end
+    const remaining = waypoints.slice(startIdx).map(([lat, lng]) => [lat, lng]);
+
+    // Traveled path — from start to current step
+    const traveled = waypoints.slice(0, startIdx + 1).map(([lat, lng]) => [lat, lng]);
+
+    if (remaining.length > 1) {
+        activeRouteLine = L.polyline(remaining, {
+            color:     ROUTE_LINE_COLOR,
+            weight:    5,
+            opacity:   0.9,
+            lineJoin:  'round',
+            lineCap:   'round'
+        }).addTo(map);
+    }
+
+    if (traveled.length > 1) {
+        traveledLine = L.polyline(traveled, {
+            color:   TRAVELED_LINE_COLOR,
+            weight:  3,
+            opacity: 0.5,
+            dashArray: '4, 6'
+        }).addTo(map);
+    }
+}
+
+function updateRouteLine(waypoints, currentIdx) {
+    if (!waypoints || waypoints.length === 0) return;
+
+    const remaining = waypoints.slice(currentIdx).map(([lat, lng]) => [lat, lng]);
+    const traveled  = waypoints.slice(0, currentIdx + 1).map(([lat, lng]) => [lat, lng]);
+
+    if (activeRouteLine) {
+        activeRouteLine.setLatLngs(remaining);
+    } else if (remaining.length > 1) {
+        activeRouteLine = L.polyline(remaining, {
+            color: ROUTE_LINE_COLOR, weight: 5, opacity: 0.9,
+            lineJoin: 'round', lineCap: 'round'
+        }).addTo(map);
+    }
+
+    if (traveledLine) {
+        traveledLine.setLatLngs(traveled);
+    } else if (traveled.length > 1) {
+        traveledLine = L.polyline(traveled, {
+            color: TRAVELED_LINE_COLOR, weight: 3, opacity: 0.5, dashArray: '4, 6'
+        }).addTo(map);
+    }
+}
+
+function flashRerouteLine() {
+    // Flash amber to signal rerouting
+    if (activeRouteLine) {
+        activeRouteLine.setStyle({ color: '#f59e0b', weight: 6, dashArray: '8, 6' });
+    }
+}
+
+function snapToNewRoute(newWaypoints) {
+    clearRouteLines();
+    if (newWaypoints && newWaypoints.length > 1) {
+        activeRouteLine = L.polyline(
+            newWaypoints.map(([lat, lng]) => [lat, lng]),
+            { color: ROUTE_LINE_COLOR, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' }
+        ).addTo(map);
+    }
+}
+
+function clearRouteLines() {
+    if (activeRouteLine) { try { map.removeLayer(activeRouteLine); } catch (_) {} activeRouteLine = null; }
+    if (traveledLine)    { try { map.removeLayer(traveledLine);    } catch (_) {} traveledLine    = null; }
+}
+
 async function startTracking(deliveryId, destLat, destLng) {
     if (isNavigating) return;
 
@@ -103,7 +201,10 @@ async function startTracking(deliveryId, destLat, destLng) {
 
     if (!fromLat || !destLat) { console.warn("Missing coords for simulation"); return; }
 
-    isNavigating = true;
+    isNavigating  = true;
+    simDestLat    = destLat;
+    simDestLng    = destLng;
+    simDeliveryId = deliveryId;
 
     const statusBox = document.getElementById("map-status");
     if (statusBox) statusBox.innerHTML =
@@ -114,10 +215,15 @@ async function startTracking(deliveryId, destLat, destLng) {
     simWaypoints = await fetchRouteWaypoints(fromLat, fromLng, destLat, destLng);
     simStepIndex = 0;
 
+    // Draw initial full route line
+    drawRouteLine(simWaypoints, 0);
+
     map.setView([fromLat, fromLng], SIM_ZOOM_LEVEL);
 
     if (simInterval) clearInterval(simInterval);
     simInterval = setInterval(async () => {
+        if (isRerouting) return; // pause ticking while reroute in progress
+
         if (simStepIndex >= simWaypoints.length) {
             clearInterval(simInterval);
             simInterval = null;
@@ -133,6 +239,15 @@ async function startTracking(deliveryId, destLat, destLng) {
         driverLat = lat;
         driverLng = lng;
 
+        // ── REROUTE SIMULATION ──────────────────────────────────────
+        // Randomly simulate a detour (driver took a different road)
+        // by injecting a small perpendicular offset then rerouting
+        if (!isRerouting && Math.random() < REROUTE_CHANCE) {
+            triggerReroute(lat, lng, deliveryId, destLat, destLng, statusBox);
+            return; // skip normal marker update this tick — reroute handles it
+        }
+        // ────────────────────────────────────────────────────────────
+
         if (deliveryMarkers[deliveryId]) {
             deliveryMarkers[deliveryId].setLatLng([lat, lng]);
             deliveryMarkers[deliveryId].getPopup()?.setContent(
@@ -142,13 +257,8 @@ async function startTracking(deliveryId, destLat, destLng) {
 
         map.setView([lat, lng], SIM_ZOOM_LEVEL);
 
-        if (deliveryRoutes[deliveryId] && destLat && destLng &&
-            typeof deliveryRoutes[deliveryId].setWaypoints === "function") {
-            deliveryRoutes[deliveryId].setWaypoints([
-                L.latLng(lat, lng),
-                L.latLng(destLat, destLng)
-            ]);
-        }
+        // Update the live route line — shrink remaining, grow traveled
+        updateRouteLine(simWaypoints, simStepIndex);
 
         try {
             await updateDoc(doc(db, "deliveries", deliveryId), { currentLat: lat, currentLng: lng });
@@ -159,14 +269,105 @@ async function startTracking(deliveryId, destLat, destLng) {
     }, SIM_STEP_MS);
 }
 
+/* =========================================
+   REROUTE ENGINE
+   Simulates the truck taking a wrong turn
+   then recalculating back to destination.
+========================================= */
+
+async function triggerReroute(fromLat, fromLng, deliveryId, destLat, destLng, statusBox) {
+    isRerouting = true;
+
+    // ① Flash the existing route line amber — signals deviation
+    flashRerouteLine();
+
+    if (statusBox) statusBox.innerHTML =
+        `<i class="fa-solid fa-rotate fa-spin" style="color:#f59e0b;"></i>
+         <strong style="color:#f59e0b;"> Rerouting…</strong> Truck deviated from planned route`;
+
+    showRerouteBanner();
+
+    // ② Move truck slightly off-road to simulate a wrong turn
+    const offsetLat = fromLat + (Math.random() - 0.5) * 0.003;
+    const offsetLng = fromLng + (Math.random() - 0.5) * 0.003;
+
+    if (deliveryMarkers[deliveryId]) {
+        deliveryMarkers[deliveryId].setLatLng([offsetLat, offsetLng]);
+    }
+    map.setView([offsetLat, offsetLng], SIM_ZOOM_LEVEL);
+
+    // Write detour position so admin sees truck go off-route
+    try {
+        await updateDoc(doc(db, "deliveries", deliveryId), {
+            currentLat: offsetLat, currentLng: offsetLng
+        });
+    } catch (e) { console.warn("Firestore reroute write:", e); }
+
+    // ③ Pause 1.5s — "calculating new route"
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // ④ Fetch new route from the detour position
+    const newWaypoints = await fetchRouteWaypoints(offsetLat, offsetLng, destLat, destLng);
+
+    // ⑤ Snap the route line to the new path (blue again)
+    snapToNewRoute(newWaypoints);
+
+    // Replace sim waypoints with the recalculated route
+    simWaypoints = newWaypoints;
+    simStepIndex = 0;
+    driverLat    = offsetLat;
+    driverLng    = offsetLng;
+
+    // ⑥ Restore status bar — route recalculated
+    if (statusBox) statusBox.innerHTML =
+        `<i class="fa-solid fa-route" style="color:#059669;"></i>
+         <strong style="color:#059669;"> Route recalculated</strong> — back on track`;
+
+    hideRerouteBanner();
+    isRerouting = false;
+}
+
+function showRerouteBanner() {
+    let banner = document.getElementById("reroute-banner");
+    if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "reroute-banner";
+        banner.className = "reroute-banner";
+        const simBanner = document.getElementById("sim-banner");
+        if (simBanner) simBanner.insertAdjacentElement("afterend", banner);
+        else {
+            const mapEl = document.getElementById("delivery-map");
+            if (mapEl) mapEl.insertAdjacentElement("afterend", banner);
+        }
+    }
+    banner.innerHTML = `
+        <i class="fa-solid fa-rotate fa-spin" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0;"></i>
+        <div>
+            <div style="font-size:0.88rem;font-weight:700;color:#92400e;">Rerouting in progress</div>
+            <div style="font-size:0.75rem;color:#b45309;margin-top:2px;">Truck deviated — calculating new route to destination</div>
+        </div>`;
+    banner.style.display = "flex";
+}
+
+function hideRerouteBanner() {
+    const banner = document.getElementById("reroute-banner");
+    if (banner) banner.style.display = "none";
+}
+
 function stopTracking() {
     if (simInterval) { clearInterval(simInterval); simInterval = null; }
-    isNavigating = false;
-    driverLat    = null;
-    driverLng    = null;
-    simStepIndex = 0;
-    simWaypoints = [];
+    isNavigating  = false;
+    isRerouting   = false;
+    driverLat     = null;
+    driverLng     = null;
+    simStepIndex  = 0;
+    simWaypoints  = [];
+    simDestLat    = null;
+    simDestLng    = null;
+    simDeliveryId = null;
+    clearRouteLines();
     hideSimBanner();
+    hideRerouteBanner();
     const statusBox = document.getElementById("map-status");
     if (statusBox) statusBox.innerText = "Tracking stopped. Delivery completed.";
     if (map) map.setZoom(12);
