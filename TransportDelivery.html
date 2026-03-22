@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="TransportDelivery.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="delay-bell.css">
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
 </head>
 <body>
@@ -30,7 +30,7 @@
             <li data-role="superadmin admin manager inspector"><a href="QualityControl.html"><i class="fa-solid fa-shield-halved"></i><span class="label">Quality Control</span></a></li>
             <li data-role="superadmin admin manager inspector delivery"><a href="FreshnessEvaluation.html"><i class="fa-solid fa-water"></i><span class="label">Freshness Evaluation</span></a></li>
             <li data-role="superadmin admin manager delivery"><a href="TransportDelivery.html" class="active"><i class="fa-solid fa-route"></i><span class="label">Transport &amp; Delivery</span></a></li>
-            <li data-role="superadmin admin manager delivery"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
+            <li data-role="superadmin admin manager"><a href="AnalyticsReporting.html"><i class="fa-solid fa-chart-line"></i><span class="label">Analytics &amp; Reporting</span></a></li>
             <li data-role="superadmin admin manager"><a href="UserManagement.html"><i class="fa-solid fa-users"></i><span class="label">User Management</span></a></li>
         </ul>
     </nav>
@@ -53,12 +53,12 @@
 </header>
 
 <main class="content">
+
     <section class="page-header">
-        <h2>Transport & Delivery</h2>
+        <h2>Transport &amp; Delivery</h2>
         <p class="subtitle">Monitoring delivery progress, environmental conditions, and routes</p>
     </section>
 
-    <!-- Schedule New Delivery (admin/manager only) -->
     <section class="panel panel-trigger" id="createDeliveryWrapper" style="display:none;">
         <button class="new-inspection-trigger" id="btn-new-delivery" aria-label="Open New Delivery Log">
             <div class="ni-trigger-icon"><i class="fa-solid fa-truck-fast"></i></div>
@@ -70,7 +70,35 @@
         </button>
     </section>
 
-    <!-- 1. LIVE GPS TRACKING -->
+    <section class="panel">
+        <div class="panel-header-flex">
+            <h3>Delivery Status Summary</h3>
+            <span class="summary-hint">Click a card to view details</span>
+        </div>
+        <div class="qc-status-cards">
+            <div class="qc-status-card yellow" id="btn-pending" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div class="card-info"><div class="card-title">Pending</div><div class="card-count" id="pending-count">0</div><div class="card-cta">View records →</div></div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+            </div>
+            <div class="qc-status-card blue" id="btn-enroute" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
+                <div class="card-info"><div class="card-title">En Route</div><div class="card-count" id="enroute-count">0</div><div class="card-cta">View records →</div></div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+            </div>
+            <div class="qc-status-card green" id="btn-delivered" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-box-check"></i></div>
+                <div class="card-info"><div class="card-title">Delivered</div><div class="card-count" id="delivered-count">0</div><div class="card-cta">View records →</div></div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+            </div>
+            <div class="qc-status-card red" id="btn-delayed" role="button" tabindex="0">
+                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="card-info"><div class="card-title">Delayed</div><div class="card-count" id="delayed-count">0</div><div class="card-cta">View records →</div></div>
+                <i class="fa-solid fa-chevron-right card-arrow"></i>
+            </div>
+        </div>
+    </section>
+
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Live GPS Tracking</h3>
@@ -92,25 +120,8 @@
         </div>
 
         <div id="delivery-map"></div>
+
         <div id="storeSearchStatus" class="store-search-status" style="display:none;"></div>
-
-        <!-- ROUTE ALTERNATIVES PANEL — delivery role only, shown for pending deliveries -->
-        <div id="route-alternatives-panel" class="route-alternatives-panel" style="display:none;">
-            <div class="route-alt-header">
-                <div class="route-alt-title">
-                    <i class="fa-solid fa-route"></i>
-                    <span>Choose Your Route</span>
-                </div>
-                <span class="route-alt-hint">Select the best route before starting your delivery</span>
-            </div>
-            <div class="route-alt-cards" id="route-alt-cards">
-                <div class="route-alt-loading">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Calculating available routes…
-                </div>
-            </div>
-        </div>
-
         <div id="nearbyStoresPanel" class="nearby-stores-panel" hidden>
             <div class="nearby-stores-header">
                 <div class="nearby-stores-title"><i class="fa-solid fa-store"></i> Nearby Ice &amp; Convenience Stores</div>
@@ -120,62 +131,15 @@
         </div>
     </section>
 
-    <!-- 2. ALL ACTIVE DELIVERIES -->
     <section class="panel">
         <div class="panel-header-flex"><h3>All Active Deliveries</h3></div>
-        <table class="delivery-table qc-table">
-            <thead>
-                <tr>
-                    <th>Delivery ID</th><th>Batch</th><th>Driver</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Status / Action</th>
-                </tr>
-            </thead>
-            <tbody id="all-deliveries-body"></tbody>
-        </table>
-    </section>
-
-    <!-- 3. DELIVERY STATUS SUMMARY -->
-    <section class="panel">
-        <div class="panel-header-flex">
-            <h3>Delivery Status Summary</h3>
-            <span class="summary-hint">Click a card to view details</span>
-        </div>
-        <div class="qc-status-cards">
-            <div class="qc-status-card yellow" id="btn-pending" role="button" tabindex="0">
-                <div class="card-icon"><i class="fa-solid fa-hourglass-half"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Pending</div>
-                    <div class="card-count" id="pending-count">0</div>
-                    <div class="card-cta">View records →</div>
-                </div>
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-            </div>
-            <div class="qc-status-card blue" id="btn-enroute" role="button" tabindex="0">
-                <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
-                <div class="card-info">
-                    <div class="card-title">En Route</div>
-                    <div class="card-count" id="enroute-count">0</div>
-                    <div class="card-cta">View records →</div>
-                </div>
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-            </div>
-            <div class="qc-status-card green" id="btn-delivered" role="button" tabindex="0">
-                <div class="card-icon"><i class="fa-solid fa-box-check"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Delivered</div>
-                    <div class="card-count" id="delivered-count">0</div>
-                    <div class="card-cta">View records →</div>
-                </div>
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-            </div>
-            <div class="qc-status-card red" id="btn-delayed" role="button" tabindex="0">
-                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <div class="card-info">
-                    <div class="card-title">Delayed</div>
-                    <div class="card-count" id="delayed-count">0</div>
-                    <div class="card-cta">View records →</div>
-                </div>
-                <i class="fa-solid fa-chevron-right card-arrow"></i>
-            </div>
+        <div style="overflow-x:auto;">
+            <table class="delivery-table qc-table">
+                <thead>
+                    <tr><th>Delivery ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>Avg Temp (°C)</th><th>ETA</th><th>Status / Action</th></tr>
+                </thead>
+                <tbody id="all-deliveries-body"></tbody>
+            </table>
         </div>
     </section>
 
@@ -219,11 +183,7 @@
                     <input type="text" id="destination" placeholder="Type to search..." autocomplete="off">
                     <div id="dest-suggestions" class="autocomplete-dropdown"></div>
                 </div>
-                <div class="ni-form-group">
-                    <label>Estimated Arrival</label>
-                    <input type="datetime-local" id="eta">
-                    <p id="eta-hint" style="font-size:11px;color:#64748b;margin-top:4px;min-height:16px;"></p>
-                </div>
+                <div class="ni-form-group"><label>Estimated Arrival</label><input type="datetime-local" id="eta"></div>
             </div>
         </div>
         <div class="ni-modal-footer">
@@ -242,7 +202,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="delivery-table qc-table">
-                <thead><tr><th>ID</th><th>Batch</th><th>Driver</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
                 <tbody id="pending-body"></tbody>
             </table>
         </div>
@@ -258,7 +218,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="delivery-table qc-table">
-                <thead><tr><th>ID</th><th>Batch</th><th>Driver</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
                 <tbody id="enroute-body"></tbody>
             </table>
         </div>
@@ -274,7 +234,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="delivery-table qc-table">
-                <thead><tr><th>ID</th><th>Batch</th><th>Driver</th><th>Truck</th><th>Origin</th><th>Destination</th><th>Delivered At</th><th>Status</th></tr></thead>
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>Delivered At</th><th>Status</th></tr></thead>
                 <tbody id="delivered-body"></tbody>
             </table>
         </div>
@@ -290,7 +250,7 @@
         </div>
         <div class="qc-modal-body">
             <table class="delivery-table qc-table">
-                <thead><tr><th>ID</th><th>Batch</th><th>Driver</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
+                <thead><tr><th>ID</th><th>Batch</th><th>Truck</th><th>Origin</th><th>Destination</th><th>ETA</th><th>Action</th></tr></thead>
                 <tbody id="delayed-body"></tbody>
             </table>
         </div>
@@ -302,6 +262,8 @@
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
 <script type="module" src="TransportDelivery.js"></script>
+<script type="module" src="delay-bell.js"></script>
+
 <script>
     (function () {
         function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); document.body.style.overflow = 'hidden'; }
@@ -311,12 +273,13 @@
         document.getElementById('btn-delivered')?.addEventListener('click', () => openModal('modal-delivered'));
         document.getElementById('btn-delayed')?.addEventListener('click',   () => openModal('modal-delayed'));
         document.getElementById('btn-new-delivery')?.addEventListener('click', () => openModal('modal-new-delivery'));
-        document.querySelectorAll('.qc-modal-close').forEach(btn => { btn.addEventListener('click', () => closeModal(btn.dataset.close)); });
+        document.querySelectorAll('.qc-modal-close').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
         document.querySelectorAll('.ni-btn-clear').forEach(btn => { if (btn.dataset.close) btn.addEventListener('click', () => closeModal(btn.dataset.close)); });
-        document.querySelectorAll('.qc-modal-overlay').forEach(overlay => { overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); }); });
+        document.querySelectorAll('.qc-modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); }));
         document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.qc-modal-overlay.active').forEach(el => closeModal(el.id)); });
         window.closeModal = closeModal;
     })();
 </script>
+
 </body>
 </html>
