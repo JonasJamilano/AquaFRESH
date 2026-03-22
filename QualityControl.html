@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="QualityControl.css?v=2">
+    <link rel="stylesheet" href="QualityControl.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="icon" type="image/png" href="assets/AquaFRESH.png">
+    <link rel="stylesheet" href="delay-bell.css">
 </head>
 <body>
 
@@ -87,7 +88,13 @@
     <section class="panel">
         <div class="panel-header-flex">
             <h3>Inspection Status Summary</h3>
-            <span class="summary-hint">Click a card to view details</span>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span class="summary-hint">Click a card to view details</span>
+                <button class="disposal-icon-btn" id="btn-for-disposal" aria-label="View For Disposal" title="For Disposal">
+                    <i class="fa-solid fa-trash-can-arrow-up"></i>
+                    <span class="disposal-count-badge" id="disposal-count-badge" style="display:none;">0</span>
+                </button>
+            </div>
         </div>
         <div class="qc-status-cards">
 
@@ -382,6 +389,50 @@
     </div>
 </div>
 
+<!-- ===================== MODAL: For Disposal ===================== -->
+<div class="qc-modal-overlay" id="modal-disposal">
+    <div class="qc-modal wide">
+        <div class="qc-modal-header disposal">
+            <h3><i class="fa-solid fa-trash-can-arrow-up"></i> For Disposal <span class="modal-count-badge" id="modal-disposal-count">0</span></h3>
+            <button class="qc-modal-close" data-close="modal-disposal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="qc-modal-body">
+            <!-- Tabs inside modal -->
+            <div class="disposal-info-banner">
+                <i class="fa-solid fa-circle-info"></i>
+                <span><strong>Rejected</strong> batches are auto-disposed. <strong>With Issues</strong> can be disposed or continued.</span>
+            </div>
+            <div class="disposal-tabs-row">
+                <div class="disposal-tabs">
+                    <button class="disposal-tab active" data-dtab="issues">With Issues</button>
+                    <button class="disposal-tab" data-dtab="disposed">Disposed</button>
+                </div>
+                <button class="clear-disposed-btn" id="clear-disposed-btn" style="display:none;">
+                    <i class="fa-solid fa-broom"></i> Clear Disposed Records
+                </button>
+            </div>
+            <table class="qc-table" id="disposal-table">
+                <thead>
+                    <tr>
+                        <th>Batch ID</th>
+                        <th>Inspector</th>
+                        <th>Product</th>
+                        <th>Location</th>
+                        <th>Issue / Reason</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="disposal-body"></tbody>
+            </table>
+            <div class="qc-modal-empty" id="disposal-empty" style="display:none;">
+                <i class="fa-solid fa-inbox"></i> No records found.
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ===================== SCRIPTS ===================== -->
 <script type="module" src="sidebar.js"></script>
 <script type="module" src="role-ui.js"></script>
@@ -418,6 +469,7 @@
         document.getElementById('btn-passed').addEventListener('click',   () => openModal('modal-passed'));
         document.getElementById('btn-issues').addEventListener('click',   () => openModal('modal-issues'));
         document.getElementById('btn-rejected').addEventListener('click', () => openModal('modal-rejected'));
+        document.getElementById('btn-for-disposal').addEventListener('click', () => openModal('modal-disposal'));
 
         ['btn-passed', 'btn-issues', 'btn-rejected'].forEach(id => {
             document.getElementById(id).addEventListener('keydown', e => {
@@ -494,5 +546,7 @@
         });
     })();
 </script>
+
+<script type="module" src="delay-bell.js"></script>
 </body>
 </html>

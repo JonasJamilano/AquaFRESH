@@ -345,16 +345,19 @@ document.getElementById("save-inspection-btn")
                 });
                 alert("Inspection updated successfully!");
             } else {
+                const isRejected = classification === "Rejected";
                 await addDoc(collection(db, "inspections"), {
                     batchCode,
                     productType,
-                    productCategory: currentProductCategory,
+                    productCategory:  currentProductCategory,
                     location,
-                    inspectorName:   currentInspectorName,
+                    inspectorName:    currentInspectorName,
                     criteria,
-                    score:           finalScore,
-                    overallStatus:   classification,
-                    createdAt:       serverTimestamp()
+                    score:            finalScore,
+                    overallStatus:    classification,
+                    disposalStatus:   isRejected ? "auto-disposed" : "pending",
+                    disposedAt:       isRejected ? serverTimestamp() : null,
+                    createdAt:        serverTimestamp()
                 });
                 alert("Inspection saved successfully!");
             }
@@ -690,7 +693,202 @@ document.getElementById("confirm-clear-btn")
 // ==========================
 // Initial Load
 // ==========================
-window.addEventListener("DOMContentLoaded", () => {
-    loadInspectionsToday();
-    loadInspectionsByStatus();
+window.addEventListener("DOMContentLoaded", async () => {
+    await loadInspectionsToday();
+    await loadInspectionsByStatus();
+
+    // Auto-open modal if URL has ?modal=passed|issues|rejected
+    const params   = new URLSearchParams(window.location.search);
+    const modal    = params.get("modal");
+    const modalMap = {
+        "passed"   : "modal-passed",
+        "issues"   : "modal-issues",
+        "rejected" : "modal-rejected"
+    };
+    if (modal && modalMap[modal]) {
+        const el = document.getElementById(modalMap[modal]);
+        if (el) {
+            el.classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
+    }
+});
+
+
+// ==========================
+// For Disposal — Load & Mark
+// Rejected = auto-disposed
+// With Issues = dispose or continue
+// ==========================
+async function loadDisposalRecords() {
+    const activeTab = document.querySelector(".disposal-tab.active")?.dataset?.dtab || "issues";
+
+    try {
+        const qIssues   = query(collection(db, "inspections"), where("overallStatus", "==", "With Issues"));
+        const qRejected = query(collection(db, "inspections"), where("overallStatus", "==", "Rejected"));
+
+        const [issuesSnap, rejectedSnap] = await Promise.all([
+            getDocs(qIssues), getDocs(qRejected)
+        ]);
+
+        const issuesDocs   = [];
+        const rejectedDocs = [];
+        issuesSnap.forEach(d   => issuesDocs.push({ id: d.id, ...d.data() }));
+        rejectedSnap.forEach(d => rejectedDocs.push({ id: d.id, ...d.data() }));
+
+        // Badge = pending With Issues only (not yet disposed/continued)
+        const pendingCount = issuesDocs.filter(d => !d.disposalStatus || d.disposalStatus === "pending").length;
+        const badge      = document.getElementById("disposal-count-badge");
+        const modalBadge = document.getElementById("modal-disposal-count");
+        if (badge) {
+            badge.textContent   = pendingCount;
+            badge.style.display = pendingCount > 0 ? "flex" : "none";
+        }
+        if (modalBadge) modalBadge.textContent = pendingCount;
+
+        // Build filtered list
+        let filtered = [];
+        const clearBtn = document.getElementById("clear-disposed-btn");
+
+        if (activeTab === "issues") {
+            // With Issues that are still pending
+            filtered = issuesDocs.filter(d => !d.disposalStatus || d.disposalStatus === "pending");
+            if (clearBtn) clearBtn.style.display = "none";
+        } else if (activeTab === "disposed") {
+            // Rejected (auto) + manually disposed With Issues — combined
+            const manuallyDisposed = issuesDocs.filter(d => d.disposalStatus === "disposed");
+            filtered = [...rejectedDocs, ...manuallyDisposed];
+            if (clearBtn) clearBtn.style.display = filtered.length > 0 ? "inline-flex" : "none";
+        }
+
+        filtered.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+
+        const tbody   = document.getElementById("disposal-body");
+        const emptyEl = document.getElementById("disposal-empty");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) {
+            if (emptyEl) emptyEl.style.display = "block";
+            return;
+        }
+        if (emptyEl) emptyEl.style.display = "none";
+
+        filtered.forEach(r => {
+            const isRejected = r.overallStatus === "Rejected";
+            const isDisposed = r.disposalStatus === "disposed";
+
+            const detailCell = (r.criteria || [])
+                .filter(c => c.assessment !== "Excellent")
+                .map(c => c.criteriaName).join(", ") || "—";
+
+            const statusBadge = isRejected
+                ? `<span class="status disposed"><i class="fa-solid fa-ban"></i> Auto-Disposed</span>`
+                : isDisposed
+                ? `<span class="status disposed"><i class="fa-solid fa-check"></i> Disposed</span>`
+                : `<span class="status warning"><i class="fa-solid fa-triangle-exclamation"></i> With Issues</span>`;
+
+            const actionCell = (isRejected || isDisposed)
+                ? `<span style="font-size:0.78rem;color:#94a3b8;">—</span>`
+                : `<div style="display:flex;gap:6px;flex-wrap:wrap;">
+                       <button class="mark-disposed-btn" data-id="${r.id}">
+                           <i class="fa-solid fa-trash-can"></i> Dispose
+                       </button>
+                       <button class="mark-continue-btn" data-id="${r.id}">
+                           <i class="fa-solid fa-arrow-rotate-right"></i> Continue
+                       </button>
+                   </div>`;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${r.batchCode ?? "—"}</strong></td>
+                <td>${r.inspectorName    ?? "—"}</td>
+                <td>${r.productType      ?? "—"}</td>
+                <td>${r.location         ?? "—"}</td>
+                <td>${detailCell}</td>
+                <td>${formatDate(r.createdAt)}</td>
+                <td>${statusBadge}</td>
+                <td>${actionCell}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Mark Disposed
+        document.querySelectorAll(".mark-disposed-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                try {
+                    await updateDoc(doc(db, "inspections", btn.dataset.id), {
+                        disposalStatus: "disposed",
+                        disposedAt:     serverTimestamp()
+                    });
+                    await loadDisposalRecords();
+                    await loadInspectionsByStatus();
+                    await loadInspectionsToday();
+                } catch (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Dispose';
+                }
+            });
+        });
+
+        // Continue
+        document.querySelectorAll(".mark-continue-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                try {
+                    await updateDoc(doc(db, "inspections", btn.dataset.id), {
+                        disposalStatus: "continued",
+                        continuedAt:    serverTimestamp()
+                    });
+                    await loadDisposalRecords();
+                } catch (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-arrow-rotate-right"></i> Continue';
+                }
+            });
+        });
+
+    } catch (err) {
+        console.error("Load disposal error:", err);
+    }
+}
+
+// Clear disposed records
+async function clearDisposedRecords() {
+    if (!confirm("Remove all disposed records from the list? This cannot be undone.")) return;
+    const btn = document.getElementById("clear-disposed-btn");
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Clearing...'; }
+    try {
+        const qRejected = query(collection(db, "inspections"), where("overallStatus", "==", "Rejected"));
+        const qDisposed = query(collection(db, "inspections"), where("disposalStatus", "==", "disposed"));
+        const [rejSnap, dispSnap] = await Promise.all([getDocs(qRejected), getDocs(qDisposed)]);
+        const deletions = [];
+        rejSnap.forEach(d  => deletions.push(deleteDoc(doc(db, "inspections", d.id))));
+        dispSnap.forEach(d => deletions.push(deleteDoc(doc(db, "inspections", d.id))));
+        await Promise.all(deletions);
+        await loadDisposalRecords();
+        await loadInspectionsByStatus();
+        await loadInspectionsToday();
+    } catch (err) {
+        console.error("Clear disposed error:", err);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-broom"></i> Clear Disposed Records'; }
+    }
+}
+
+// Disposal tab switching & modal trigger
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".disposal-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".disposal-tab").forEach(t => t.classList.remove("active"));
+            tab.classList.add("active");
+            loadDisposalRecords();
+        });
+    });
+    document.getElementById("btn-for-disposal")?.addEventListener("click", loadDisposalRecords);
+    document.getElementById("clear-disposed-btn")?.addEventListener("click", clearDisposedRecords);
+    loadDisposalRecords();
 });
