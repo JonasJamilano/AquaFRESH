@@ -700,12 +700,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Auto-open modal if URL has ?modal=passed|issues|rejected
     const params   = new URLSearchParams(window.location.search);
     const modal    = params.get("modal");
+    const action   = params.get("action");
     const modalMap = {
         "passed"   : "modal-passed",
         "issues"   : "modal-issues",
         "rejected" : "modal-rejected"
     };
-    if (modal && modalMap[modal]) {
+    if (action === "new") {
+        // Auto-open product chooser directly
+        document.getElementById("modal-product-chooser")?.classList.add("active");
+        document.body.style.overflow = "hidden";
+    } else if (modal && modalMap[modal]) {
         const el = document.getElementById(modalMap[modal]);
         if (el) {
             el.classList.add("active");
