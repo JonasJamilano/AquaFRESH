@@ -140,6 +140,19 @@
             <i class="fa-solid fa-arrow-rotate-left"></i> Change Tank
         </button>
     </div>
+        <!-- TOP-LEVEL TAB BAR -->
+        <div class="trends-tabs" style="margin-bottom:24px;">
+            <div class="trends-tab active" data-trendtab="sensor">
+                <i class="fa-solid fa-microchip"></i> Sensor Trends
+            </div>
+            <div class="trends-tab" data-trendtab="freshness">
+                <i class="fa-solid fa-fish"></i> Freshness Trends
+            </div>
+            <div class="trends-tab" data-trendtab="delivery">
+                <i class="fa-solid fa-truck"></i> Delivery Performance
+            </div>
+        </div>
+
         <!-- SENSOR TRENDS -->
         <div class="trends-panel active" id="sensor">
             <div class="trend-tabs">
@@ -153,25 +166,53 @@
         </div>
         <!-- FRESHNESS TRENDS -->
         <div class="trends-panel" id="freshness">
-            <div class="trend-tabs">
-                <div class="trend-card active" data-trend="fresh"><div class="trend-icon"><i class="fa-solid fa-fish"></i></div><div class="trend-info"><div class="trend-title">Fresh</div><div class="trend-value">76%</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
-                <div class="trend-card" data-trend="moderate"><div class="trend-icon"><i class="fa-solid fa-water"></i></div><div class="trend-info"><div class="trend-title">Moderate</div><div class="trend-value">18%</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
-                <div class="trend-card" data-trend="spoiled"><div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="trend-info"><div class="trend-title">Spoiled</div><div class="trend-value">6%</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
+            <!-- Percentage summary cards -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-fish"></i> Fresh</div>
+                    <div id="fresh-pct" style="font-size:1.8rem;font-weight:800;color:#16a34a;line-height:1;">--%</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">of total</div>
+                </div>
+                <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#ca8a04;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-water"></i> With Issues</div>
+                    <div id="moderate-pct" style="font-size:1.8rem;font-weight:800;color:#ca8a04;line-height:1;">--%</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">of total</div>
+                </div>
+                <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Rejected</div>
+                    <div id="spoiled-pct" style="font-size:1.8rem;font-weight:800;color:#dc2626;line-height:1;">--%</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">of total</div>
+                </div>
             </div>
-            <div class="trend-content active" id="fresh"><div class="chart-box"><i class="fa-solid fa-chart-column"></i> Freshness Outcome Chart</div></div>
-            <div class="trend-content" id="moderate"><div class="chart-box"><i class="fa-solid fa-chart-column"></i> Moderate Freshness Chart</div></div>
-            <div class="trend-content" id="spoiled"><div class="chart-box"><i class="fa-solid fa-chart-column"></i> Spoiled Fish Chart</div></div>
+            <!-- Combined stacked bar chart -->
+            <div class="chart-wrapper" style="min-height:300px;">
+                <canvas id="freshnessStackedChart"></canvas>
+            </div>
         </div>
         <!-- DELIVERY PERFORMANCE -->
         <div class="trends-panel" id="delivery">
-            <div class="trend-tabs">
-                <div class="trend-card active" data-trend="ontime"><div class="trend-icon"><i class="fa-solid fa-truck-fast"></i></div><div class="trend-info"><div class="trend-title">On-Time Rate</div><div class="trend-value">82%</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
-                <div class="trend-card" data-trend="delay"><div class="trend-icon"><i class="fa-solid fa-clock"></i></div><div class="trend-info"><div class="trend-title">Average Delay</div><div class="trend-value">18m</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
-                <div class="trend-card" data-trend="late"><div class="trend-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="trend-info"><div class="trend-title">Late Deliveries</div><div class="trend-value">3</div></div><i class="fa-solid fa-chevron-right trend-arrow"></i></div>
+            <!-- Summary cards -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-truck-fast"></i> On-Time Rate</div>
+                    <div id="delivery-ontime-pct" style="font-size:1.8rem;font-weight:800;color:#16a34a;line-height:1;">--%</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">of completed deliveries</div>
+                </div>
+                <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-clock"></i> Avg Delay</div>
+                    <div id="delivery-avg-delay" style="font-size:1.8rem;font-weight:800;color:#2563eb;line-height:1;">--</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">minutes late</div>
+                </div>
+                <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:14px 16px;text-align:center;">
+                    <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Late Deliveries</div>
+                    <div id="delivery-late-count" style="font-size:1.8rem;font-weight:800;color:#dc2626;line-height:1;">--</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;">total delayed</div>
+                </div>
             </div>
-            <div class="trend-content active" id="ontime"><div class="chart-box"><i class="fa-solid fa-chart-line"></i> On-Time Delivery Chart</div></div>
-            <div class="trend-content" id="delay"><div class="chart-box"><i class="fa-solid fa-chart-line"></i> Average Delay Chart</div></div>
-            <div class="trend-content" id="late"><div class="chart-box"><i class="fa-solid fa-chart-line"></i> Late Deliveries Chart</div></div>
+            <!-- Combined line chart -->
+            <div class="chart-wrapper" style="min-height:300px;">
+                <canvas id="deliveryPerformanceChart"></canvas>
+            </div>
         </div>
     </section>
 </main>
@@ -228,7 +269,17 @@ document.querySelectorAll(".trends-tab").forEach(tab => {
         document.querySelectorAll(".trends-tab").forEach(t => t.classList.remove("active"));
         document.querySelectorAll(".trends-panel").forEach(p => p.classList.remove("active"));
         tab.classList.add("active");
-        document.getElementById(tab.dataset.trendtab).classList.add("active");
+        const target = document.getElementById(tab.dataset.trendtab);
+        if (target) {
+            target.classList.add("active");
+            // Resize charts inside the newly visible panel
+            setTimeout(() => {
+                target.querySelectorAll("canvas").forEach(canvas => {
+                    const chart = Chart.getChart(canvas);
+                    if (chart) chart.resize();
+                });
+            }, 50);
+        }
     });
 });
 function openSensorModal()  { document.getElementById("sensorModal").classList.add("active"); }

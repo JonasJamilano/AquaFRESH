@@ -1,4 +1,5 @@
 import { database } from "./firebase.js";
+import { db } from "./firebase.js";
 import {
     ref,
     onValue,
@@ -7,6 +8,15 @@ import {
     limitToLast,
     get
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import {
+    collection,
+    getDocs,
+    query as fsQuery,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const inspectionsCol = collection(db, "inspections");
+const deliveriesCol  = collection(db, "deliveries");
 
 /* =========================================
    CONSTANTS
@@ -146,6 +156,8 @@ document.addEventListener("DOMContentLoaded", () => {
     watchConnectionStatus();
     injectHistorySections();
     loadAllHistory();
+    loadFreshnessTrends();
+    loadDeliveryPerformance();
 });
 
 /* =========================================
@@ -717,6 +729,348 @@ function normalizeTimestampValue(value) {
 }
 
 /* =========================================
+   FRESHNESS TRENDS
+   Queries all inspections from Firestore,
+   calculates overall percentages for the
+   summary cards, and renders a single
+   stacked bar chart for last 7 days.
+========================================= */
+
+let freshnessStackedChart = null;
+
+async function loadFreshnessTrends() {
+    if (typeof Chart === "undefined") return;
+
+    try {
+        const snap = await getDocs(fsQuery(
+            inspectionsCol,
+            orderBy("createdAt", "asc")
+        ));
+
+        // Generate last 7 day labels
+        const dayLabels = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            dayLabels.push(d.toLocaleDateString([], { month: "short", day: "numeric" }));
+        }
+
+        const dailyPassed   = new Array(7).fill(0);
+        const dailyIssues   = new Array(7).fill(0);
+        const dailyRejected = new Array(7).fill(0);
+
+        let totalPassed = 0, totalIssues = 0, totalRejected = 0;
+
+        const today  = new Date();
+        today.setHours(23, 59, 59, 999);
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 6);
+        cutoff.setHours(0, 0, 0, 0);
+
+        if (!snap.empty) {
+            snap.forEach(docSnap => {
+                const data   = docSnap.data();
+                const status = data.overallStatus || "";
+
+                if (status === "Passed")           totalPassed++;
+                else if (status === "With Issues") totalIssues++;
+                else if (status === "Rejected")    totalRejected++;
+
+                const ts = data.createdAt?.toDate ? data.createdAt.toDate() : null;
+                if (!ts || ts < cutoff) return;
+
+                const diffDays = Math.floor((today - ts) / (1000 * 60 * 60 * 24));
+                const idx      = 6 - diffDays;
+                if (idx < 0 || idx > 6) return;
+
+                if (status === "Passed")           dailyPassed[idx]++;
+                else if (status === "With Issues") dailyIssues[idx]++;
+                else if (status === "Rejected")    dailyRejected[idx]++;
+            });
+        }
+
+        // Update percentage cards
+        const total = (totalPassed + totalIssues + totalRejected) || 1;
+        const pct   = (n) => Math.round((n / total) * 100) + "%";
+
+        const freshEl    = document.getElementById("fresh-pct");
+        const moderateEl = document.getElementById("moderate-pct");
+        const spoiledEl  = document.getElementById("spoiled-pct");
+        if (freshEl)    freshEl.textContent    = pct(totalPassed);
+        if (moderateEl) moderateEl.textContent = pct(totalIssues);
+        if (spoiledEl)  spoiledEl.textContent  = pct(totalRejected);
+
+        // Render stacked bar chart
+        const canvas = document.getElementById("freshnessStackedChart");
+        if (!canvas) return;
+
+        if (freshnessStackedChart) {
+            freshnessStackedChart.destroy();
+            freshnessStackedChart = null;
+        }
+
+        freshnessStackedChart = new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: dayLabels,
+                datasets: [
+                    {
+                        label          : "Fresh (Passed)",
+                        data           : dailyPassed,
+                        backgroundColor: "#86efac",
+                        borderColor    : "#16a34a",
+                        borderWidth    : 1.5,
+                        borderRadius   : { topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4 },
+                        borderSkipped  : "bottom"
+                    },
+                    {
+                        label          : "With Issues",
+                        data           : dailyIssues,
+                        backgroundColor: "#fde047",
+                        borderColor    : "#ca8a04",
+                        borderWidth    : 1.5,
+                        borderRadius   : 0,
+                        borderSkipped  : false
+                    },
+                    {
+                        label          : "Rejected",
+                        data           : dailyRejected,
+                        backgroundColor: "#fca5a5",
+                        borderColor    : "#dc2626",
+                        borderWidth    : 1.5,
+                        borderRadius   : { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                        borderSkipped  : "bottom"
+                    }
+                ]
+            },
+            options: {
+                responsive         : true,
+                maintainAspectRatio: false,
+                animation          : { duration: 400 },
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks  : { color: "#475569", font: { size: 11 } },
+                        grid   : { display: false }
+                    },
+                    y: {
+                        stacked    : true,
+                        beginAtZero: true,
+                        ticks      : { color: "#475569", stepSize: 1, precision: 0 },
+                        grid       : { color: "rgba(148,163,184,0.15)" }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display : true,
+                        position: "top",
+                        labels  : {
+                            usePointStyle: true,
+                            pointStyle   : "rectRounded",
+                            color        : "#475569",
+                            font         : { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        mode     : "index",
+                        intersect: false,
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} inspection${ctx.parsed.y !== 1 ? "s" : ""}`
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Freshness trends error:", err);
+    }
+}
+
+/* =========================================
+   DELIVERY PERFORMANCE TRENDS
+   Reads from Firestore deliveries collection.
+   - On-Time Rate: delivered before/on ETA
+   - Avg Delay: avg mins late for delayed ones
+   - Late count: total delayed deliveries
+   - Line chart: daily on-time vs late (7 days)
+========================================= */
+
+let deliveryPerformanceChart = null;
+
+async function loadDeliveryPerformance() {
+    if (typeof Chart === "undefined") return;
+
+    try {
+        const snap = await getDocs(fsQuery(
+            deliveriesCol,
+            orderBy("createdAt", "asc")
+        ));
+
+        // Day labels for last 7 days
+        const dayLabels = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            dayLabels.push(d.toLocaleDateString([], { month: "short", day: "numeric" }));
+        }
+
+        const today  = new Date();
+        today.setHours(23, 59, 59, 999);
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 6);
+        cutoff.setHours(0, 0, 0, 0);
+
+        const dailyOnTime = new Array(7).fill(0);
+        const dailyLate   = new Array(7).fill(0);
+
+        let totalDelivered = 0;
+        let totalOnTime    = 0;
+        let totalLate      = 0;
+        let totalDelayMins = 0;
+        let delayCount     = 0;
+
+        if (!snap.empty) {
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+
+                // Only count completed deliveries
+                if (d.status !== "delivered") return;
+                if (!d.deliveredAt || !d.eta) return;
+
+                totalDelivered++;
+
+                const etaMs       = new Date(d.eta).getTime();
+                const deliveredMs = d.deliveredAt.toDate
+                    ? d.deliveredAt.toDate().getTime()
+                    : new Date(d.deliveredAt).getTime();
+
+                if (isNaN(etaMs) || isNaN(deliveredMs)) return;
+
+                const GRACE_MS   = 20 * 60 * 1000; // match TransportDelivery 20-min grace
+                const isLate     = deliveredMs > etaMs + GRACE_MS;
+                const delayMins  = Math.round((deliveredMs - etaMs - GRACE_MS) / 60000);
+
+                if (isLate) {
+                    totalLate++;
+                    if (delayMins > 0) {
+                        totalDelayMins += delayMins;
+                        delayCount++;
+                    }
+                } else {
+                    totalOnTime++;
+                }
+
+                // Daily buckets — use deliveredAt date
+                const deliveredDate = d.deliveredAt.toDate ? d.deliveredAt.toDate() : new Date(d.deliveredAt);
+                if (deliveredDate < cutoff) return;
+
+                const diffDays = Math.floor((today - deliveredDate) / (1000 * 60 * 60 * 24));
+                const idx      = 6 - diffDays;
+                if (idx < 0 || idx > 6) return;
+
+                if (isLate) dailyLate[idx]++;
+                else        dailyOnTime[idx]++;
+            });
+        }
+
+        // Update summary cards
+        const onTimePct  = totalDelivered > 0 ? Math.round((totalOnTime / totalDelivered) * 100) : 0;
+        const avgDelayMins = delayCount > 0 ? Math.round(totalDelayMins / delayCount) : 0;
+
+        const ontimeEl = document.getElementById("delivery-ontime-pct");
+        const delayEl  = document.getElementById("delivery-avg-delay");
+        const lateEl   = document.getElementById("delivery-late-count");
+
+        if (ontimeEl) ontimeEl.textContent = `${onTimePct}%`;
+        if (delayEl)  delayEl.textContent  = avgDelayMins > 0 ? `${avgDelayMins}` : "0";
+        if (lateEl)   lateEl.textContent   = `${totalLate}`;
+
+        // Render combined line chart
+        const canvas = document.getElementById("deliveryPerformanceChart");
+        if (!canvas) return;
+
+        if (deliveryPerformanceChart) {
+            deliveryPerformanceChart.destroy();
+            deliveryPerformanceChart = null;
+        }
+
+        deliveryPerformanceChart = new Chart(canvas, {
+            type: "line",
+            data: {
+                labels  : dayLabels,
+                datasets: [
+                    {
+                        label          : "On-Time",
+                        data           : dailyOnTime,
+                        borderColor    : "#16a34a",
+                        backgroundColor: "#16a34a",
+                        borderWidth    : 2.5,
+                        tension        : 0.35,
+                        fill           : false,
+                        pointRadius    : 5,
+                        pointBackgroundColor: "#16a34a",
+                        pointBorderColor    : "#ffffff",
+                        pointBorderWidth    : 2
+                    },
+                    {
+                        label          : "Late / Delayed",
+                        data           : dailyLate,
+                        borderColor    : "#dc2626",
+                        backgroundColor: "#dc2626",
+                        borderWidth    : 2.5,
+                        tension        : 0.35,
+                        fill           : false,
+                        pointRadius    : 5,
+                        pointBackgroundColor: "#dc2626",
+                        pointBorderColor    : "#ffffff",
+                        pointBorderWidth    : 2
+                    }
+                ]
+            },
+            options: {
+                responsive         : true,
+                maintainAspectRatio: false,
+                animation          : { duration: 400 },
+                scales: {
+                    x: {
+                        ticks: { color: "#475569", font: { size: 11 } },
+                        grid : { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks      : { color: "#475569", stepSize: 1, precision: 0 },
+                        grid       : { color: "rgba(148,163,184,0.15)" }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display : true,
+                        position: "top",
+                        labels  : {
+                            usePointStyle: true,
+                            pointStyle   : "circle",
+                            color        : "#475569",
+                            font         : { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        mode     : "index",
+                        intersect: false,
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} deliver${ctx.parsed.y !== 1 ? "ies" : ""}`
+                        }
+                    }
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Delivery performance error:", err);
+    }
+}
+
+/* =========================================
    TANK SELECTION & DYNAMIC UI
 ========================================= */
 
@@ -725,8 +1079,9 @@ window.selectTank = function(tankId) {
     const trends = document.getElementById("trendsPanelSection");
     trends.style.display = "block";
     trends.scrollIntoView({ behavior: "smooth" });
-    // Resize charts now that container is visible
     Object.values(liveCharts).forEach(chart => chart.resize());
+    if (freshnessStackedChart)    freshnessStackedChart.resize();
+    if (deliveryPerformanceChart) deliveryPerformanceChart.resize();
 };
 
 window.backToSelection = function() {
