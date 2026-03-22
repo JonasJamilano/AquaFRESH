@@ -38,9 +38,6 @@ let batchesMap     = {};
 
 /* =========================================
    ROUTE ALTERNATIVES STATE
-   Tracks the fetched routes, which one the
-   driver selected, and which delivery the
-   panel is currently showing.
 ========================================= */
 
 const ROUTE_COLORS = [
@@ -49,11 +46,11 @@ const ROUTE_COLORS = [
     { line: '#8b5cf6', colorClass: 'color-tertiary',   numClass: 'num-tertiary'  },
 ];
 
-let altRoutes          = [];   // up to 3 LRM route objects
-let selectedAltIndex   = 0;    // which card is selected (0 = first)
-let altDeliveryId      = null; // which delivery the panel belongs to
-let altPolylines       = [];   // drawn polylines for alternatives
-let altFetchControl    = null; // temporary LRM control used only to fetch routes
+let altRoutes          = [];
+let selectedAltIndex   = 0;
+let altDeliveryId      = null;
+let altPolylines       = [];
+let altFetchControl    = null;
 
 /* =========================================
    CONSTANTS
@@ -62,6 +59,157 @@ let altFetchControl    = null; // temporary LRM control used only to fetch route
 const LOGS_PATH           = "AquaFresh_Logs";
 const LIVE_POLL_INTERVAL  = 10_000;
 const STORE_SEARCH_RADIUS = 5000;
+
+/* =========================================
+   GPS SIMULATION
+========================================= */
+
+let simInterval   = null;
+let simStepIndex  = 0;
+let simWaypoints  = [];
+
+const SIM_STEP_MS    = 1500;
+const SIM_ZOOM_LEVEL = 16;
+
+async function fetchRouteWaypoints(fromLat, fromLng, toLat, toLng) {
+    try {
+        const url  = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+        const res  = await fetch(url);
+        const data = await res.json();
+        if (data.routes?.[0]) {
+            return data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        }
+    } catch (e) {
+        console.warn("OSRM fallback to straight line:", e);
+    }
+    const steps = 30;
+    return Array.from({ length: steps + 1 }, (_, i) => [
+        fromLat + (toLat - fromLat) * (i / steps),
+        fromLng + (toLng - fromLng) * (i / steps)
+    ]);
+}
+
+async function startTracking(deliveryId, destLat, destLng) {
+    if (isNavigating) return;
+
+    let fromLat = null, fromLng = null;
+    try {
+        const snap = await getDocs(query(collection(db, "deliveries"), where("__name__", "==", deliveryId)));
+        snap.forEach(d => {
+            fromLat = d.data().currentLat || d.data().originLat;
+            fromLng = d.data().currentLng || d.data().originLng;
+        });
+    } catch (e) { console.error("Could not read delivery origin:", e); }
+
+    if (!fromLat || !destLat) { console.warn("Missing coords for simulation"); return; }
+
+    isNavigating = true;
+
+    const statusBox = document.getElementById("map-status");
+    if (statusBox) statusBox.innerHTML =
+        `<i class="fa-solid fa-satellite-dish" style="color:#3b82f6;"></i> <strong>GPS Simulation Active</strong> — truck moving along route`;
+
+    showSimBanner(deliveryId);
+
+    simWaypoints = await fetchRouteWaypoints(fromLat, fromLng, destLat, destLng);
+    simStepIndex = 0;
+
+    map.setView([fromLat, fromLng], SIM_ZOOM_LEVEL);
+
+    if (simInterval) clearInterval(simInterval);
+    simInterval = setInterval(async () => {
+        if (simStepIndex >= simWaypoints.length) {
+            clearInterval(simInterval);
+            simInterval = null;
+            if (statusBox) statusBox.innerHTML =
+                `<i class="fa-solid fa-flag-checkered" style="color:#059669;"></i> Arrived at destination — mark as delivered`;
+            updateSimBanner(simWaypoints.length, simWaypoints.length);
+            return;
+        }
+
+        const [lat, lng] = simWaypoints[simStepIndex];
+        simStepIndex++;
+
+        driverLat = lat;
+        driverLng = lng;
+
+        if (deliveryMarkers[deliveryId]) {
+            deliveryMarkers[deliveryId].setLatLng([lat, lng]);
+            deliveryMarkers[deliveryId].getPopup()?.setContent(
+                `<b>${deliveryId}</b><br>Status: en route<br><small>Simulated GPS</small>`
+            );
+        }
+
+        map.setView([lat, lng], SIM_ZOOM_LEVEL);
+
+        if (deliveryRoutes[deliveryId] && destLat && destLng &&
+            typeof deliveryRoutes[deliveryId].setWaypoints === "function") {
+            deliveryRoutes[deliveryId].setWaypoints([
+                L.latLng(lat, lng),
+                L.latLng(destLat, destLng)
+            ]);
+        }
+
+        try {
+            await updateDoc(doc(db, "deliveries", deliveryId), { currentLat: lat, currentLng: lng });
+        } catch (e) { console.warn("Firestore GPS write:", e); }
+
+        updateSimBanner(simStepIndex, simWaypoints.length);
+
+    }, SIM_STEP_MS);
+}
+
+function stopTracking() {
+    if (simInterval) { clearInterval(simInterval); simInterval = null; }
+    isNavigating = false;
+    driverLat    = null;
+    driverLng    = null;
+    simStepIndex = 0;
+    simWaypoints = [];
+    hideSimBanner();
+    const statusBox = document.getElementById("map-status");
+    if (statusBox) statusBox.innerText = "Tracking stopped. Delivery completed.";
+    if (map) map.setZoom(12);
+}
+
+function showSimBanner(deliveryId) {
+    let banner = document.getElementById("sim-banner");
+    if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "sim-banner";
+        banner.className = "sim-banner";
+        const mapEl = document.getElementById("delivery-map");
+        if (mapEl) mapEl.insertAdjacentElement("afterend", banner);
+    }
+    banner.innerHTML = `
+        <div class="sim-banner-left">
+            <i class="fa-solid fa-satellite-dish sim-pulse"></i>
+            <div>
+                <div class="sim-banner-title">GPS Simulation Active</div>
+                <div class="sim-banner-sub">Demo mode — admin map updates live via Firestore</div>
+            </div>
+        </div>
+        <div class="sim-banner-right">
+            <div class="sim-progress-wrap">
+                <div class="sim-progress-bar" id="sim-progress-bar" style="width:0%"></div>
+            </div>
+            <span class="sim-progress-label" id="sim-progress-label">Starting…</span>
+        </div>`;
+    banner.style.display = "flex";
+}
+
+function updateSimBanner(current, total) {
+    const bar   = document.getElementById("sim-progress-bar");
+    const label = document.getElementById("sim-progress-label");
+    const pct   = Math.round((current / total) * 100);
+    if (bar)   bar.style.width   = pct + "%";
+    if (label) label.textContent = `${pct}% complete (${current}/${total} steps)`;
+}
+
+function hideSimBanner() {
+    const banner = document.getElementById("sim-banner");
+    if (banner) banner.style.display = "none";
+}
 
 /* =========================================
    ALERT SOUND
@@ -135,7 +283,6 @@ function getAlarmMessages(payload) {
     const messages = [];
     const temp = parseNumericValue(payload.water_temp);
     const ph   = parseNumericValue(payload.ph_level);
-
     if (!Number.isNaN(temp)) {
         if (temp < 0) messages.push(`Water temperature dropped below 0°C (current: ${temp.toFixed(1)} °C)`);
         else if (temp > 4) messages.push(`Water temperature exceeded 4°C (current: ${temp.toFixed(1)} °C)`);
@@ -155,17 +302,13 @@ function renderMapAlarmBanner(messages, timestamp) {
     const banner = document.getElementById("mapAlarmBanner");
     const list   = document.getElementById("mapAlarmMessages");
     const tsEl   = document.getElementById("mapAlarmTimestamp");
-
     if (!banner || !list) return;
-
     if (!messages || messages.length === 0) {
         banner.hidden = true;
         list.innerHTML = "";
         return;
     }
-
     list.innerHTML = messages.map(m => `<li>${m}</li>`).join("");
-
     if (tsEl && timestamp) {
         const d = new Date(typeof timestamp === "number"
             ? (timestamp < 1e12 ? timestamp * 1000 : timestamp)
@@ -175,7 +318,6 @@ function renderMapAlarmBanner(messages, timestamp) {
             hour: "2-digit", minute: "2-digit", second: "2-digit"
         })}`;
     }
-
     banner.hidden = false;
 }
 
@@ -192,11 +334,9 @@ async function findNearestStores(lat, lng) {
         const dist = getDistanceMeters(lat, lng, lastStoreFetchLat, lastStoreFetchLng);
         if (dist < 200 && storeFetchActive) return;
     }
-
     lastStoreFetchLat = lat;
     lastStoreFetchLng = lng;
     storeFetchActive  = true;
-
     const radius = STORE_SEARCH_RADIUS;
     const overpassQuery = `
         [out:json][timeout:15];
@@ -210,34 +350,18 @@ async function findNearestStores(lat, lng) {
         );
         out body;
     `;
-
     try {
         updateStoreStatus("Searching for nearby stores…", "loading");
-
-        const res  = await fetch("https://overpass-api.de/api/interpreter", {
-            method : "POST",
-            body   : overpassQuery
-        });
+        const res  = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: overpassQuery });
         const data = await res.json();
         const stores = data.elements || [];
-
         clearStoreMarkers();
-
-        if (stores.length === 0) {
-            updateStoreStatus("No nearby stores found within 5 km.", "empty");
-            hideStorePanel();
-            return;
-        }
-
-        const sorted = stores
-            .map(s => ({ ...s, distance: getDistanceMeters(lat, lng, s.lat, s.lon) }))
-            .sort((a, b) => a.distance - b.distance)
-            .slice(0, 10);
-
+        if (stores.length === 0) { updateStoreStatus("No nearby stores found within 5 km.", "empty"); hideStorePanel(); return; }
+        const sorted = stores.map(s => ({ ...s, distance: getDistanceMeters(lat, lng, s.lat, s.lon) }))
+            .sort((a, b) => a.distance - b.distance).slice(0, 10);
         plotStoreMarkers(sorted, lat, lng);
         renderStoreList(sorted);
         updateStoreStatus(`Found ${sorted.length} store(s) within 5 km`, "ok");
-
     } catch (err) {
         console.error("Overpass API error:", err);
         updateStoreStatus("Could not load nearby stores. Check connection.", "error");
@@ -253,30 +377,22 @@ function plotStoreMarkers(stores, fromLat, fromLng) {
     const storeIcon = L.divIcon({
         className: "store-marker-icon",
         html: `<div class="store-marker"><i class="fa-solid fa-store"></i></div>`,
-        iconSize:  [34, 34],
-        iconAnchor:[17, 17]
+        iconSize: [34, 34], iconAnchor: [17, 17]
     });
-
     stores.forEach((store, idx) => {
         const name   = store.tags?.name || "Unnamed Store";
         const type   = getStoreTypeLabel(store.tags);
         const distKm = (store.distance / 1000).toFixed(1);
-
-        const marker = L.marker([store.lat, store.lon], { icon: storeIcon })
-            .addTo(map)
+        const marker = L.marker([store.lat, store.lon], { icon: storeIcon }).addTo(map)
             .bindPopup(`
                 <div class="store-popup">
                     <div class="store-popup-name">${idx + 1}. ${name}</div>
                     <div class="store-popup-type">${type}</div>
                     <div class="store-popup-dist"><i class="fa-solid fa-location-dot"></i> ${distKm} km away</div>
-                    <button
-                        class="store-popup-directions"
-                        onclick="navigateToStore(${store.lat}, ${store.lon}, '${name.replace(/'/g, "\\'")}')">
+                    <button class="store-popup-directions" onclick="navigateToStore(${store.lat}, ${store.lon}, '${name.replace(/'/g, "\\'")}')">
                         <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
                     </button>
-                </div>
-            `, { maxWidth: 220 });
-
+                </div>`, { maxWidth: 220 });
         storeMarkers.push(marker);
     });
 }
@@ -285,12 +401,10 @@ function renderStoreList(stores) {
     const panel = document.getElementById("nearbyStoresPanel");
     const list  = document.getElementById("nearbyStoresList");
     if (!panel || !list) return;
-
     list.innerHTML = stores.map((store, idx) => {
         const name   = store.tags?.name || "Unnamed Store";
         const type   = getStoreTypeLabel(store.tags);
         const distKm = (store.distance / 1000).toFixed(1);
-
         return `
         <div class="store-list-item" onclick="focusStore(${store.lat}, ${store.lon})">
             <div class="store-list-num">${idx + 1}</div>
@@ -301,7 +415,6 @@ function renderStoreList(stores) {
             <i class="fa-solid fa-chevron-right store-list-arrow"></i>
         </div>`;
     }).join("");
-
     panel.hidden = false;
 }
 
@@ -320,14 +433,8 @@ function clearStoresAndHidePanel() {
 }
 
 window.onFindStoresClicked = function () {
-    if (!currentlyEnRoute) {
-        showStoreBtnFeedback("Start your delivery first to find nearby stores.", "empty");
-        return;
-    }
-    if (driverLat === null || driverLng === null) {
-        showStoreBtnFeedback("Waiting for GPS signal… try again in a moment.", "loading");
-        return;
-    }
+    if (!currentlyEnRoute) { showStoreBtnFeedback("Start your delivery first to find nearby stores.", "empty"); return; }
+    if (driverLat === null || driverLng === null) { showStoreBtnFeedback("Waiting for GPS signal… try again in a moment.", "loading"); return; }
     document.getElementById("delivery-map")?.scrollIntoView({ behavior: "smooth", block: "center" });
     findNearestStores(driverLat, driverLng);
 };
@@ -341,36 +448,28 @@ window.focusStore = function(lat, lng) {
     if (map) map.setView([lat, lng], 17);
     storeMarkers.forEach(m => {
         const pos = m.getLatLng();
-        if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
-            m.openPopup();
-        }
+        if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) m.openPopup();
     });
 };
 
 window.navigateToStore = function(storeLat, storeLng, storeName) {
-    if (driverLat === null || driverLng === null) {
-        alert("GPS position not available yet. Please wait a moment and try again.");
-        return;
-    }
+    if (driverLat === null || driverLng === null) { alert("GPS position not available yet."); return; }
     map.closePopup();
     Object.keys(deliveryRoutes).forEach(id => {
         const route = deliveryRoutes[id];
-        if (route) { map.removeControl(route); savedDeliveryId = id; }
+        if (route && !route._placeholder) { map.removeControl(route); savedDeliveryId = id; }
     });
     if (storeRoute) { map.removeControl(storeRoute); storeRoute = null; }
     storeRoute = L.Routing.control({
-        waypoints: [ L.latLng(driverLat, driverLng), L.latLng(storeLat, storeLng) ],
-        addWaypoints      : false,
-        routeWhileDragging: false,
-        fitSelectedRoutes : true,
-        show              : false,
+        waypoints: [L.latLng(driverLat, driverLng), L.latLng(storeLat, storeLng)],
+        addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: true, show: false,
         lineOptions: { styles: [{ color: '#0ea5e9', opacity: 1, weight: 6 }] },
         createMarker: () => null
     }).addTo(map);
     storeRoute.on('routesfound', function(e) {
-        const route     = e.routes[0];
-        const distKm    = (route.summary.totalDistance / 1000).toFixed(1);
-        const minutes   = Math.round(route.summary.totalTime / 60);
+        const route = e.routes[0];
+        const distKm = (route.summary.totalDistance / 1000).toFixed(1);
+        const minutes = Math.round(route.summary.totalTime / 60);
         const statusBox = document.getElementById('map-status');
         if (statusBox) {
             statusBox.innerHTML = `
@@ -387,14 +486,10 @@ window.navigateToStore = function(storeLat, storeLng, storeName) {
 
 window.backToDeliveryRoute = function() {
     if (storeRoute) { map.removeControl(storeRoute); storeRoute = null; }
-    if (savedDeliveryId && deliveryRoutes[savedDeliveryId]) {
-        deliveryRoutes[savedDeliveryId].addTo(map);
-    }
+    if (savedDeliveryId && deliveryRoutes[savedDeliveryId]) deliveryRoutes[savedDeliveryId].addTo(map);
     savedDeliveryId = null;
     const statusBox = document.getElementById('map-status');
-    if (statusBox) {
-        statusBox.innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
-    }
+    if (statusBox) statusBox.innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
     updateStoreStatus("", "");
 };
 
@@ -423,10 +518,7 @@ function getDistanceMeters(lat1, lng1, lat2, lng2) {
     const R    = 6371000;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a    = Math.sin(dLat / 2) ** 2
-               + Math.cos(lat1 * Math.PI / 180)
-               * Math.cos(lat2 * Math.PI / 180)
-               * Math.sin(dLng / 2) ** 2;
+    const a    = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -442,11 +534,7 @@ function startSensorWatch() {
 }
 
 function watchSensor() {
-    const latestQuery = dbQuery(
-        ref(database, LOGS_PATH),
-        orderByKey(),
-        limitToLast(1)
-    );
+    const latestQuery = dbQuery(ref(database, LOGS_PATH), orderByKey(), limitToLast(1));
     onValue(latestQuery, (snapshot) => {
         if (!snapshot.exists()) return;
         let payload = null;
@@ -457,7 +545,7 @@ function watchSensor() {
         renderMapAlarmBanner(messages, timestamp);
         handleAlarmSound(hasAlarms);
         if (!hasAlarms && storeFetchActive) clearStoresAndHidePanel();
-    }, (error) => { console.warn("Sensor watch error on TransportDelivery:", error); });
+    }, (error) => { console.warn("Sensor watch error:", error); });
 }
 
 /* =========================================
@@ -469,9 +557,7 @@ document.addEventListener("DOMContentLoaded", initPage);
 async function initPage() {
     const role = localStorage.getItem("role");
     unlockAudio();
-
     await loadBatches();
-
     if (["superadmin", "admin", "manager"].includes(role)) {
         const triggerWrap = document.getElementById("createDeliveryWrapper");
         if (triggerWrap) triggerWrap.style.display = "block";
@@ -482,10 +568,25 @@ async function initPage() {
             if (preview) { preview.value = "Generating..."; preview.value = await generateDeliveryCode(); }
         });
     }
-
     initMap();
     listenToDeliveries();
     startSensorWatch();
+
+    // Auto-open modal if URL has ?modal=
+    const params   = new URLSearchParams(window.location.search);
+    const modal    = params.get("modal");
+    const modalMap = {
+        "pending"   : "modal-pending",
+        "enroute"   : "modal-enroute",
+        "delayed"   : "modal-delayed",
+        "delivered" : "modal-delivered"
+    };
+    if (modal && modalMap[modal]) {
+        setTimeout(() => {
+            const el = document.getElementById(modalMap[modal]);
+            if (el) { el.classList.add("active"); document.body.style.overflow = "hidden"; }
+        }, 800);
+    }
 }
 
 /* =========================================
@@ -499,16 +600,10 @@ async function generateDeliveryCode() {
         snapshot.forEach(d => {
             const code  = d.data().deliveryCode || "";
             const match = code.match(/^D-(\d+)$/i);
-            if (match) {
-                const num = parseInt(match[1], 10);
-                if (num > maxNum) maxNum = num;
-            }
+            if (match) { const num = parseInt(match[1], 10); if (num > maxNum) maxNum = num; }
         });
         return "D-" + String(maxNum + 1).padStart(2, "0");
-    } catch (e) {
-        console.error("Could not generate delivery code:", e);
-        return "D-01";
-    }
+    } catch (e) { console.error("Could not generate delivery code:", e); return "D-01"; }
 }
 
 /* =========================================
@@ -517,9 +612,7 @@ async function generateDeliveryCode() {
 
 function initMap() {
     map = L.map('delivery-map').setView([14.5995, 120.9842], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
     document.getElementById('map-status').innerText = "Map loaded. Awaiting active deliveries.";
 }
 
@@ -557,9 +650,7 @@ async function handleSearch(queryText, type) {
                     div.onclick   = () => selectLocation(place, type);
                     suggestionBox.appendChild(div);
                 });
-            } else {
-                suggestionBox.style.display = "none";
-            }
+            } else { suggestionBox.style.display = "none"; }
         } catch (err) { console.error("Geocoding error", err); }
     }, 500);
 }
@@ -574,9 +665,7 @@ function selectLocation(place, type) {
         selectedDest = { lat: parseFloat(place.lat), lng: parseFloat(place.lon), name: place.display_name };
         document.getElementById("dest-suggestions").style.display = "none";
     }
-    if (selectedOrigin.lat && selectedDest.lat) {
-        autoCalculateETA();
-    }
+    if (selectedOrigin.lat && selectedDest.lat) autoCalculateETA();
 }
 
 /* =========================================
@@ -586,47 +675,30 @@ function selectLocation(place, type) {
 async function autoCalculateETA() {
     const etaInput = document.getElementById("eta");
     const etaHint  = document.getElementById("eta-hint");
-
     if (!etaInput) return;
-
-    etaInput.value       = "";
+    etaInput.value = "";
     etaInput.placeholder = "Calculating route…";
     if (etaHint) etaHint.textContent = "⏳ Fetching route estimate…";
-
     try {
-        const url = `https://router.project-osrm.org/route/v1/driving/` +
-                    `${selectedOrigin.lng},${selectedOrigin.lat};` +
-                    `${selectedDest.lng},${selectedDest.lat}` +
-                    `?overview=false`;
-
+        const url  = `https://router.project-osrm.org/route/v1/driving/${selectedOrigin.lng},${selectedOrigin.lat};${selectedDest.lng},${selectedDest.lat}?overview=false`;
         const res  = await fetch(url);
         const data = await res.json();
-
-        if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
+        if (data.code !== "Ok" || !data.routes?.length) {
             etaInput.placeholder = "Could not calculate — enter manually";
             if (etaHint) etaHint.textContent = "⚠️ Route not found. Please set ETA manually.";
             return;
         }
-
         const seconds = data.routes[0].duration;
         const distKm  = (data.routes[0].distance / 1000).toFixed(1);
         const hours   = Math.floor(seconds / 3600);
         const minutes = Math.round((seconds % 3600) / 60);
         const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
-
         const BUFFER_MINUTES = 15;
         const etaDate = new Date(Date.now() + seconds * 1000 + BUFFER_MINUTES * 60 * 1000);
-
         const pad = n => String(n).padStart(2, "0");
-        const formatted = `${etaDate.getFullYear()}-${pad(etaDate.getMonth()+1)}-${pad(etaDate.getDate())}` +
-                          `T${pad(etaDate.getHours())}:${pad(etaDate.getMinutes())}`;
-
-        etaInput.value       = formatted;
+        etaInput.value = `${etaDate.getFullYear()}-${pad(etaDate.getMonth()+1)}-${pad(etaDate.getDate())}T${pad(etaDate.getHours())}:${pad(etaDate.getMinutes())}`;
         etaInput.placeholder = "Estimated Arrival";
-        if (etaHint) {
-            etaHint.textContent = `🛣️ ${distKm} km · ~${timeStr} drive (+15 min buffer). You can still adjust manually.`;
-        }
-
+        if (etaHint) etaHint.textContent = `🛣️ ${distKm} km · ~${timeStr} drive (+15 min buffer). You can still adjust manually.`;
     } catch (err) {
         console.error("OSRM ETA error:", err);
         etaInput.placeholder = "Could not calculate — enter manually";
@@ -641,37 +713,20 @@ async function autoCalculateETA() {
 async function loadBatches() {
     const select = document.getElementById("batchSelect");
     if (select) select.innerHTML = `<option value="">Select Batch</option>`;
-
     try {
         const passedSnap = await getDocs(query(inspectionsCol, where("overallStatus", "==", "Passed")));
-
-        if (passedSnap.empty) {
-            if (select) select.innerHTML += `<option value="" disabled>No passed batches available</option>`;
-            return;
-        }
-
-        passedSnap.forEach(docSnap => {
-            batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id;
-        });
-
+        if (passedSnap.empty) { if (select) select.innerHTML += `<option value="" disabled>No passed batches available</option>`; return; }
+        passedSnap.forEach(docSnap => { batchesMap[docSnap.id] = docSnap.data().batchCode || docSnap.id; });
         const deliveriesSnap = await getDocs(deliveriesCol);
         const usedBatchIds   = new Set();
-        deliveriesSnap.forEach(d => {
-            if (d.data().batchId) usedBatchIds.add(d.data().batchId);
-        });
-
+        deliveriesSnap.forEach(d => { if (d.data().batchId) usedBatchIds.add(d.data().batchId); });
         let availableCount = 0;
         passedSnap.forEach(docSnap => {
             if (usedBatchIds.has(docSnap.id)) return;
             availableCount++;
-            if (select) {
-                select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
-            }
+            if (select) select.innerHTML += `<option value="${docSnap.id}">${batchesMap[docSnap.id]}</option>`;
         });
-
-        if (availableCount === 0 && select) {
-            select.innerHTML += `<option value="" disabled>All passed batches are already scheduled</option>`;
-        }
+        if (availableCount === 0 && select) select.innerHTML += `<option value="" disabled>All passed batches are already scheduled</option>`;
     } catch (err) { console.error("Error loading batches:", err); }
 }
 
@@ -680,9 +735,7 @@ async function loadDrivers() {
     const snapshot = await getDocs(q);
     const select   = document.getElementById("driverSelect");
     select.innerHTML = `<option value="">Assign Driver</option>`;
-    snapshot.forEach(docSnap => {
-        select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().fullName}</option>`;
-    });
+    snapshot.forEach(docSnap => { select.innerHTML += `<option value="${docSnap.id}">${docSnap.data().fullName}</option>`; });
 }
 
 /* =========================================
@@ -694,42 +747,24 @@ window.createDelivery = async function () {
     const driverId = document.getElementById("driverSelect").value;
     const truck    = document.getElementById("truckSelect").value;
     const eta      = document.getElementById("eta").value;
-
     if (!batchId || !driverId || !truck || !selectedOrigin.lat || !selectedDest.lat) {
         alert("Please fill all fields, select a truck, and pick valid locations from the dropdown.");
         return;
     }
-
     const deliveryCode = document.getElementById("deliveryCodeDisplay").value || await generateDeliveryCode();
     const driverSnap   = await getDocs(query(usersCol, where("__name__", "==", driverId)));
     let driverName     = "";
     driverSnap.forEach(d => driverName = d.data().fullName);
-
     const batchCode = batchesMap[batchId] || batchId;
-
     await addDoc(deliveriesCol, {
-        deliveryCode,
-        batchId,
-        batchCode,
-        driverId,
-        driverName,
-        truck,
-        eta,
-        origin:      selectedOrigin.name,
-        originLat:   selectedOrigin.lat,
-        originLng:   selectedOrigin.lng,
-        destination: selectedDest.name,
-        destLat:     selectedDest.lat,
-        destLng:     selectedDest.lng,
-        status:      "pending",
-        createdAt:   serverTimestamp(),
-        currentLat:  selectedOrigin.lat,
-        currentLng:  selectedOrigin.lng,
-        avgTemp:     null
+        deliveryCode, batchId, batchCode, driverId, driverName, truck, eta,
+        origin: selectedOrigin.name, originLat: selectedOrigin.lat, originLng: selectedOrigin.lng,
+        destination: selectedDest.name, destLat: selectedDest.lat, destLng: selectedDest.lng,
+        status: "pending", createdAt: serverTimestamp(),
+        currentLat: selectedOrigin.lat, currentLng: selectedOrigin.lng, avgTemp: null
     });
-
     alert(`Delivery ${deliveryCode} created successfully!`);
-    document.getElementById("origin").value      = "";
+    document.getElementById("origin").value = "";
     document.getElementById("destination").value = "";
     document.getElementById("truckSelect").value = "";
     document.getElementById("deliveryCodeDisplay").value = "";
@@ -741,17 +776,11 @@ window.createDelivery = async function () {
 
 /* =========================================
    ROUTE ALTERNATIVES
-   Shows up to 3 route cards below the map
-   for a pending delivery. Delivery role only.
-   The driver selects a route, then presses
-   "Start Delivery" which uses the chosen one.
 ========================================= */
 
 function showRouteAlternatives(deliveryId, oLat, oLng, dLat, dLng) {
     const role = localStorage.getItem("role");
     if (role !== "delivery") return;
-
-    // Don't re-render if already showing for this delivery
     if (altDeliveryId === deliveryId && altRoutes.length > 0) return;
 
     altDeliveryId    = deliveryId;
@@ -763,84 +792,42 @@ function showRouteAlternatives(deliveryId, oLat, oLng, dLat, dLng) {
     if (!panel || !cards) return;
 
     panel.style.display = "block";
-    cards.innerHTML = `
-        <div class="route-alt-loading">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            Calculating available routes…
-        </div>`;
+    cards.innerHTML = `<div class="route-alt-loading"><i class="fa-solid fa-spinner fa-spin"></i> Calculating available routes…</div>`;
 
-    // Clean up any previous fetch control
     clearAltFetchControl();
 
-    // Use a hidden LRM control purely to fetch the route alternatives
     altFetchControl = L.Routing.control({
-        waypoints: [
-            L.latLng(oLat, oLng),
-            L.latLng(dLat, dLng)
-        ],
-        addWaypoints:       false,
-        routeWhileDragging: false,
-        fitSelectedRoutes:  true,
-        show:               false,
-        showAlternatives:   true,
-        lineOptions: {
-            styles: [{ color: ROUTE_COLORS[0].line, opacity: 1, weight: 5 }]
-        },
-        altLineOptions: {
-            styles: [
-                { color: 'black',                  opacity: 0.15, weight: 9   },
-                { color: 'white',                  opacity: 0.8,  weight: 6   },
-                { color: ROUTE_COLORS[1].line,     opacity: 0.85, weight: 4.5 }
-            ]
-        },
+        waypoints: [L.latLng(oLat, oLng), L.latLng(dLat, dLng)],
+        addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: true,
+        show: false, showAlternatives: true,
+        lineOptions: { styles: [{ color: ROUTE_COLORS[0].line, opacity: 1, weight: 5 }] },
+        altLineOptions: { styles: [{ color: 'black', opacity: 0.15, weight: 9 }, { color: 'white', opacity: 0.8, weight: 6 }, { color: ROUTE_COLORS[1].line, opacity: 0.85, weight: 4.5 }] },
         createMarker: () => null
     }).addTo(map);
 
     altFetchControl.on('routesfound', function(e) {
-        // Cap at 3 alternatives
         altRoutes = e.routes.slice(0, 3);
-
-        // Draw all route lines on the map so driver can preview them
         clearAltPolylines();
         altRoutes.forEach((route, idx) => {
             const color = ROUTE_COLORS[idx] || ROUTE_COLORS[0];
-            const opacity = idx === 0 ? 1 : 0.45;
-            const weight  = idx === 0 ? 6 : 4;
             const poly = L.polyline(route.coordinates, {
-                color:   color.line,
-                weight,
-                opacity,
-                dashArray: idx === 0 ? null : '6, 8'
+                color: color.line, weight: idx === 0 ? 6 : 4,
+                opacity: idx === 0 ? 1 : 0.45, dashArray: idx === 0 ? null : '6, 8'
             }).addTo(map);
             altPolylines.push(poly);
         });
-
-        // Fit map to show all routes
-        if (altPolylines.length > 0) {
-            const group = L.featureGroup(altPolylines);
-            map.fitBounds(group.getBounds(), { padding: [30, 30] });
-        }
-
+        if (altPolylines.length > 0) map.fitBounds(L.featureGroup(altPolylines).getBounds(), { padding: [30, 30] });
         renderRouteCards(altRoutes, deliveryId);
-
-        // Update status bar with first route info
         updateStatusBarForRoute(0);
     });
 
     altFetchControl.on('routingerror', function() {
-        cards.innerHTML = `
-            <div class="route-alt-loading" style="color:#dc2626;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                Could not load route alternatives. Check your connection.
-            </div>`;
+        cards.innerHTML = `<div class="route-alt-loading" style="color:#dc2626;"><i class="fa-solid fa-triangle-exclamation"></i> Could not load route alternatives.</div>`;
     });
 }
 
 function clearAltFetchControl() {
-    if (altFetchControl) {
-        try { map.removeControl(altFetchControl); } catch (_) {}
-        altFetchControl = null;
-    }
+    if (altFetchControl) { try { map.removeControl(altFetchControl); } catch (_) {} altFetchControl = null; }
 }
 
 function clearAltPolylines() {
@@ -853,19 +840,14 @@ function hideRouteAlternatives() {
     if (panel) panel.style.display = "none";
     clearAltFetchControl();
     clearAltPolylines();
-    altRoutes        = [];
-    altDeliveryId    = null;
-    selectedAltIndex = 0;
+    altRoutes = []; altDeliveryId = null; selectedAltIndex = 0;
 }
 
 function renderRouteCards(routes, deliveryId) {
     const cards = document.getElementById("route-alt-cards");
     if (!cards) return;
-
-    // Find fastest and shortest for badge labelling
     const minTime = Math.min(...routes.map(r => r.summary.totalTime));
     const minDist = Math.min(...routes.map(r => r.summary.totalDistance));
-
     cards.innerHTML = routes.map((route, idx) => {
         const color   = ROUTE_COLORS[idx] || ROUTE_COLORS[0];
         const distKm  = (route.summary.totalDistance / 1000).toFixed(1);
@@ -873,37 +855,19 @@ function renderRouteCards(routes, deliveryId) {
         const hrs     = Math.floor(secs / 3600);
         const mins    = Math.round((secs % 3600) / 60);
         const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
-
-        // Use the first segment of the LRM route name if available
-        const routeName = route.name
-            ? route.name.split(',')[0].trim()
-            : `Route ${idx + 1}`;
-
+        const routeName = route.name ? route.name.split(',')[0].trim() : `Route ${idx + 1}`;
         let badges = '';
-        if (route.summary.totalTime === minTime && routes.length > 1) {
-            badges += `<span class="route-alt-badge fastest"><i class="fa-solid fa-bolt"></i> Fastest</span>`;
-        }
-        if (route.summary.totalDistance === minDist && routes.length > 1) {
-            badges += `<span class="route-alt-badge shortest"><i class="fa-solid fa-minimize"></i> Shortest</span>`;
-        }
-
-        const isSelected = idx === selectedAltIndex;
-
+        if (route.summary.totalTime === minTime && routes.length > 1) badges += `<span class="route-alt-badge fastest"><i class="fa-solid fa-bolt"></i> Fastest</span>`;
+        if (route.summary.totalDistance === minDist && routes.length > 1) badges += `<span class="route-alt-badge shortest"><i class="fa-solid fa-minimize"></i> Shortest</span>`;
         return `
-        <div class="route-alt-card ${isSelected ? 'selected' : ''}"
-             data-route-idx="${idx}"
-             onclick="selectRouteAlternative(${idx}, '${deliveryId}')">
+        <div class="route-alt-card ${idx === selectedAltIndex ? 'selected' : ''}" data-route-idx="${idx}" onclick="selectRouteAlternative(${idx}, '${deliveryId}')">
             <div class="route-alt-color ${color.colorClass}"></div>
             <div class="route-alt-num ${color.numClass}">${idx + 1}</div>
             <div class="route-alt-info">
                 <div class="route-alt-name">${routeName}${badges}</div>
                 <div class="route-alt-meta">
-                    <span class="route-alt-stat">
-                        <i class="fa-solid fa-road"></i> ${distKm} km
-                    </span>
-                    <span class="route-alt-stat">
-                        <i class="fa-solid fa-clock"></i> ~${timeStr}
-                    </span>
+                    <span class="route-alt-stat"><i class="fa-solid fa-road"></i> ${distKm} km</span>
+                    <span class="route-alt-stat"><i class="fa-solid fa-clock"></i> ~${timeStr}</span>
                 </div>
             </div>
             <div class="route-alt-check"><i class="fa-solid fa-check"></i></div>
@@ -911,27 +875,14 @@ function renderRouteCards(routes, deliveryId) {
     }).join('');
 }
 
-// Called when driver taps a route card
 window.selectRouteAlternative = function(idx, deliveryId) {
     if (idx < 0 || idx >= altRoutes.length) return;
-
     selectedAltIndex = idx;
-
-    // Update card selected state
-    document.querySelectorAll('.route-alt-card').forEach((card, i) => {
-        card.classList.toggle('selected', i === idx);
-    });
-
-    // Redraw polylines: selected route solid + full opacity, others faded
+    document.querySelectorAll('.route-alt-card').forEach((card, i) => card.classList.toggle('selected', i === idx));
     altPolylines.forEach((poly, i) => {
-        poly.setStyle({
-            opacity:   i === idx ? 1    : 0.3,
-            weight:    i === idx ? 6    : 3,
-            dashArray: i === idx ? null : '6, 8'
-        });
+        poly.setStyle({ opacity: i === idx ? 1 : 0.3, weight: i === idx ? 6 : 3, dashArray: i === idx ? null : '6, 8' });
         if (i === idx) poly.bringToFront();
     });
-
     updateStatusBarForRoute(idx);
 };
 
@@ -949,7 +900,7 @@ function updateStatusBarForRoute(idx) {
         statusBox.innerHTML = `
             <i class="fa-solid fa-route" style="color:${color.line};"></i>
             <b>Route ${idx + 1} selected:</b> ${distKm} km · ~${timeStr}
-            <span style="font-size:11px;color:#94a3b8;margin-left:8px;">Press Start Delivery to begin navigation</span>`;
+            <span style="font-size:11px;color:#94a3b8;margin-left:8px;">Press Start Delivery to begin</span>`;
     }
 }
 
@@ -962,15 +913,12 @@ function listenToDeliveries() {
     const userId = localStorage.getItem("userId");
 
     let q = query(deliveriesCol);
-    if (role === "delivery") {
-        q = query(deliveriesCol, where("driverId", "==", userId));
-    }
+    if (role === "delivery") q = query(deliveriesCol, where("driverId", "==", userId));
 
     const truckIcon = L.divIcon({
         className: 'custom-truck-icon',
-        html:      "<div class='truck-marker'><i class='fa-solid fa-truck'></i></div>",
-        iconSize:  [36, 36],
-        iconAnchor:[18, 18]
+        html: "<div class='truck-marker'><i class='fa-solid fa-truck'></i></div>",
+        iconSize: [36, 36], iconAnchor: [18, 18]
     });
 
     onSnapshot(q, (snapshot) => {
@@ -980,125 +928,67 @@ function listenToDeliveries() {
         const deliveredBody = document.getElementById("delivered-body");
         const delayedBody   = document.getElementById("delayed-body");
 
-        allBody.innerHTML       = "";
-        pendingBody.innerHTML   = "";
-        enrouteBody.innerHTML   = "";
-        deliveredBody.innerHTML = "";
-        delayedBody.innerHTML   = "";
+        allBody.innerHTML = pendingBody.innerHTML = enrouteBody.innerHTML = deliveredBody.innerHTML = delayedBody.innerHTML = "";
 
         let counts = { pending: 0, enroute: 0, delivered: 0, delayed: 0 };
-
         let docsArray = [];
         snapshot.forEach(docSnap => docsArray.push({ id: docSnap.id, ...docSnap.data() }));
         docsArray.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
         currentlyEnRoute = docsArray.some(d => d.status === "en_route");
-
-        // Auto-mark delayed: en_route deliveries more than 20 mins past ETA
-        const now      = Date.now();
-        const GRACE_MS = 20 * 60 * 1000;
-        docsArray.forEach(async d => {
-            if (d.status === "en_route" && d.eta) {
-                const etaMs = new Date(d.eta).getTime();
-                if (!isNaN(etaMs) && now > etaMs + GRACE_MS) {
-                    try {
-                        await updateDoc(doc(db, "deliveries", d.id), { status: "delayed" });
-                    } catch (e) { console.warn("Could not auto-mark delayed:", e); }
-                }
-            }
-        });
-
-        // Track whether the delivery role user has a pending delivery
-        // to decide whether to show/hide the route alternatives panel
         let hasPendingDelivery = false;
 
-        docsArray.forEach(d => {
+        docsArray.forEach(async d => {
             const id = d.id;
 
             if (d.status === "delivered") {
-                // Clean up map layers for completed deliveries
                 if (deliveryMarkers[id]) { map.removeLayer(deliveryMarkers[id]); delete deliveryMarkers[id]; }
-                if (deliveryRoutes[id])  { map.removeControl(deliveryRoutes[id]); delete deliveryRoutes[id]; }
+                if (deliveryRoutes[id] && !deliveryRoutes[id]._placeholder) { map.removeControl(deliveryRoutes[id]); delete deliveryRoutes[id]; }
             } else {
-                // Draw route on map for non-delivered deliveries
                 if (d.originLat && d.destLat && !deliveryRoutes[id]) {
-
                     if (role === "delivery" && d.status === "pending") {
-                        // ── DELIVERY ROLE + PENDING ──
-                        // Show route alternatives panel instead of a fixed LRM route.
-                        // The polylines are drawn inside showRouteAlternatives().
                         hasPendingDelivery = true;
-                        showRouteAlternatives(
-                            id,
-                            d.currentLat || d.originLat,
-                            d.currentLng || d.originLng,
-                            d.destLat,
-                            d.destLng
-                        );
-                        // Store a placeholder so we don't re-trigger on next snapshot
+                        showRouteAlternatives(id, d.currentLat || d.originLat, d.currentLng || d.originLng, d.destLat, d.destLng);
                         deliveryRoutes[id] = { _placeholder: true, setWaypoints: () => {} };
-
                     } else {
-                        // ── ALL OTHER ROLES / EN ROUTE / DELAYED ──
-                        // Standard LRM route with alternatives visible on map
                         deliveryRoutes[id] = L.Routing.control({
-                            waypoints: [
-                                L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng),
-                                L.latLng(d.destLat, d.destLng)
-                            ],
-                            addWaypoints:       false,
-                            routeWhileDragging: false,
-                            fitSelectedRoutes:  true,
-                            show:               true,
-                            showAlternatives:   true,
-                            altLineOptions: {
-                                styles: [
-                                    { color: 'black',   opacity: 0.15, weight: 9   },
-                                    { color: 'white',   opacity: 0.8,  weight: 6   },
-                                    { color: '#64748b', opacity: 0.9,  weight: 4.5 }
-                                ]
-                            },
+                            waypoints: [L.latLng(d.currentLat || d.originLat, d.currentLng || d.originLng), L.latLng(d.destLat, d.destLng)],
+                            addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: true,
+                            show: true, showAlternatives: true,
+                            altLineOptions: { styles: [{ color: 'black', opacity: 0.15, weight: 9 }, { color: 'white', opacity: 0.8, weight: 6 }, { color: '#64748b', opacity: 0.9, weight: 4.5 }] },
                             lineOptions: { styles: [{ color: '#0d9488', opacity: 1, weight: 6 }] },
                             createMarker: () => null
                         }).addTo(map);
-
                         deliveryRoutes[id].on('routeselected', function(e) {
-                            const route      = e.route;
+                            const route = e.route;
                             const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
                             const hours      = Math.floor(route.summary.totalTime / 3600);
                             const minutes    = Math.round((route.summary.totalTime % 3600) / 60);
                             const timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
                             const statusBox  = document.getElementById('map-status');
-                            if (statusBox) {
-                                statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
-                            }
+                            if (statusBox) statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
                         });
                     }
                 }
 
                 const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('focus') === id && !isNavigating) {
-                    map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
-                }
+                if (urlParams.get('focus') === id && !isNavigating) map.setView([d.currentLat || d.originLat, d.currentLng || d.originLng], 14);
 
                 if (d.currentLat && d.currentLng) {
                     if (!deliveryMarkers[id]) {
                         deliveryMarkers[id] = L.marker([d.currentLat, d.currentLng], { icon: truckIcon })
-                            .addTo(map)
-                            .bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
+                            .addTo(map).bindPopup(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
                     } else {
                         deliveryMarkers[id].setLatLng([d.currentLat, d.currentLng]);
                         deliveryMarkers[id].getPopup().setContent(`<b>${d.deliveryCode}</b><br>Status: ${d.status.replace("_", " ")}`);
                     }
                 }
 
-                // Resume GPS tracking for en_route / delayed deliveries
                 if (role === "delivery" && (d.status === "en_route" || d.status === "delayed") && !isNavigating) {
                     startTracking(id, d.destLat, d.destLng);
                 }
             }
 
-            // Build action buttons
             let actionButton = "";
             if (role === "delivery") {
                 if (d.status === "pending")
@@ -1114,12 +1004,10 @@ function listenToDeliveries() {
             const truckName     = d.truck        || "-";
             const formattedDate = d.eta          ? new Date(d.eta).toLocaleString() : "-";
             const deliveredDate = d.deliveredAt  ? d.deliveredAt.toDate().toLocaleString() : "-";
-
-            const displayBatch = d.batchCode || batchesMap[d.batchId] || d.batchId || "-";
+            const displayBatch  = d.batchCode    || batchesMap[d.batchId] || d.batchId || "-";
 
             if (d.status !== "delivered") {
-                allBody.innerHTML += `
-                <tr>
+                allBody.innerHTML += `<tr>
                     <td><strong>${d.deliveryCode}</strong></td>
                     <td>${displayBatch}</td>
                     <td>${d.driverName || "-"}</td>
@@ -1146,16 +1034,12 @@ function listenToDeliveries() {
             }
         });
 
-        // Hide alternatives panel if the delivery role user has no pending deliveries
-        if (role === "delivery" && !hasPendingDelivery) {
-            hideRouteAlternatives();
-        }
+        if (role === "delivery" && !hasPendingDelivery) hideRouteAlternatives();
 
         document.getElementById("pending-count").textContent   = counts.pending;
         document.getElementById("enroute-count").textContent   = counts.enroute;
         document.getElementById("delivered-count").textContent = counts.delivered;
         document.getElementById("delayed-count").textContent   = counts.delayed;
-
         document.getElementById("modal-pending-count").textContent   = counts.pending;
         document.getElementById("modal-enroute-count").textContent   = counts.enroute;
         document.getElementById("modal-delivered-count").textContent = counts.delivered;
@@ -1164,7 +1048,7 @@ function listenToDeliveries() {
 }
 
 /* =========================================
-   UPDATE STATUS & GPS TRACKING
+   UPDATE STATUS
 ========================================= */
 
 window.updateStatus = async function (id, status, destLat = null, destLng = null) {
@@ -1172,36 +1056,17 @@ window.updateStatus = async function (id, status, destLat = null, destLng = null
 
     if (status === "en_route") {
         updateData.startedAt = serverTimestamp();
-
-        // Hide the route alternatives panel — driver has committed to a route
         hideRouteAlternatives();
-
-        // Clean up the placeholder entry so the real LRM control can be created
-        if (deliveryRoutes[id]?._placeholder) {
-            delete deliveryRoutes[id];
-        }
-
-        // If the driver selected a non-default route, draw it as a proper LRM
-        // control so GPS tracking can update waypoints via setWaypoints()
+        if (deliveryRoutes[id]?._placeholder) delete deliveryRoutes[id];
         if (altRoutes.length > 0 && selectedAltIndex < altRoutes.length) {
             const chosenColor = ROUTE_COLORS[selectedAltIndex] || ROUTE_COLORS[0];
-            // The route is already drawn as a polyline from showRouteAlternatives.
-            // For GPS tracking we need a real LRM control with setWaypoints support.
             deliveryRoutes[id] = L.Routing.control({
-                waypoints: [
-                    L.latLng(destLat ? altRoutes[selectedAltIndex].coordinates[0].lat : altRoutes[0].coordinates[0].lat,
-                             destLat ? altRoutes[selectedAltIndex].coordinates[0].lng : altRoutes[0].coordinates[0].lng),
-                    L.latLng(destLat, destLng)
-                ],
-                addWaypoints:       false,
-                routeWhileDragging: false,
-                fitSelectedRoutes:  false,
-                show:               false,
+                waypoints: [L.latLng(destLat, destLng), L.latLng(destLat, destLng)],
+                addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: false, show: false,
                 lineOptions: { styles: [{ color: chosenColor.line, opacity: 1, weight: 6 }] },
                 createMarker: () => null
             }).addTo(map);
         }
-
         startTracking(id, destLat, destLng);
     }
 
@@ -1215,53 +1080,3 @@ window.updateStatus = async function (id, status, destLat = null, destLng = null
 
     await updateDoc(doc(db, "deliveries", id), updateData);
 };
-
-function startTracking(deliveryId, destLat, destLng) {
-    if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser.");
-        return;
-    }
-    navigator.geolocation.getCurrentPosition(position => {
-        isNavigating = true;
-        document.getElementById('map-status').innerHTML =
-            `<i class="fa-solid fa-location-crosshairs" style="color:#059669;"></i> Navigation Mode Active`;
-
-        watchId = navigator.geolocation.watchPosition(async pos => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            driverLat = lat;
-            driverLng = lng;
-
-            map.setView([lat, lng], 18);
-            if (deliveryMarkers[deliveryId]) deliveryMarkers[deliveryId].setLatLng([lat, lng]);
-            if (deliveryRoutes[deliveryId] && destLat && destLng &&
-                typeof deliveryRoutes[deliveryId].setWaypoints === "function") {
-                deliveryRoutes[deliveryId].setWaypoints([
-                    L.latLng(lat, lng),
-                    L.latLng(destLat, destLng)
-                ]);
-            }
-            await updateDoc(doc(db, "deliveries", deliveryId), { currentLat: lat, currentLng: lng });
-
-        }, error => {
-            console.error(error);
-            document.getElementById('map-status').innerText = "GPS Error: Please enable location services.";
-        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
-
-    }, error => {
-        alert("Location permission denied. Please enable location access for this site.");
-        console.error(error);
-    });
-}
-
-function stopTracking() {
-    if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        isNavigating  = false;
-        driverLat     = null;
-        driverLng     = null;
-        document.getElementById('map-status').innerText = "Tracking stopped. Delivery completed.";
-        map.setZoom(12);
-    }
-}
