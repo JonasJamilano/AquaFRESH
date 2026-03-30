@@ -36,6 +36,19 @@ let selectedOrigin = { lat: null, lng: null, name: "" };
 let selectedDest   = { lat: null, lng: null, name: "" };
 let batchesMap     = {};
 
+let followMode = true;
+
+window.toggleFollowMode = function() {
+    followMode = !followMode;
+    const btn = document.getElementById('follow-toggle');
+    if (btn) {
+        btn.innerHTML = followMode
+            ? `<i class="fa-solid fa-location-crosshairs"></i> Follow: ON`
+            : `<i class="fa-solid fa-expand"></i> Follow: OFF`;
+        btn.style.background = followMode ? '#0d9488' : '#64748b';
+    }
+};
+
 /* =========================================
    ROUTE ALTERNATIVES STATE
    Tracks the fetched routes, which one the
@@ -517,10 +530,13 @@ async function generateDeliveryCode() {
 
 function initMap() {
     map = L.map('delivery-map').setView([14.5995, 120.9842], 12);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
     }).addTo(map);
-    document.getElementById('map-status').innerText = "Map loaded. Awaiting active deliveries.";
+
+    document.getElementById('map-status').innerText =
+        "Map loaded. Awaiting active deliveries.";
 }
 
 /* =========================================
@@ -1062,15 +1078,21 @@ function listenToDeliveries() {
                             createMarker: () => null
                         }).addTo(map);
 
-                        deliveryRoutes[id].on('routeselected', function(e) {
-                            const route      = e.route;
+                            deliveryRoutes[id].on('routesfound', function(e) {
+                            if (!e.routes || !e.routes.length) return;
+
+                            const route = e.routes[0];
+
                             const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
-                            const hours      = Math.floor(route.summary.totalTime / 3600);
-                            const minutes    = Math.round((route.summary.totalTime % 3600) / 60);
-                            const timeString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes} mins`;
-                            const statusBox  = document.getElementById('map-status');
+                            const minutes = Math.round(route.summary.totalTime / 60);
+
+                            const statusBox = document.getElementById('map-status');
                             if (statusBox) {
-                                statusBox.innerHTML = `<i class="fa-solid fa-route" style="color:#0f766e;"></i> <b>Route:</b> ${distanceKm} km | Est. Time: <span style="color:#0f766e; font-weight:700;">${timeString}</span>`;
+                                statusBox.innerHTML = `
+                                    <i class="fa-solid fa-route" style="color:#0f766e;"></i>
+                                    <b>Route:</b> ${distanceKm} km | 
+                                    Est. Time: <span style="color:#0f766e;font-weight:700;">${minutes} min</span>
+                                `;
                             }
                         });
                     }
@@ -1233,7 +1255,10 @@ function startTracking(deliveryId, destLat, destLng) {
             driverLat = lat;
             driverLng = lng;
 
-            map.setView([lat, lng], 18);
+            // Only auto-center if user is not interacting
+            if (followMode) {
+            map.setView([lat, lng], map.getZoom());
+            }
             if (deliveryMarkers[deliveryId]) deliveryMarkers[deliveryId].setLatLng([lat, lng]);
             if (deliveryRoutes[deliveryId] && destLat && destLng &&
                 typeof deliveryRoutes[deliveryId].setWaypoints === "function") {

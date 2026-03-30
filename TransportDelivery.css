@@ -594,6 +594,196 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
     .route-alt-stat { font-size: 0.76rem; }
 }
 
+/* ==============================================
+   FOLLOW MODE BUTTON
+   Overlays on the map after navigation starts.
+   Delivery role only.
+============================================== */
+.follow-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s, transform 0.12s, box-shadow 0.15s;
+    white-space: nowrap;
+}
+ 
+.follow-mode-btn:hover { transform: translateY(-1px); }
+.follow-mode-btn:active { transform: translateY(0); }
+ 
+.follow-on {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+ 
+.follow-off {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: none;
+}
+ 
+/* ==============================================
+   SWITCH ROUTE BUTTON
+   Appears in map-status bar when en route.
+============================================== */
+.switch-route-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 12px;
+    padding: 5px 14px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1.5px solid #93c5fd;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s, transform 0.12s;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+ 
+.switch-route-btn:hover {
+    background: #dbeafe;
+    transform: translateY(-1px);
+}
+ 
+/* ==============================================
+   SWITCH ROUTE PANEL
+   Appears below the route alternatives panel
+   when driver presses Switch Route en route.
+============================================== */
+.switch-route-panel {
+    display: none;
+    margin-top: 16px;
+    border: 1.5px solid #3b82f6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+    animation: switchRouteIn 0.2s ease;
+}
+ 
+@keyframes switchRouteIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+ 
+.switch-route-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px;
+    background: linear-gradient(135deg, #1e3a5f, #1e40af);
+    flex-wrap: wrap;
+    gap: 6px;
+}
+ 
+.switch-route-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #bfdbfe;
+}
+ 
+.switch-route-title i { color: #60a5fa; }
+ 
+.switch-route-hint {
+    font-size: 11px;
+    color: #93c5fd;
+}
+ 
+.switch-route-cards { padding: 4px 0; }
+ 
+.switch-route-actions {
+    display: flex;
+    gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    flex-wrap: wrap;
+}
+ 
+.switch-route-confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s, transform 0.12s;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+ 
+.switch-route-confirm-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+ 
+.switch-route-cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: #fff;
+    color: #475569;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s;
+}
+ 
+.switch-route-cancel-btn:hover { background: #f1f5f9; }
+
+.follow-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: #0d9488;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 12px;
+}
+.follow-mode-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+ 
+@media (max-width: 768px) {
+    .switch-route-header { flex-direction: column; align-items: flex-start; }
+    .switch-route-actions { flex-direction: column; }
+    .switch-route-confirm-btn,
+    .switch-route-cancel-btn { width: 100%; justify-content: center; }
+    .follow-mode-btn { width: 100%; justify-content: center; margin-top: 8px; }
+    .switch-route-btn { margin-left: 0; margin-top: 6px; width: 100%; justify-content: center; }
+}
+
 /* =====================================================================
    RESPONSIVE — SMALL MOBILE  ≤ 400px
 ===================================================================== */
