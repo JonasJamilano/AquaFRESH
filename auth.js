@@ -41,13 +41,18 @@ document.addEventListener("DOMContentLoaded", () => {
     signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const fullName = document.getElementById("fullName").value;
-      const email = document.getElementById("signupEmail").value;
-      const phone = document.getElementById("phone").value;
-      const address = document.getElementById("address").value;
-      const role = document.getElementById("role").value;
-      const password = document.getElementById("signupPassword").value;
+      const fullName       = document.getElementById("fullName").value;
+      const email          = document.getElementById("signupEmail").value;
+      const phone          = document.getElementById("phone").value;
+      const address        = document.getElementById("address").value;
+      const role           = document.getElementById("role").value;
+      const password       = document.getElementById("signupPassword").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // Customer-specific field
+      const deliveryAddress = role === "customer"
+        ? (document.getElementById("deliveryAddress")?.value || "")
+        : "";
 
       if (password !== confirmPassword) {
         alert("Passwords do not match");
@@ -55,20 +60,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        // 🔥 Create Auth account
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
+        // Create Firebase Auth account
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // generate custom ID
+        // Generate custom ID
         const customId = await generateUserCustomId();
 
-        // save user profile
-        await setDoc(doc(db, "users", user.uid), {
+        // Build user profile — include deliveryAddress only for customers
+        const userProfile = {
           customId,
           fullName,
           email,
@@ -77,7 +77,14 @@ document.addEventListener("DOMContentLoaded", () => {
           role,
           status: "active",
           createdAt: serverTimestamp()
-        });
+        };
+
+        if (role === "customer") {
+          userProfile.deliveryAddress = deliveryAddress;
+        }
+
+        // Save user profile to Firestore
+        await setDoc(doc(db, "users", user.uid), userProfile);
 
         alert("Account created successfully!");
         window.location.href = "Login.html";
@@ -89,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   /* ======================
      LOGIN
   ====================== */
@@ -99,19 +105,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById("loginEmail").value;
+      const email    = document.getElementById("loginEmail").value;
       const password = document.getElementById("loginPassword").value;
 
       try {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 🔥 Get user role from Firestore
+        // Get user role from Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
 
         if (!userDoc.exists()) {
@@ -126,20 +127,24 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // Save to localStorage (keep same keys so system works)
-        localStorage.setItem("role", userData.role);
-        localStorage.setItem("user", userData.fullName);
-        localStorage.setItem("userId", user.uid);
+        // Save to localStorage
+        localStorage.setItem("role",         userData.role);
+        localStorage.setItem("user",         userData.fullName);
+        localStorage.setItem("userId",       user.uid);
         localStorage.setItem("userFullName", userData.fullName);
-        localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("userRole",     userData.role);
 
         // Redirect by role
         if (["superadmin", "admin", "manager"].includes(userData.role)) {
           window.location.href = "Dashboard.html";
         } else if (userData.role === "inspector") {
           window.location.href = "InspectorDashboard.html";
-        } else {
+        } else if (userData.role === "delivery") {
           window.location.href = "DeliveryDashboard.html";
+        } else if (userData.role === "customer") {
+          window.location.href = "CustomerDashboard.html";
+        } else {
+          window.location.href = "Login.html";
         }
 
       } catch (error) {

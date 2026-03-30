@@ -489,6 +489,7 @@ async function initPage() {
         const triggerWrap = document.getElementById("createDeliveryWrapper");
         if (triggerWrap) triggerWrap.style.display = "block";
         loadDrivers();
+        loadCustomers();
         setupLocationAutocomplete();
         document.getElementById("btn-new-delivery")?.addEventListener("click", async () => {
             const preview = document.getElementById("deliveryCodeDisplay");
@@ -701,6 +702,18 @@ async function loadDrivers() {
     });
 }
 
+async function loadCustomers() {
+    const q        = query(usersCol, where("role", "==", "customer"), where("status", "==", "active"));
+    const snapshot = await getDocs(q);
+    const select   = document.getElementById("customerSelect");
+    if (!select) return;
+    select.innerHTML = `<option value="">No Customer (Internal)</option>`;
+    snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        select.innerHTML += `<option value="${docSnap.id}">${d.fullName} — ${d.deliveryAddress || d.address || ""}</option>`;
+    });
+}
+
 /* =========================================
    CREATE DELIVERY
 ========================================= */
@@ -710,6 +723,7 @@ window.createDelivery = async function () {
     const driverId = document.getElementById("driverSelect").value;
     const truck    = document.getElementById("truckSelect").value;
     const eta      = document.getElementById("eta").value;
+    const customerId = document.getElementById("customerSelect")?.value || "";
 
     if (!batchId || !driverId || !truck || !selectedOrigin.lat || !selectedDest.lat) {
         alert("Please fill all fields, select a truck, and pick valid locations from the dropdown.");
@@ -731,6 +745,7 @@ window.createDelivery = async function () {
         driverName,
         truck,
         eta,
+        customerId,
         origin:      selectedOrigin.name,
         originLat:   selectedOrigin.lat,
         originLng:   selectedOrigin.lng,
