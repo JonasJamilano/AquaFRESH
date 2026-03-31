@@ -34,6 +34,7 @@ function getStatusBadgeHTML(statusStr) {
     if (norm.includes('pending'))                                    colorClass = 'status-pending';
     else if (norm.includes('route'))                                 colorClass = 'status-enroute';
     else if (norm.includes('delivered') || norm.includes('passed')) colorClass = 'status-success';
+    else if (norm.includes('received'))                              colorClass = 'status-received';
     else if (norm.includes('delayed')   || norm.includes('rejected')) colorClass = 'status-danger';
     else if (norm.includes('issue'))                                 colorClass = 'status-warning';
     const displayStr = statusStr.replace("_", " ");
@@ -58,7 +59,8 @@ function renderActivities() {
         // Module filter — "qc" matches inspection type, "transport" matches delivery type
         const matchModule = !moduleFilter ||
             (moduleFilter === "qc"        && a.type === "inspection") ||
-            (moduleFilter === "transport" && a.type === "delivery");
+            (moduleFilter === "transport" && a.type === "delivery" && a.module !== "Customer") ||
+            (moduleFilter === "customer"  && a.module === "Customer");
 
         // Status filter
         const matchStatus = !statusFilter ||
@@ -113,19 +115,33 @@ function listenToRecentActivity() {
         renderActivities();
     });
 
-    onSnapshot(collection(db, "deliveries"), (snap) => {
+        onSnapshot(collection(db, "deliveries"), (snap) => {
         allActivities = allActivities.filter(a => a.type !== "delivery");
         snap.forEach(doc => {
             const d = doc.data();
             if (d.createdAt) {
-                allActivities.push({
-                    type:   "delivery",
-                    time:   d.createdAt.toDate(),
-                    module: "Transport",
-                    detail: `Delivery ${d.deliveryCode} — ${d.status?.replace("_", " ")}`,
-                    status: d.status,
-                    link:   "TransportDelivery.html"
-                });
+                // Transport activity — exclude received (that belongs to customer)
+                if (d.status !== "received") {
+                    allActivities.push({
+                        type:   "delivery",
+                        time:   d.createdAt.toDate(),
+                        module: "Transport",
+                        detail: `Delivery ${d.deliveryCode} — ${d.status?.replace("_", " ")}`,
+                        status: d.status,
+                        link:   "TransportDelivery.html"
+                    });
+                }
+                // Customer receipt activity — only when received
+                if (d.status === "received" && d.receivedAt) {
+                    allActivities.push({
+                        type:   "delivery",
+                        time:   d.receivedAt.toDate(),
+                        module: "Customer",
+                        detail: `Delivery ${d.deliveryCode} — receipt confirmed`,
+                        status: "received",
+                        link:   "TransportDelivery.html"
+                    });
+                }
             }
         });
         renderActivities();
@@ -259,7 +275,7 @@ function renderTransport() {
 
     const active    = filtered.filter(d => d.status === "pending" || d.status === "en_route");
     const delayed   = filtered.filter(d => d.status === "delayed");
-    const delivered = filtered.filter(d => d.status === "delivered");
+    const delivered = filtered.filter(d => d.status === "delivered" || d.status === "received");
 
     document.getElementById("dash-active-count").textContent    = active.length;
     document.getElementById("dash-delayed-count").textContent   = delayed.length;

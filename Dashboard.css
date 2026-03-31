@@ -144,6 +144,8 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .status-warning  { background: #fef3c7; color: #92400e; }
 .status-warning  .status-dot { background: #d97706; }
 .text-center { text-align: center !important; }
+.status-pill.status-received .status-dot { background: #0d9488; }
+.status-pill.status-received { background: #ccfbf1; color: #0f766e; }
 
 /* =====================
    SIDEBAR COLLAPSE (desktop)

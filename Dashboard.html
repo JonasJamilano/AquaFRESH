@@ -102,6 +102,7 @@
                 <option value="">All Modules</option>
                 <option value="qc">Quality Control</option>
                 <option value="transport">Transport &amp; Delivery</option>
+                <option value="customer">Customer</option>
             </select>
             <!-- Level 2: Status filter — updates dynamically based on module -->
             <select id="recent-sort-status" class="dash-filter-select">
@@ -336,6 +337,9 @@
             { value: "en_route",  label: "En Route"  },
             { value: "delivered", label: "Delivered" },
             { value: "delayed",   label: "Delayed"   }
+        ],
+        customer: [                                    // ← ADD THIS
+        { value: "received",  label: "Received"  }
         ]
     };
 
