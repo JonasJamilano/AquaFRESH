@@ -282,7 +282,7 @@ function listenToMyDeliveries() {
                 counts.enroute++;
                 enrouteBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${shortDest}</td><td>${formattedDate}</td><td>${viewMapBtn}</td></tr>`;
             }
-            else if (d.status === "delivered") {
+            else if (d.status === "delivered" || d.status === "received") {
                 counts.delivered++;
                 deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${shortDest}</td><td>${deliveredDate}</td><td>${statusBadge}</td></tr>`;
             }

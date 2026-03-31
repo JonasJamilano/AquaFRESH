@@ -224,6 +224,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .qc-status-card.blue   .card-icon { background: #dbeafe; color: #3b82f6; }
 .qc-status-card.blue   .card-count { color: #3b82f6; }
 
+
 /* =====================
    TABLE
 ===================== */
@@ -276,6 +277,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #334155; di
 .status-en_route  { background-color: #dbeafe; color: #1e40af; }
 .status-delivered { background-color: #dcfce7; color: #166534; }
 .status-delayed   { background-color: #fee2e2; color: #991b1b; }
+.status-received  { background-color: #ccfbf1; color: #0f766e; }
 
 /* MAP ACTION BUTTON */
 .btn-map {
