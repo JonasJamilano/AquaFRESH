@@ -1017,7 +1017,7 @@ function listenToDeliveries() {
         deliveredBody.innerHTML = "";
         delayedBody.innerHTML   = "";
 
-        let counts = { pending: 0, enroute: 0, delivered: 0, delayed: 0 };
+        let counts = { pending: 0, enroute: 0, delivered: 0, delayed: 0, received: 0 };
 
         let docsArray = [];
         snapshot.forEach(docSnap => docsArray.push({ id: docSnap.id, ...docSnap.data() }));
@@ -1046,7 +1046,7 @@ function listenToDeliveries() {
         docsArray.forEach(d => {
             const id = d.id;
 
-            if (d.status === "delivered") {
+            if (d.status === "delivered" || d.status === "received") {
                 // Clean up map layers for completed deliveries
                 if (deliveryMarkers[id]) { map.removeLayer(deliveryMarkers[id]); delete deliveryMarkers[id]; }
                 if (deliveryRoutes[id])  { map.removeControl(deliveryRoutes[id]); delete deliveryRoutes[id]; }
@@ -1154,7 +1154,7 @@ function listenToDeliveries() {
 
             const displayBatch = d.batchCode || batchesMap[d.batchId] || d.batchId || "-";
 
-            if (d.status !== "delivered") {
+            if (d.status !== "delivered" && d.status !== "received") {
                 allBody.innerHTML += `
                 <tr>
                     <td><strong>${d.deliveryCode}</strong></td>
@@ -1177,6 +1177,9 @@ function listenToDeliveries() {
             } else if (d.status === "delivered") {
                 counts.delivered++;
                 deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Delivered</span></td></tr>`;
+            } else if (d.status === "received") {   // ← ADD THIS BLOCK
+                counts.delivered++;   // counts toward delivered total, not a separate count
+                deliveredBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${deliveredDate}</td><td><span class="status-delivered">Received ✓</span></td></tr>`;
             } else {
                 counts.delayed++;
                 delayedBody.innerHTML += `<tr><td><strong>${d.deliveryCode}</strong></td><td>${displayBatch}</td><td>${d.driverName || "-"}</td><td>${truckName}</td><td>${shortOrigin}</td><td>${shortDest}</td><td>${formattedDate}</td><td>${actionButton}</td></tr>`;
