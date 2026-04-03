@@ -946,7 +946,7 @@ async function loadDeliveryPerformance() {
                 const d = docSnap.data();
 
                 // Only count completed deliveries
-                if (d.status !== "delivered") return;
+                if (d.status !== "delivered" && d.status !== "received") return;
                 if (!d.deliveredAt || !d.eta) return;
 
                 totalDelivered++;
